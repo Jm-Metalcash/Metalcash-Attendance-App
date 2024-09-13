@@ -6,7 +6,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import { ref } from "vue"; // Import Vue's ref function
+
 
 defineProps({
     canResetPassword: {
@@ -16,6 +16,8 @@ defineProps({
         type: String,
     },
 });
+
+
 
 const form = useForm({
     email: "",
@@ -92,10 +94,10 @@ const submit = () => {
                 </label>
 
                 <Link
-                    href="#"
+                    :href="route('password.request')"
                     class="text-sm text-indigo-600 hover:text-indigo-800"
                 >
-                    Mot de passe oublié ?
+                    Mot de passe oublié?
                 </Link>
             </div>
 
