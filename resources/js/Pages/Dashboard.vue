@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import ModalDashboard from "@/Components/ModalDashboard.vue";
@@ -46,6 +46,10 @@ const days = ref([
 const arrivalButtonRef = ref(null);
 const departureButtonRef = ref(null);
 
+//variable qui stock le total heure de travail de la semaine
+const weeklyTotal = ref("00h00");
+
+
 // Variables pour le modal
 const showModal = ref(false);
 const actionType = ref("");
@@ -60,6 +64,51 @@ function openModal(type) {
     });
     showModal.value = true;
 }
+
+// Fonction pour calculer la différence entre l'heure d'arrivée et de départ
+function calculateTotal(arrival, departure) {
+    if (!arrival || !departure) return "00:00";
+
+    const [arrivalHour, arrivalMinute] = arrival.split(":").map(Number);
+    const [departureHour, departureMinute] = departure.split(":").map(Number);
+
+    let totalMinutes =
+        departureHour * 60 +
+        departureMinute -
+        (arrivalHour * 60 + arrivalMinute);
+
+    // Gérer les cas où le départ est le lendemain
+    if (totalMinutes < 0) totalMinutes += 24 * 60;
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+}
+
+// Fonction pour calculer le total de la semaine
+function calculateWeeklyTotal() {
+    let totalMinutes = 0;
+
+    // Additionner les heures et minutes de chaque jour
+    days.value.forEach(day => {
+        if (day.total) {
+            const [hours, minutes] = day.total.split('h').map(Number);
+            totalMinutes += hours * 60 + minutes;
+        }
+    });
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+}
+
+// Met à jour le total de la semaine chaque fois que les heures d'un jour sont modifiées
+watch(days, () => {
+    weeklyTotal.value = calculateWeeklyTotal();
+}, { deep: true });
+
 
 // Confirmer l'action et enregistrer l'heure
 function confirmAction() {
@@ -87,6 +136,11 @@ function confirmAction() {
             document.getElementById("hourDepartureToday");
         hourDepartureToday.textContent = currentTime;
         hourDepartureToday.classList.add("text-red-700");
+
+        // Calcule le total après avoir enregistré l'heure de départ
+        dayInfo.total = calculateTotal(dayInfo.arrival, dayInfo.departure);
+        //calculer le total de la semaine après avoir mis à jour l'heure de départ
+        weeklyTotal.value = calculateWeeklyTotal();
     }
 
     showModal.value = false;
@@ -288,7 +342,7 @@ function formatDateVerbose(date) {
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ day.total }}
+                                    {{ day.total || "--:--" }}
                                 </td>
                             </tr>
                         </tbody>
@@ -314,7 +368,7 @@ function formatDateVerbose(date) {
                     </h3>
                     <p class="text-white mt-4 text-base">
                         <strong>Total :</strong>
-                        <span class="font-semibold text-white">12h00</span>
+                        <span class="font-semibold text-white">{{ weeklyTotal }}</span>
                     </p>
                 </div>
             </div>
