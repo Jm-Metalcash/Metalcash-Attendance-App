@@ -68,9 +68,9 @@ const logoUrl = computed(() => '/images/logo-HD.png');
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
+                                        <DropdownLink :href="route('profile.edit')"> Mon profil </DropdownLink>
                                         <DropdownLink :href="route('logout')" method="post" as="button">
-                                            Log Out
+                                            Se déconnecter
                                         </DropdownLink>
                                     </template>
                                 </Dropdown>

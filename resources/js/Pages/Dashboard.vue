@@ -49,7 +49,6 @@ const departureButtonRef = ref(null);
 //variable qui stock le total heure de travail de la semaine
 const weeklyTotal = ref("00h00");
 
-
 // Variables pour le modal
 const showModal = ref(false);
 const actionType = ref("");
@@ -91,9 +90,9 @@ function calculateWeeklyTotal() {
     let totalMinutes = 0;
 
     // Additionner les heures et minutes de chaque jour
-    days.value.forEach(day => {
+    days.value.forEach((day) => {
         if (day.total) {
-            const [hours, minutes] = day.total.split('h').map(Number);
+            const [hours, minutes] = day.total.split("h").map(Number);
             totalMinutes += hours * 60 + minutes;
         }
     });
@@ -105,10 +104,13 @@ function calculateWeeklyTotal() {
 }
 
 // Met à jour le total de la semaine chaque fois que les heures d'un jour sont modifiées
-watch(days, () => {
-    weeklyTotal.value = calculateWeeklyTotal();
-}, { deep: true });
-
+watch(
+    days,
+    () => {
+        weeklyTotal.value = calculateWeeklyTotal();
+    },
+    { deep: true }
+);
 
 // Confirmer l'action et enregistrer l'heure
 function confirmAction() {
@@ -187,21 +189,25 @@ function formatDateVerbose(date) {
             </h2>
         </template>
 
-        <section class="attendance-section">
+        <section
+            class="attendance-section w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
+        >
             <div class="mt-8 flex flex-col items-center space-y-8">
                 <!-- Bloc de date, heure, et citation -->
-                <div class="p-6 rounded-lg text-center">
-                    <h2 class="text-gray-800 text-2xl font-semibold">
+                <div
+                    class="p-6 rounded-lg text-center w-full bg-white shadow-md"
+                >
+                    <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
                         <i class="fas fa-clock text-blue-600 mr-2"></i> Suivi du
                         temps de travail
                     </h2>
-                    <p class="text-gray-600 mt-4 text-base">
+                    <p class="text-gray-600 mt-4 text-sm sm:text-base">
                         <strong>Bonjour Jordan</strong>, nous sommes le :
-                        <span class="font-semibold text-gray-900">
-                            {{ formatDateVerbose(new Date()) }}
-                        </span>
+                        <span class="font-semibold text-gray-900">{{
+                            formatDateVerbose(new Date())
+                        }}</span>
                     </p>
-                    <p class="text-gray-600 mt-2 text-base">
+                    <p class="text-gray-600 mt-2 text-sm sm:text-base">
                         <i class="fas fa-hourglass-half mr-1"></i> Heure
                         actuelle :
                         <span class="font-semibold text-gray-900">{{
@@ -215,7 +221,7 @@ function formatDateVerbose(date) {
 
                 <!-- Boutons d'arrivée et de départ -->
                 <div
-                    class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-lg"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg"
                 >
                     <!-- Heure d'arrivée -->
                     <div
@@ -275,32 +281,32 @@ function formatDateVerbose(date) {
                 </div>
 
                 <!-- Table des heures de la semaine -->
-                <div class="w-full max-w-4xl mx-auto mt-8">
+                <div class="w-full max-w-4xl mx-auto mt-8 overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Jour
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Date
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Arrivée
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Départ
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Total
                                 </th>
@@ -308,40 +314,29 @@ function formatDateVerbose(date) {
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="(day, index) in days" :key="index">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     {{ day.day }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     {{ day.date }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="relative">
-                                        <input
-                                            v-model="day.arrival"
-                                            type="time"
-                                            class="w-full text-gray-900 border border-gray-300 rounded-md pr-10 cursor-not-allowed"
-                                            disabled
-                                        />
-                                        <i
-                                            class="fa-regular fa-clock absolute inset-y-3 right-0 pr-3 flex items-center text-gray-400"
-                                        ></i>
-                                    </div>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <input
+                                        v-model="day.arrival"
+                                        type="time"
+                                        class="w-full text-gray-900 border border-gray-300 rounded-md pr-10 cursor-not-allowed"
+                                        disabled
+                                    />
                                 </td>
-
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="relative">
-                                        <input
-                                            v-model="day.departure"
-                                            type="time"
-                                            class="w-full text-gray-900 border border-gray-300 rounded-md pr-10 cursor-not-allowed"
-                                            disabled
-                                        />
-                                        <i
-                                            class="fa-regular fa-clock absolute inset-y-3 right-0 pr-3 flex items-center text-gray-400"
-                                        ></i>
-                                    </div>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <input
+                                        v-model="day.departure"
+                                        type="time"
+                                        class="w-full text-gray-900 border border-gray-300 rounded-md pr-10 cursor-not-allowed"
+                                        disabled
+                                    />
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     {{ day.total || "--:--" }}
                                 </td>
                             </tr>
@@ -349,30 +344,34 @@ function formatDateVerbose(date) {
                     </table>
                 </div>
 
-                <!-- Modal -->
-                <ModalDashboard
-                    :showModal="showModal"
-                    :currentTime="currentTime"
-                    :actionType="actionType"
-                    @confirm="confirmAction"
-                    @cancel="cancelAction"
-                />
-
                 <!-- Total des heures de la semaine -->
                 <div
-                    class="totalHour w-full max-w-4xl mx-auto px-4 py-2 bg-[rgb(0,87,151)] text-end"
+                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 bg-[rgb(0,87,151)] text-center sm:text-right"
                 >
-                    <h3 class="text-white text-lg font-semibold">
+                    <h3
+                        class="text-white text-lg font-semibold flex justify-center sm:justify-end items-center"
+                    >
                         <i class="fas fa-calendar-week text-white mr-2"></i>
                         Total de la semaine
                     </h3>
-                    <p class="text-white mt-4 text-base">
+                    <p class="text-white mt-2 sm:mt-4 text-base">
                         <strong>Total :</strong>
-                        <span class="font-semibold text-white">{{ weeklyTotal }}</span>
+                        <span class="font-semibold text-white ml-2 text-lg">{{
+                            weeklyTotal
+                        }}</span>
                     </p>
                 </div>
             </div>
         </section>
+
+        <!-- Modal -->
+        <ModalDashboard
+            :showModal="showModal"
+            :currentTime="currentTime"
+            :actionType="actionType"
+            @confirm="confirmAction"
+            @cancel="cancelAction"
+        />
     </AuthenticatedLayout>
 </template>
 
