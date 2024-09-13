@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -8,6 +8,8 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+
+const logoUrl = computed(() => '/images/logo-HD.png');
 </script>
 
 <template>
@@ -21,9 +23,7 @@ const showingNavigationDropdown = ref(false);
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
+                                    <img :src="logoUrl" alt="Logo Metalcash" class="w-16 h-16">
                                 </Link>
                             </div>
 
@@ -34,6 +34,10 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                             </div>
                         </div>
+                        
+
+
+
 
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <!-- Settings Dropdown -->
