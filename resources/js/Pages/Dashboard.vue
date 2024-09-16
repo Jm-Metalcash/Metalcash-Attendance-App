@@ -1,7 +1,8 @@
 <script setup>
 import { ref, watch } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import { Head, Link } from "@inertiajs/vue3";
 import ModalDashboard from "@/Components/ModalDashboard.vue";
 
 // Tableau des jours
@@ -202,7 +203,7 @@ function formatDateVerbose(date) {
                         temps de travail
                     </h2>
                     <p class="text-gray-600 mt-4 text-sm sm:text-base">
-                        <strong>Bonjour Jordan</strong>, nous sommes le :
+                        Bonjour <span class="font-bold">{{ $page.props.auth.user.name }}</span>, nous sommes le :
                         <span class="font-semibold text-gray-900">{{
                             formatDateVerbose(new Date())
                         }}</span>
@@ -281,7 +282,8 @@ function formatDateVerbose(date) {
                 </div>
 
                 <!-- Table des heures de la semaine -->
-                <div class="w-full max-w-4xl mx-auto mt-8 overflow-x-auto">
+                <div class="w-full max-w-4xl mx-auto overflow-x-auto">
+                    <h3 class="bg-[rgb(0,85,150)] text-gray-100 p-4 text-left font-bold mt-12 mb-4">Cette semaine : </h3>
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
@@ -346,7 +348,7 @@ function formatDateVerbose(date) {
 
                 <!-- Total des heures de la semaine -->
                 <div
-                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 bg-[rgb(0,87,151)] text-center sm:text-right"
+                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 bg-[rgb(0,85,150)] text-center sm:text-right"
                 >
                     <h3
                         class="text-white text-lg font-semibold flex justify-center sm:justify-end items-center"
@@ -360,6 +362,12 @@ function formatDateVerbose(date) {
                             weeklyTotal
                         }}</span>
                     </p>
+                </div>
+
+                <div class="pt-4">
+                    <Link :href="route('historique')">
+                        <PrimaryButton>Voir historique complet</PrimaryButton>
+                    </Link>
                 </div>
             </div>
         </section>
