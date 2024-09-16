@@ -16,6 +16,14 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/historique', function () {
+    return Inertia::render('Historique');
+})->middleware(['auth', 'verified'])->name('historique');
+
+
+Route::get('/calendrier', function () {
+    return Inertia::render('Calendrier');
+})->middleware(['auth', 'verified'])->name('calendrier');
 
 
 

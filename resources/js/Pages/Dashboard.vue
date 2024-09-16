@@ -184,13 +184,13 @@ function formatDateVerbose(date) {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
                 Dashboard
             </h2>
         </template>
 
         <section
-            class="attendance-section w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
+            class="attendance-section w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-8 pb-20"
         >
             <div class="mt-8 flex flex-col items-center space-y-8">
                 <!-- Bloc de date, heure, et citation -->
