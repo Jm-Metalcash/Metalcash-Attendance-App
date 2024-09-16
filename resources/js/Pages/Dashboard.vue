@@ -1,11 +1,10 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, watch, onMounted, onUnmounted, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { Head, Link, usePage } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 import ModalDashboard from "@/Components/ModalDashboard.vue";
 import axios from "axios";
-
 
 // Tableau des jours de la semaine
 const defaultDays = [
@@ -63,7 +62,10 @@ onMounted(() => {
             });
         })
         .catch((error) => {
-            console.error("Erreur lors de la récupération des données : ", error);
+            console.error(
+                "Erreur lors de la récupération des données : ",
+                error
+            );
         });
 });
 
@@ -78,10 +80,12 @@ const showModal = ref(false);
 const actionType = ref("");
 let currentTime = "";
 // Variable réactive pour stocker l'heure actuelle
-const currentTimeReactive = ref(new Date().toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit"
-}));
+const currentTimeReactive = ref(
+    new Date().toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+    })
+);
 
 // Ouvrir le modal
 function openModal(type) {
@@ -100,7 +104,10 @@ function calculateTotal(arrival, departure) {
     const [arrivalHour, arrivalMinute] = arrival.split(":").map(Number);
     const [departureHour, departureMinute] = departure.split(":").map(Number);
 
-    let totalMinutes = (departureHour * 60 + departureMinute) - (arrivalHour * 60 + arrivalMinute);
+    let totalMinutes =
+        departureHour * 60 +
+        departureMinute -
+        (arrivalHour * 60 + arrivalMinute);
 
     // Gérer les cas où le départ est le lendemain
     if (totalMinutes < 0) totalMinutes += 24 * 60;
@@ -128,12 +135,10 @@ function calculateWeeklyTotal() {
     return `${totalHours}h${remainingMinutes.toString().padStart(2, "0")}`;
 }
 
-
 function formatDateForBackend(date) {
-    const [day, month, year] = date.split('/');
+    const [day, month, year] = date.split("/");
     return `${year}-${month}-${day}`; // Retourne la date au format Y-m-d
 }
-
 
 // Confirmer l'action et enregistrer l'heure
 function confirmAction() {
@@ -150,23 +155,30 @@ function confirmAction() {
     // Conversion de la date au format 'Y-m-d' avant de l'envoyer à la base de données
     const formattedDate = formatDateForBackend(dayInfo.date);
 
-    axios.post('/days/store', {
-        day: dayInfo.day,
-        date: formattedDate, // Utiliser la date au format 'Y-m-d'
-        arrival: dayInfo.arrival,
-        departure: dayInfo.departure,
-        total: dayInfo.total
-    })
-    .then(response => {
-        console.log(response.data.message);
-    })
-    .catch(error => {
-        if (error.response && error.response.status === 422) {
-            console.error("Erreur de validation : ", error.response.data.errors);
-        } else {
-            console.error("Erreur lors de l'enregistrement des données :", error);
-        }
-    });
+    axios
+        .post("/days/store", {
+            day: dayInfo.day,
+            date: formattedDate, // Utiliser la date au format 'Y-m-d'
+            arrival: dayInfo.arrival,
+            departure: dayInfo.departure,
+            total: dayInfo.total,
+        })
+        .then((response) => {
+            console.log(response.data.message);
+        })
+        .catch((error) => {
+            if (error.response && error.response.status === 422) {
+                console.error(
+                    "Erreur de validation : ",
+                    error.response.data.errors
+                );
+            } else {
+                console.error(
+                    "Erreur lors de l'enregistrement des données :",
+                    error
+                );
+            }
+        });
 
     showModal.value = false;
 }
@@ -189,8 +201,11 @@ watch(
 function getWeekDate(dayIndex) {
     const today = new Date();
     const currentDayOfWeek = today.getDay();
-    const distanceFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - distanceFromMonday));
+    const distanceFromMonday =
+        currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const firstDayOfWeek = new Date(
+        today.setDate(today.getDate() - distanceFromMonday)
+    );
     const date = new Date(firstDayOfWeek);
     date.setDate(firstDayOfWeek.getDate() + (dayIndex - 1));
     return date.toLocaleDateString("fr-FR");
@@ -206,12 +221,20 @@ function formatDateVerbose(date) {
     return date.toLocaleDateString("fr-FR", options);
 }
 
+// Fonction pour vérifier si l'arrivée a déjà été enregistrée pour aujourd'hui
+const today = new Date().toLocaleDateString("fr-FR");
+// Vérifier si une arrivée est enregistrée pour aujourd'hui
+const isArrivalRecordedForToday = computed(() => {
+    const dayInfo = days.value.find((day) => day.date === today);
+    return dayInfo && dayInfo.arrival !== ""; // Le bouton est désactivé si une arrivée existe
+});
+
 // Mettre à jour l'heure actuelle chaque seconde
 onMounted(() => {
     const intervalId = setInterval(() => {
         currentTimeReactive.value = new Date().toLocaleTimeString("fr-FR", {
             hour: "2-digit",
-            minute: "2-digit"
+            minute: "2-digit",
         });
     }, 1000);
 
@@ -226,7 +249,9 @@ onMounted(() => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
+            <h2
+                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
+            >
                 Aujourd'hui
             </h2>
         </template>
@@ -244,16 +269,21 @@ onMounted(() => {
                         temps de travail
                     </h2>
                     <p class="text-gray-600 mt-4 text-sm sm:text-base">
-                        Bonjour <span class="font-bold">{{ $page.props.auth.user.name }}</span>, nous sommes le :
+                        Bonjour
+                        <span class="font-bold">{{
+                            $page.props.auth.user.name
+                        }}</span
+                        >, nous sommes le :
                         <span class="font-semibold text-gray-900">
                             {{ formatDateVerbose(new Date()) }}
-                           </span>
+                        </span>
                     </p>
                     <p class="text-gray-600 mt-2 text-sm sm:text-base">
                         <i class="fas fa-hourglass-half mr-1"></i> Heure
                         actuelle :
-                        <span class="font-semibold text-gray-900">{{ currentTimeReactive }}</span>
-                        
+                        <span class="font-semibold text-gray-900">{{
+                            currentTimeReactive
+                        }}</span>
                     </p>
                 </div>
 
@@ -272,10 +302,17 @@ onMounted(() => {
                             Heure d'arrivée
                         </h3>
                         <button
+                            :disabled="isArrivalRecordedForToday"
                             ref="arrivalButtonRef"
                             id="arrivalButton"
                             @click="openModal('arrival')"
-                            class="mt-4 cursor-pointer text-green-700 border border-green-700 bg-white hover:text-white hover:bg-green-800 transition-colors duration-300 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-full text-sm px-6 py-3"
+                            :class="{
+                                'bg-green-700 text-white cursor-not-allowed':
+                                    isArrivalRecordedForToday,
+                                'text-green-700 border border-green-700 bg-white hover:text-white hover:bg-green-800 cursor-pointer':
+                                    !isArrivalRecordedForToday,
+                            }"
+                            class="mt-4 transition-colors duration-300 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-6 py-3"
                         >
                             <i class="fas fa-arrow-right"></i> Enregistrer
                         </button>
@@ -318,9 +355,13 @@ onMounted(() => {
                     </div>
                 </div>
 
+                <h3
+                    class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 p-4 text-left font-bold mt-12 mb-4"
+                >
+                    Cette semaine :
+                </h3>
                 <!-- Table des heures de la semaine -->
                 <div class="w-full max-w-4xl mx-auto overflow-x-auto">
-                    <h3 class="bg-[rgb(0,85,150)] text-gray-100 p-4 text-left font-bold mt-12 mb-4">Cette semaine : </h3>
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
@@ -353,11 +394,27 @@ onMounted(() => {
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="(day, index) in days" :key="index">
-                                <td class="px-4 py-4 whitespace-nowrap">{{ day.day }}</td>
-                                <td class="px-4 py-4 whitespace-nowrap">{{ day.date }}</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-center">{{ day.arrival || '--:--' }}</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-center">{{ day.departure || '--:--' }}</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-right">{{ day.total || '--:--' }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    {{ day.day }}
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    {{ day.date }}
+                                </td>
+                                <td
+                                    class="px-4 py-4 whitespace-nowrap text-center"
+                                >
+                                    {{ day.arrival || "--:--" }}
+                                </td>
+                                <td
+                                    class="px-4 py-4 whitespace-nowrap text-center"
+                                >
+                                    {{ day.departure || "--:--" }}
+                                </td>
+                                <td
+                                    class="px-4 py-4 whitespace-nowrap text-right"
+                                >
+                                    {{ day.total || "--:--" }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>

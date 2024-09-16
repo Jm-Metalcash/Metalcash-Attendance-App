@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Day;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
+use Carbon\Carbon;
+
 
 class DayController extends Controller
 {
@@ -39,6 +40,12 @@ class DayController extends Controller
     {
         // Récupérer les jours de la semaine pour l'utilisateur connecté
         $days = Day::where('user_id', Auth::id())->get();
+
+        // Formater la date avant de l'envoyer dans la réponse JSON
+        $days = $days->map(function($day) {
+            $day->date = Carbon::parse($day->date)->format('d/m/Y'); // Format "jour-mois-année"
+            return $day;
+        });
 
         return response()->json($days);
     }
