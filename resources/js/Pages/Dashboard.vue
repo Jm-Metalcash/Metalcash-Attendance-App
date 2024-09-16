@@ -180,12 +180,12 @@ function formatDateVerbose(date) {
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Aujourd'hui" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
-                Dashboard
+                Aujourd'hui
             </h2>
         </template>
 
