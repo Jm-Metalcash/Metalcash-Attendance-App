@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DayController;
+use App\Models\Day;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +26,13 @@ Route::get('/historique', function () {
 Route::get('/calendrier', function () {
     return Inertia::render('Calendrier');
 })->middleware(['auth', 'verified'])->name('calendrier');
+
+
+//Envoi les données des jours dans la bd
+Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
+
+//Récupère les données des jours du user dans la db
+Route::get('/dashboard/days', [DayController::class, 'index']);
 
 
 

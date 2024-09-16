@@ -1,12 +1,14 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, usePage } from "@inertiajs/vue3";
 import ModalDashboard from "@/Components/ModalDashboard.vue";
+import axios from "axios";
 
-// Tableau des jours
-const days = ref([
+
+// Tableau des jours de la semaine
+const defaultDays = [
     {
         day: "Lundi",
         date: getWeekDate(1),
@@ -42,18 +44,44 @@ const days = ref([
         departure: "",
         total: "",
     },
-]);
+];
+
+// Créer une référence pour les jours de la semaine
+const days = ref([...defaultDays]);
+
+// Charger les données depuis la base de données
+onMounted(() => {
+    axios
+        .get("/dashboard/days")
+        .then((response) => {
+            const data = response.data;
+
+            // Combiner les jours de la semaine avec les données de la base
+            days.value = defaultDays.map((defaultDay) => {
+                const dbDay = data.find((d) => d.day === defaultDay.day);
+                return dbDay ? { ...defaultDay, ...dbDay } : defaultDay;
+            });
+        })
+        .catch((error) => {
+            console.error("Erreur lors de la récupération des données : ", error);
+        });
+});
 
 const arrivalButtonRef = ref(null);
 const departureButtonRef = ref(null);
 
-//variable qui stock le total heure de travail de la semaine
+// Variable qui stocke le total des heures de travail de la semaine
 const weeklyTotal = ref("00h00");
 
 // Variables pour le modal
 const showModal = ref(false);
 const actionType = ref("");
 let currentTime = "";
+// Variable réactive pour stocker l'heure actuelle
+const currentTimeReactive = ref(new Date().toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit"
+}));
 
 // Ouvrir le modal
 function openModal(type) {
@@ -72,10 +100,7 @@ function calculateTotal(arrival, departure) {
     const [arrivalHour, arrivalMinute] = arrival.split(":").map(Number);
     const [departureHour, departureMinute] = departure.split(":").map(Number);
 
-    let totalMinutes =
-        departureHour * 60 +
-        departureMinute -
-        (arrivalHour * 60 + arrivalMinute);
+    let totalMinutes = (departureHour * 60 + departureMinute) - (arrivalHour * 60 + arrivalMinute);
 
     // Gérer les cas où le départ est le lendemain
     if (totalMinutes < 0) totalMinutes += 24 * 60;
@@ -90,7 +115,6 @@ function calculateTotal(arrival, departure) {
 function calculateWeeklyTotal() {
     let totalMinutes = 0;
 
-    // Additionner les heures et minutes de chaque jour
     days.value.forEach((day) => {
         if (day.total) {
             const [hours, minutes] = day.total.split("h").map(Number);
@@ -98,10 +122,58 @@ function calculateWeeklyTotal() {
         }
     });
 
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
+    const totalHours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
 
-    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+    return `${totalHours}h${remainingMinutes.toString().padStart(2, "0")}`;
+}
+
+
+function formatDateForBackend(date) {
+    const [day, month, year] = date.split('/');
+    return `${year}-${month}-${day}`; // Retourne la date au format Y-m-d
+}
+
+
+// Confirmer l'action et enregistrer l'heure
+function confirmAction() {
+    const today = new Date().toLocaleDateString("fr-FR");
+    const dayInfo = days.value.find((day) => day.date === today);
+
+    if (actionType.value === "arrival") {
+        dayInfo.arrival = currentTime;
+    } else if (actionType.value === "departure") {
+        dayInfo.departure = currentTime;
+        dayInfo.total = calculateTotal(dayInfo.arrival, dayInfo.departure);
+    }
+
+    // Conversion de la date au format 'Y-m-d' avant de l'envoyer à la base de données
+    const formattedDate = formatDateForBackend(dayInfo.date);
+
+    axios.post('/days/store', {
+        day: dayInfo.day,
+        date: formattedDate, // Utiliser la date au format 'Y-m-d'
+        arrival: dayInfo.arrival,
+        departure: dayInfo.departure,
+        total: dayInfo.total
+    })
+    .then(response => {
+        console.log(response.data.message);
+    })
+    .catch(error => {
+        if (error.response && error.response.status === 422) {
+            console.error("Erreur de validation : ", error.response.data.errors);
+        } else {
+            console.error("Erreur lors de l'enregistrement des données :", error);
+        }
+    });
+
+    showModal.value = false;
+}
+
+// Annuler l'action
+function cancelAction() {
+    showModal.value = false;
 }
 
 // Met à jour le total de la semaine chaque fois que les heures d'un jour sont modifiées
@@ -113,71 +185,40 @@ watch(
     { deep: true }
 );
 
-// Confirmer l'action et enregistrer l'heure
-function confirmAction() {
-    const today = new Date().toLocaleDateString("fr-FR");
-    const dayInfo = days.value.find((day) => day.date === today);
-
-    if (actionType.value === "arrival") {
-        dayInfo.arrival = currentTime;
-        const arrivalButton = document.getElementById("arrivalButton");
-        arrivalButton.classList.remove("bg-white", "text-green-700");
-        arrivalButton.classList.add("bg-green-700", "text-white");
-        arrivalButton.style.cursor = "not-allowed";
-        arrivalButton.disabled = true;
-        const hourArrivalToday = document.getElementById("hourArrivalToday");
-        hourArrivalToday.textContent = currentTime;
-        hourArrivalToday.classList.add("text-green-700");
-    } else if (actionType.value === "departure") {
-        dayInfo.departure = currentTime;
-        const departureButton = document.getElementById("departureButton");
-        departureButton.classList.remove("bg-white", "text-red-700");
-        departureButton.classList.add("bg-red-700", "text-white");
-        departureButton.style.cursor = "not-allowed";
-        departureButton.disabled = true;
-        const hourDepartureToday =
-            document.getElementById("hourDepartureToday");
-        hourDepartureToday.textContent = currentTime;
-        hourDepartureToday.classList.add("text-red-700");
-
-        // Calcule le total après avoir enregistré l'heure de départ
-        dayInfo.total = calculateTotal(dayInfo.arrival, dayInfo.departure);
-        //calculer le total de la semaine après avoir mis à jour l'heure de départ
-        weeklyTotal.value = calculateWeeklyTotal();
-    }
-
-    showModal.value = false;
-}
-
-// Annuler l'action
-function cancelAction() {
-    showModal.value = false;
-}
-
 // Fonction pour obtenir la date de la semaine
 function getWeekDate(dayIndex) {
     const today = new Date();
     const currentDayOfWeek = today.getDay();
-    const distanceFromMonday =
-        currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-    const firstDayOfWeek = new Date(
-        today.setDate(today.getDate() - distanceFromMonday)
-    );
+    const distanceFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - distanceFromMonday));
     const date = new Date(firstDayOfWeek);
     date.setDate(firstDayOfWeek.getDate() + (dayIndex - 1));
     return date.toLocaleDateString("fr-FR");
 }
 
-// Format Jour Mois Année
+// Fonction pour obtenir la date au format "jj mois année"
 function formatDateVerbose(date) {
     const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
         day: "numeric",
+        month: "long",
+        year: "numeric",
     };
     return date.toLocaleDateString("fr-FR", options);
 }
+
+// Mettre à jour l'heure actuelle chaque seconde
+onMounted(() => {
+    const intervalId = setInterval(() => {
+        currentTimeReactive.value = new Date().toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }, 1000);
+
+    onUnmounted(() => {
+        clearInterval(intervalId);
+    });
+});
 </script>
 
 <template>
@@ -204,19 +245,15 @@ function formatDateVerbose(date) {
                     </h2>
                     <p class="text-gray-600 mt-4 text-sm sm:text-base">
                         Bonjour <span class="font-bold">{{ $page.props.auth.user.name }}</span>, nous sommes le :
-                        <span class="font-semibold text-gray-900">{{
-                            formatDateVerbose(new Date())
-                        }}</span>
+                        <span class="font-semibold text-gray-900">
+                            {{ formatDateVerbose(new Date()) }}
+                           </span>
                     </p>
                     <p class="text-gray-600 mt-2 text-sm sm:text-base">
                         <i class="fas fa-hourglass-half mr-1"></i> Heure
                         actuelle :
-                        <span class="font-semibold text-gray-900">{{
-                            new Date().toLocaleTimeString("fr-FR", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })
-                        }}</span>
+                        <span class="font-semibold text-gray-900">{{ currentTimeReactive }}</span>
+                        
                     </p>
                 </div>
 
@@ -298,17 +335,17 @@ function formatDateVerbose(date) {
                                     Date
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Arrivée
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Départ
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Total
                                 </th>
@@ -316,31 +353,11 @@ function formatDateVerbose(date) {
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="(day, index) in days" :key="index">
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    {{ day.day }}
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    {{ day.date }}
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <input
-                                        v-model="day.arrival"
-                                        type="time"
-                                        class="w-full text-gray-900 border border-gray-300 rounded-md pr-10 cursor-not-allowed"
-                                        disabled
-                                    />
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <input
-                                        v-model="day.departure"
-                                        type="time"
-                                        class="w-full text-gray-900 border border-gray-300 rounded-md pr-10 cursor-not-allowed"
-                                        disabled
-                                    />
-                                </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    {{ day.total || "--:--" }}
-                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">{{ day.day }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap">{{ day.date }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-center">{{ day.arrival || '--:--' }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-center">{{ day.departure || '--:--' }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-right">{{ day.total || '--:--' }}</td>
                             </tr>
                         </tbody>
                     </table>
