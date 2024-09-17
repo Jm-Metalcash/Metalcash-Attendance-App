@@ -89,95 +89,198 @@ const months = [
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
+            <h2
+                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
+            >
                 Historique des pointages
             </h2>
         </template>
 
-        <section class="attendance-section w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-8 pb-20">
+        <section
+            class="attendance-section w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20"
+        >
             <!-- Statistiques et actions -->
             <div class="w-full max-w-4xl mx-auto mb-8">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-6 rounded-lg shadow-md space-y-6 md:space-y-0">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-6 rounded-lg shadow-md space-y-6 md:space-y-0"
+                >
                     <!-- Section informations sur le total des heures et des jours enregistrés -->
-                    <div class="flex flex-col items-start space-y-2 text-gray-700 w-full lg:w-auto">
+                    <div
+                        class="flex flex-col items-start space-y-2 text-gray-700 w-full lg:w-auto"
+                    >
                         <div class="flex items-center text-sm">
                             <i class="fas fa-clock text-blue-500 mr-2"></i>
-                            <span><strong>Total des heures :</strong> {{ formattedTotalHours }}</span>
+                            <span
+                                ><strong>Total des heures :</strong>
+                                {{ formattedTotalHours }}</span
+                            >
                         </div>
                         <div class="flex items-center text-sm">
-                            <i class="fas fa-calendar-alt text-green-500 mr-2"></i>
-                            <span><strong>Jours enregistrés :</strong> {{ totalDaysRecorded }}</span>
+                            <i
+                                class="fas fa-calendar-alt text-green-500 mr-2"
+                            ></i>
+                            <span
+                                ><strong>Jours enregistrés :</strong>
+                                {{ totalDaysRecorded }}</span
+                            >
                         </div>
                     </div>
 
                     <!-- Filtres par année et mois sur la même ligne que les informations pour tablette et desktop -->
-                    <div class="flex flex-col sm:flex-row md:flex-row items-start md:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto lg:ml-auto">
+                    <div
+                        class="flex flex-col sm:flex-row md:flex-row items-start md:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto lg:ml-auto"
+                    >
                         <div class="flex items-center w-full sm:w-auto">
-                            <label for="year" class="text-gray-600 font-semibold text-sm mr-2">Année</label>
-                            <select id="year" v-model="selectedYear" class="w-full sm:w-48 md:w-40 border-gray-300 text-sm rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+                            <label
+                                for="year"
+                                class="text-gray-600 font-semibold text-sm mr-2"
+                                >Année</label
+                            >
+                            <select
+                                id="year"
+                                v-model="selectedYear"
+                                class="w-full sm:w-48 md:w-40 border-gray-300 text-sm rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                            >
+                                <option
+                                    v-for="year in years"
+                                    :key="year"
+                                    :value="year"
+                                >
+                                    {{ year }}
+                                </option>
                             </select>
                         </div>
 
                         <div class="flex items-center w-full sm:w-auto">
-                            <label for="month" class="text-gray-600 font-semibold text-sm mr-4 md:mr-2">Mois</label>
-                            <select id="month" v-model="selectedMonth" class="w-full sm:w-48 md:w-40 border-gray-300 text-sm rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option v-for="month in months" :key="month.value" :value="month.value">{{ month.name }}</option>
+                            <label
+                                for="month"
+                                class="text-gray-600 font-semibold text-sm mr-4 md:mr-2"
+                                >Mois</label
+                            >
+                            <select
+                                id="month"
+                                v-model="selectedMonth"
+                                class="w-full sm:w-48 md:w-40 border-gray-300 text-sm rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                            >
+                                <option
+                                    v-for="month in months"
+                                    :key="month.value"
+                                    :value="month.value"
+                                >
+                                    {{ month.name }}
+                                </option>
                             </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Header dynamique du mois et de l'année -->
-            <div class="w-full max-w-4xl mx-auto text-center md:text-right mb-4">
-                <h3 class="text-lg font-semibold text-gray-700">
-                    {{ selectedMonthYear }}
-                </h3>
-            </div>
-
             <!-- Table -->
-            <div class="w-full max-w-4xl mx-auto overflow-x-auto bg-white shadow-md rounded-lg">
+            <div
+                class="w-full max-w-4xl mx-auto overflow-x-auto bg-white shadow-md rounded-lg"
+            >
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-[rgb(0,85,150)]">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Jour</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Arrivée</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Départ</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider">Total</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                            >
+                                Jour
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                            >
+                                Date
+                            </th>
+                            <th
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                            >
+                                Arrivée
+                            </th>
+                            <th
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                            >
+                                Départ
+                            </th>
+                            <th
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
+                            >
+                                Total
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <!-- Si aucun pointage trouvé -->
                         <tr v-if="filteredDays.length === 0">
-                            <td colspan="5" class="px-6 py-4 text-center text-sm md:text-base">
-                                Aucun pointage trouvé pour la période sélectionnée.
+                            <td
+                                colspan="5"
+                                class="px-6 py-4 text-center text-sm md:text-base"
+                            >
+                                Aucun pointage trouvé pour la période
+                                sélectionnée.
                             </td>
                         </tr>
 
                         <!-- Séparation par mois lors de l'affichage de "Tous les mois" -->
-                        <template v-for="(day, index) in filteredDays" :key="day.id">
+                        <template
+                            v-for="(day, index) in filteredDays"
+                            :key="day.id"
+                        >
                             <!-- Affichage d'une ligne séparatrice au début de chaque mois -->
-                            <tr v-if="index == 0 || new Date(filteredDays[index - 1].date).getMonth() !== new Date(day.date).getMonth()">
-                                <td colspan="5" class="px-6 py-2 text-center text-lg font-bold bg-gray-800 text-gray-100">
-                                    {{ months[new Date(day.date).getMonth() + 1].name }} {{ selectedYear.value }}
+                            <tr
+                                v-if="
+                                    index == 0 ||
+                                    new Date(
+                                        filteredDays[index - 1].date
+                                    ).getMonth() !==
+                                        new Date(day.date).getMonth() ||
+                                    new Date(
+                                        filteredDays[index - 1].date
+                                    ).getFullYear() !==
+                                        new Date(day.date).getFullYear()
+                                "
+                            >
+                                <td
+                                    colspan="5"
+                                    class="px-6 py-2 text-left text-lg font-bold bg-[rgb(239,245,249)] text-gray-800"
+                                >
+                                    {{
+                                        months[
+                                            new Date(day.date).getMonth() + 1
+                                        ].name
+                                    }}
+                                    {{ new Date(day.date).getFullYear() }}
                                 </td>
                             </tr>
+
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                >
                                     {{ day.day }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">
-                                    {{ new Date(day.date).toLocaleDateString("fr-FR") }}
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                >
+                                    {{
+                                        new Date(day.date).toLocaleDateString(
+                                            "fr-FR"
+                                        )
+                                    }}
                                 </td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">
+                                <td
+                                    class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                >
                                     {{ formatTime(day.arrival) }}
                                 </td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">
+                                <td
+                                    class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                >
                                     {{ formatTime(day.departure) }}
                                 </td>
-                                <td class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base">
+                                <td
+                                    class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                >
                                     {{ day.total || "--:--" }}
                                 </td>
                             </tr>
@@ -190,7 +293,8 @@ const months = [
             <div class="pt-8 flex justify-center">
                 <Link :href="route('dashboard')">
                     <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à l'accueil
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à
+                        l'accueil
                     </PrimaryButton>
                 </Link>
             </div>
