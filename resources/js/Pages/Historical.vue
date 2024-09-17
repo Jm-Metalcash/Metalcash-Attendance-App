@@ -47,8 +47,22 @@ const totalDaysRecorded = computed(() => {
     return filteredDays.value.length;
 });
 
-// Condition pour vérifier si des jours sont disponibles après filtrage
-const hasDays = computed(() => filteredDays.value.length > 0);
+// Affiche dynamiquement le mois et l'année sélectionnés
+const selectedMonthYear = computed(() => {
+    const month =
+        selectedMonth.value === 0
+            ? "Tous les mois"
+            : months[selectedMonth.value].name;
+    return `${month} ${selectedYear.value}`;
+});
+
+// Fonction pour reformater l'heure et retirer les secondes
+function formatTime(time) {
+    if (!time) return "--:--"; // Si l'heure est vide ou nulle
+    const [hours, minutes] = time.split(":");
+    return `${hours}:${minutes}`; // Retourne HH:mm
+}
+
 
 // Liste des années disponibles (2023 à 2025)
 const years = ref([2023, 2024, 2025]);
@@ -162,6 +176,13 @@ const months = [
                 </div>
             </div>
 
+            <!-- Header dynamique du mois et de l'année -->
+            <div class="w-full max-w-4xl mx-auto text-center md:text-right mb-4">
+                <h3 class="text-lg font-semibold text-gray-700">
+                    {{ selectedMonthYear }}
+                </h3>
+            </div>
+
             <!-- Table -->
             <div
                 class="w-full max-w-4xl mx-auto overflow-x-auto bg-white shadow-md rounded-lg"
@@ -199,7 +220,7 @@ const months = [
                     <tbody class="bg-white divide-y divide-gray-200">
                         <!-- Si aucun pointage trouvé -->
                         <tr v-if="filteredDays.length === 0">
-                            <td colspan="5" class="px-6 py-4 text-center">
+                            <td colspan="5" class="px-6 py-4 text-center text-sm md:text-base">
                                 Aucun pointage trouvé pour la période
                                 sélectionnée.
                             </td>
@@ -209,23 +230,23 @@ const months = [
                             :key="day.id"
                             class="hover:bg-gray-50 transition-colors"
                         >
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">
                                 {{ day.day }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">
                                 {{
                                     new Date(day.date).toLocaleDateString(
                                         "fr-FR"
                                     )
                                 }}
                             </td>
-                            <td class="px-6 py-4 text-center whitespace-nowrap">
-                                {{ day.arrival || "--:--" }}
+                            <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">
+                                {{ formatTime(day.arrival) }}
                             </td>
-                            <td class="px-6 py-4 text-center whitespace-nowrap">
-                                {{ day.departure || "--:--" }}
+                            <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">
+                                {{ formatTime(day.departure) }}
                             </td>
-                            <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <td class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base">
                                 {{ day.total || "--:--" }}
                             </td>
                         </tr>
