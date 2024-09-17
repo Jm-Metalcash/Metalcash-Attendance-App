@@ -51,7 +51,7 @@ const days = ref([...defaultDays]);
 // Reformater les heures de la base de données pour qu'elles soient au format HH:mm
 function formatDatabaseTime(time) {
     if (!time) return null; // Si l'heure est null, retourner null
-    const [hour, minute] = time.split(':'); // Prendre uniquement les heures et minutes
+    const [hour, minute] = time.split(":"); // Prendre uniquement les heures et minutes
     return `${hour}:${minute}`; // Retourner l'heure au format HH:mm
 }
 
@@ -76,7 +76,10 @@ onMounted(() => {
             });
         })
         .catch((error) => {
-            console.error("Erreur lors de la récupération des données : ", error);
+            console.error(
+                "Erreur lors de la récupération des données : ",
+                error
+            );
         });
 });
 
@@ -154,7 +157,7 @@ function formatDateForBackend(date) {
 // Fonction pour reformater l'heure au format HH:mm
 function formatTimeToHoursMinutes(time) {
     if (!time) return null;
-    const [hour, minute] = time.split(':');
+    const [hour, minute] = time.split(":");
     return `${hour}:${minute}`; // Retourne l'heure au format HH:mm
 }
 
@@ -188,9 +191,15 @@ function confirmAction() {
         })
         .catch((error) => {
             if (error.response && error.response.status === 422) {
-                console.error("Erreur de validation : ", error.response.data.errors);
+                console.error(
+                    "Erreur de validation : ",
+                    error.response.data.errors
+                );
             } else {
-                console.error("Erreur lors de l'enregistrement des données :", error);
+                console.error(
+                    "Erreur lors de l'enregistrement des données :",
+                    error
+                );
             }
         });
 
@@ -246,9 +255,10 @@ const isArrivalRecordedForToday = computed(() => {
 // Fonction pour vérifier si le départ a déjà été enregistré pour aujourd'hui
 const isDepartureRecordedForToday = computed(() => {
     const dayInfo = days.value.find((day) => day.date === today);
-    return dayInfo ? dayInfo.departure !== null && dayInfo.departure !== "" : false;
+    return dayInfo
+        ? dayInfo.departure !== null && dayInfo.departure !== ""
+        : false;
 });
-
 
 // Mettre à jour l'heure actuelle chaque seconde
 onMounted(() => {
@@ -343,8 +353,12 @@ onMounted(() => {
                         <span
                             id="hourArrivalToday"
                             class="block text-lg mt-2 font-semibold text-gray-600"
-                            >Non enregistré</span
                         >
+                            {{
+                                days.find((day) => day.date === today)
+                                    ?.arrival || "Non enregistré"
+                            }}
+                        </span>
                     </div>
 
                     <!-- Heure de départ -->
@@ -358,26 +372,30 @@ onMounted(() => {
                             Heure de départ
                         </h3>
                         <button
-        :disabled="isDepartureRecordedForToday"
-        ref="departureButtonRef"
-        id="departureButton"
-        @click="openModal('departure')"
-        :class="{
-            'bg-red-700 text-white cursor-not-allowed': isDepartureRecordedForToday,
-            'text-red-700 border border-red-700 bg-white hover:text-white hover:bg-red-800 cursor-pointer':
-                !isDepartureRecordedForToday,
-        }"
-        class="mt-4 transition-colors duration-300 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-6 py-3"
-    >
-        <i class="fas fa-arrow-left"></i> Enregistrer
-    </button>
+                            :disabled="isDepartureRecordedForToday"
+                            ref="departureButtonRef"
+                            id="departureButton"
+                            @click="openModal('departure')"
+                            :class="{
+                                'bg-red-700 text-white cursor-not-allowed':
+                                    isDepartureRecordedForToday,
+                                'text-red-700 border border-red-700 bg-white hover:text-white hover:bg-red-800 cursor-pointer':
+                                    !isDepartureRecordedForToday,
+                            }"
+                            class="mt-4 transition-colors duration-300 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-6 py-3"
+                        >
+                            <i class="fas fa-arrow-left"></i> Enregistrer
+                        </button>
                         <p class="mt-2 text-gray-600 text-sm">
                             Heure de départ enregistrée pour aujourd'hui
                         </p>
                         <span
                             id="hourDepartureToday"
                             class="block text-lg mt-2 font-semibold text-gray-600"
-                            >Non enregistré</span
+                            >{{
+                                days.find((day) => day.date === today)
+                                    ?.departure || "Non enregistré"
+                            }}</span
                         >
                     </div>
                 </div>
