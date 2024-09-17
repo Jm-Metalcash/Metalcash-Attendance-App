@@ -46,7 +46,7 @@ const defaultDays = [
 ];
 
 // Créer une référence pour les jours de la semaine
-const days = ref([...defaultDays]);
+const days = ref([]);
 
 // Reformater les heures de la base de données pour qu'elles soient au format HH:mm
 function formatDatabaseTime(time) {
@@ -57,16 +57,30 @@ function formatDatabaseTime(time) {
 
 // Charger les données depuis la base de données
 onMounted(() => {
+    // Remplir le tableau des jours de la semaine
+    for (let i = 1; i <= 5; i++) {
+        days.value.push({
+            day: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][i - 1],
+            date: getWeekDate(i),
+            arrival: "",
+            departure: "",
+            total: "",
+        });
+    }
+
+    // Charger les données depuis la base de données
     axios
         .get("/dashboard/days")
         .then((response) => {
             const data = response.data;
 
             // Combiner les jours de la semaine avec les données de la base
-            days.value = defaultDays.map((defaultDay) => {
-                const dbDay = data.find((d) => d.day === defaultDay.day);
+            days.value = days.value.map((defaultDay) => {
+                const dbDay = data.find(
+                    (d) =>
+                        d.day === defaultDay.day && d.date === defaultDay.date
+                );
                 if (dbDay) {
-                    // Reformater les heures récupérées pour ne pas avoir de secondes
                     dbDay.arrival = formatDatabaseTime(dbDay.arrival);
                     dbDay.departure = formatDatabaseTime(dbDay.departure);
                     return { ...defaultDay, ...dbDay };
@@ -467,20 +481,17 @@ onMounted(() => {
 
                 <!-- Total des heures de la semaine -->
                 <div
-                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 bg-[rgb(0,85,150)] text-center sm:text-right"
+                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-[rgb(0,85,150)] text-center sm:text-right"
                 >
                     <h3
-                        class="text-white text-lg font-semibold flex justify-center sm:justify-end items-center"
+                        class="text-white text-base font-semibold flex justify-center sm:justify-end items-center"
                     >
                         <i class="fas fa-calendar-week text-white mr-2"></i>
-                        Total de la semaine
-                    </h3>
-                    <p class="text-white mt-2 sm:mt-4 text-base">
-                        <strong>Total :</strong>
+                        Total de la semaine :
                         <span class="font-semibold text-white ml-2 text-lg">{{
                             weeklyTotal
                         }}</span>
-                    </p>
+                    </h3>
                 </div>
 
                 <div class="pt-4">
