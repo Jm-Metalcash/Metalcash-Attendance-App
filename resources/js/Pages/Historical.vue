@@ -47,15 +47,6 @@ const totalDaysRecorded = computed(() => {
     return filteredDays.value.length;
 });
 
-// Affiche dynamiquement le mois et l'année sélectionnés
-const selectedMonthYear = computed(() => {
-    const month =
-        selectedMonth.value === 0
-            ? "Tous les mois"
-            : months[selectedMonth.value].name;
-    return `${month} ${selectedYear.value}`;
-});
-
 // Fonction pour reformater l'heure et retirer les secondes
 function formatTime(time) {
     if (!time) return "--:--"; // Si l'heure est vide ou nulle
@@ -82,6 +73,15 @@ const months = [
     { value: 11, name: "Novembre" },
     { value: 12, name: "Décembre" },
 ];
+
+//Filter les jours pour le mois sélectionné
+function filteredDaysForMonth(monthIndex) {
+    return props.days.filter((day) => {
+        const dayDate = new Date(day.date);
+        return dayDate.getFullYear() === selectedYear.value && (dayDate.getMonth() + 1) === monthIndex;
+    });
+}
+
 </script>
 
 <template>
@@ -179,115 +179,143 @@ const months = [
             <div
                 class="w-full max-w-4xl mx-auto overflow-x-auto bg-white shadow-md rounded-lg"
             >
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-[rgb(0,85,150)]">
-                        <tr>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                <!-- Si selectedMonth === 0, on boucle sur les mois et répète la table -->
+                <template v-if="selectedMonth === 0">
+                    <div v-for="monthIndex in 12" :key="monthIndex">
+                        <!-- Filtrer les jours du mois actuel -->
+                        <div v-if="filteredDaysForMonth(monthIndex).length > 0" class="month-table max-w-4xl pt-4 border border-gray-800 overflow-x-auto">
+                            <h3
+                                class="text-lg font-bold px-6 py-4 text-gray-800"
                             >
-                                Jour
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                {{ months[monthIndex].name }} {{ selectedYear }}
+                            </h3>
+                            <table
+                                class="min-w-full divide-y divide-gray-200 mb-8"
                             >
-                                Date
-                            </th>
-                            <th
-                                class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
-                            >
-                                Arrivée
-                            </th>
-                            <th
-                                class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
-                            >
-                                Départ
-                            </th>
-                            <th
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
-                            >
-                                Total
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Si aucun pointage trouvé -->
-                        <tr v-if="filteredDays.length === 0">
-                            <td
-                                colspan="5"
-                                class="px-6 py-4 text-center text-sm md:text-base"
-                            >
-                                Aucun pointage trouvé pour la période
-                                sélectionnée.
-                            </td>
-                        </tr>
+                                <thead class="bg-[rgb(0,85,150)]">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                        >
+                                            Jour
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                        >
+                                            Date
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                        >
+                                            Arrivée
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                        >
+                                            Départ
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                        >
+                                            Total
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody
+                                    class="bg-white divide-y divide-gray-200"
+                                >
+                                    <tr
+                                        v-if="
+                                            filteredDaysForMonth(monthIndex)
+                                                .length === 0
+                                        "
+                                    >
+                                        <td
+                                            colspan="5"
+                                            class="px-6 py-4 text-center text-sm md:text-base"
+                                        >
+                                            Aucun pointage trouvé pour
+                                            {{ months[monthIndex].name }}.
+                                        </td>
+                                    </tr>
+                                    <template
+                                        v-for="(
+                                            day
+                                        ) in filteredDaysForMonth(monthIndex)"
+                                        :key="day.id"
+                                    >
+                                        <tr
+                                            class="hover:bg-gray-50 transition-colors"
+                                        >
+                                            <td
+                                                class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                            >
+                                                {{ day.day }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                            >
+                                                {{
+                                                    new Date(
+                                                        day.date
+                                                    ).toLocaleDateString(
+                                                        "fr-FR"
+                                                    )
+                                                }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                            >
+                                                {{ formatTime(day.arrival) }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                            >
+                                                {{ formatTime(day.departure) }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                            >
+                                                {{ day.total || "--:--" }}
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
 
-                        <!-- Séparation par mois lors de l'affichage de "Tous les mois" -->
-                        <template
-                            v-for="(day, index) in filteredDays"
-                            :key="day.id"
-                        >
-                            <!-- Affichage d'une ligne séparatrice au début de chaque mois -->
-                            <tr
-                                v-if="
-                                    index == 0 ||
-                                    new Date(
-                                        filteredDays[index - 1].date
-                                    ).getMonth() !==
-                                        new Date(day.date).getMonth() ||
-                                    new Date(
-                                        filteredDays[index - 1].date
-                                    ).getFullYear() !==
-                                        new Date(day.date).getFullYear()
-                                "
-                            >
-                                <td
-                                    colspan="5"
-                                    class="px-6 py-2 text-left text-lg font-bold bg-[rgb(239,245,249)] text-gray-800"
-                                >
-                                    {{
-                                        months[
-                                            new Date(day.date).getMonth() + 1
-                                        ].name
-                                    }}
-                                    {{ new Date(day.date).getFullYear() }}
-                                </td>
+                <!-- Si selectedMonth !== 0, on garde l'affichage actuel -->
+                <template v-else>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-[rgb(0,85,150)]">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Jour</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Arrivée</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Départ</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider">Total</th>
                             </tr>
-
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
-                                >
-                                    {{ day.day }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
-                                >
-                                    {{
-                                        new Date(day.date).toLocaleDateString(
-                                            "fr-FR"
-                                        )
-                                    }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
-                                >
-                                    {{ formatTime(day.arrival) }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
-                                >
-                                    {{ formatTime(day.departure) }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
-                                >
-                                    {{ day.total || "--:--" }}
-                                </td>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-if="filteredDays.length === 0">
+                                <td colspan="5" class="px-6 py-4 text-center text-sm md:text-base">Aucun pointage trouvé pour la période sélectionnée.</td>
                             </tr>
-                        </template>
-                    </tbody>
-                </table>
+                            <template v-for="(day, index) in filteredDays" :key="day.id">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">{{ day.day }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">{{ new Date(day.date).toLocaleDateString("fr-FR") }}</td>
+                                    <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.arrival) }}</td>
+                                    <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.departure) }}</td>
+                                    <td class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base">{{ day.total || "--:--" }}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
             </div>
+
             <div
                 class="totalHour max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-[rgb(0,85,150)] text-center sm:text-right"
             >
@@ -301,6 +329,7 @@ const months = [
                     }}</span>
                 </h3>
             </div>
+
             <!-- Retour au Dashboard -->
             <div class="pt-8 flex justify-center">
                 <Link :href="route('dashboard')">
@@ -320,4 +349,11 @@ const months = [
     background-color: #edf6ff;
     transition: background-color 0.3s ease;
 }
+
+.month-table:first-of-type {
+  margin-top: 4px;
+  margin-bottom: 12px
+}
+
+
 </style>
