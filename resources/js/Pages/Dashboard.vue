@@ -447,14 +447,14 @@ onMounted(() => {
 
                 <!-- Total des heures de la semaine -->
                 <div
-                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-[rgb(0,85,150)] text-center sm:text-right"
+                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-gray-800 text-center sm:text-right"
                 >
                     <h3
                         class="text-white text-base flex justify-center sm:justify-end items-center"
                     >
-                        <i class="fas fa-calendar-week text-white mr-2"></i>
+                        <i class="fas fa-calendar-week text-gray-100 mr-2"></i>
                         Total de la semaine :
-                        <span class="font-semibold text-white ml-2 text-base">{{
+                        <span class="font-semibold text-gray-100 ml-2 text-base">{{
                             weeklyTotal
                         }}</span>
                     </h3>

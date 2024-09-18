@@ -183,39 +183,39 @@ function filteredDaysForMonth(monthIndex) {
                 <template v-if="selectedMonth === 0">
                     <div v-for="monthIndex in 12" :key="monthIndex">
                         <!-- Filtrer les jours du mois actuel -->
-                        <div v-if="filteredDaysForMonth(monthIndex).length > 0" class="month-table max-w-4xl pt-4 border border-gray-800 overflow-x-auto">
+                        <div v-if="filteredDaysForMonth(monthIndex).length > 0" class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto">
                             <h3
-                                class="text-lg font-bold px-6 py-4 text-gray-800"
+                                class="py-4 text-lg font-bold px-6 text-center bg-[rgb(0,85,150)] text-gray-100"
                             >
                                 {{ months[monthIndex].name }} {{ selectedYear }}
                             </h3>
                             <table
                                 class="min-w-full divide-y divide-gray-200 mb-8"
                             >
-                                <thead class="bg-[rgb(0,85,150)]">
+                                <thead class="">
                                     <tr>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
                                         >
                                             Jour
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
                                         >
                                             Date
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                            class="px-6 py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider"
                                         >
                                             Arrivée
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                            class="px-6 py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider"
                                         >
                                             Départ
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                            class="px-6 py-3 text-right text-xs font-medium text-gray-800 uppercase tracking-wider"
                                         >
                                             Total
                                         </th>
@@ -248,7 +248,7 @@ function filteredDaysForMonth(monthIndex) {
                                             class="hover:bg-gray-50 transition-colors"
                                         >
                                             <td
-                                                class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                                class="px-6 py-4 whitespace-nowrap text-lg md:text-base"
                                             >
                                                 {{ day.day }}
                                             </td>
@@ -302,7 +302,7 @@ function filteredDaysForMonth(monthIndex) {
                             <tr v-if="filteredDays.length === 0">
                                 <td colspan="5" class="px-6 py-4 text-center text-sm md:text-base">Aucun pointage trouvé pour la période sélectionnée.</td>
                             </tr>
-                            <template v-for="(day, index) in filteredDays" :key="day.id">
+                            <template v-for="day in filteredDays" :key="day.id">
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">{{ day.day }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">{{ new Date(day.date).toLocaleDateString("fr-FR") }}</td>
@@ -317,21 +317,21 @@ function filteredDaysForMonth(monthIndex) {
             </div>
 
             <div
-                class="totalHour max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-[rgb(0,85,150)] text-center sm:text-right"
+                class="totalHour max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-gray-800 text-center sm:text-right"
             >
                 <h3
                     class="text-white text-base flex justify-center sm:justify-end items-center"
                 >
-                    <i class="fas fa-calendar-week text-white mr-2 text-sm"></i>
+                    <i class="fas fa-calendar-week text-gray-100 mr-2 text-sm"></i>
                     Total des heures :
-                    <span class="font-semibold text-white ml-2 text-base">{{
+                    <span class="font-semibold text-gray-100 ml-2 text-base">{{
                         formattedTotalHours
                     }}</span>
                 </h3>
             </div>
 
             <!-- Retour au Dashboard -->
-            <div class="pt-8 flex justify-center">
+            <div class="pt-16 flex justify-center">
                 <Link :href="route('dashboard')">
                     <PrimaryButton>
                         <i class="fas fa-arrow-left mr-2"></i> Retour à
@@ -350,10 +350,9 @@ function filteredDaysForMonth(monthIndex) {
     transition: background-color 0.3s ease;
 }
 
-.month-table:first-of-type {
+.month-table {
   margin-top: 4px;
   margin-bottom: 12px
 }
-
 
 </style>
