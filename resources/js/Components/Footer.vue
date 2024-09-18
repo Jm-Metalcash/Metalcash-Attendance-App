@@ -43,6 +43,7 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                 <hr
                     class="my-6 border-gray-200 sm:mx-auto lg:my-8"
                 />
+                <!-- Developped by Jordan Morlet -->
                 <span
                     class="block text-sm text-gray-200 sm:text-center"
                     >© 2024

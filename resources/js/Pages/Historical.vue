@@ -288,7 +288,19 @@ const months = [
                     </tbody>
                 </table>
             </div>
-
+            <div
+                class="totalHour max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-[rgb(0,85,150)] text-center sm:text-right"
+            >
+                <h3
+                    class="text-white text-base flex justify-center sm:justify-end items-center"
+                >
+                    <i class="fas fa-calendar-week text-white mr-2 text-sm"></i>
+                    Total des heures :
+                    <span class="font-semibold text-white ml-2 text-base">{{
+                        formattedTotalHours
+                    }}</span>
+                </h3>
+            </div>
             <!-- Retour au Dashboard -->
             <div class="pt-8 flex justify-center">
                 <Link :href="route('dashboard')">
@@ -304,7 +316,7 @@ const months = [
 
 <style scoped>
 /* Ajout d'une petite animation de survol sur les lignes de la table */
-tr:hover {
+.transition-colors:hover {
     background-color: #edf6ff;
     transition: background-color 0.3s ease;
 }

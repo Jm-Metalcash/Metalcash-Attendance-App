@@ -6,44 +6,8 @@ import { Head, Link } from "@inertiajs/vue3";
 import ModalDashboard from "@/Components/ModalDashboard.vue";
 import axios from "axios";
 
-// Tableau des jours de la semaine
-const defaultDays = [
-    {
-        day: "Lundi",
-        date: getWeekDate(1),
-        arrival: "",
-        departure: "",
-        total: "",
-    },
-    {
-        day: "Mardi",
-        date: getWeekDate(2),
-        arrival: "",
-        departure: "",
-        total: "",
-    },
-    {
-        day: "Mercredi",
-        date: getWeekDate(3),
-        arrival: "",
-        departure: "",
-        total: "",
-    },
-    {
-        day: "Jeudi",
-        date: getWeekDate(4),
-        arrival: "",
-        departure: "",
-        total: "",
-    },
-    {
-        day: "Vendredi",
-        date: getWeekDate(5),
-        arrival: "",
-        departure: "",
-        total: "",
-    },
-];
+
+const onInitialPageLoaded = ref(false);
 
 // Créer une référence pour les jours de la semaine
 const days = ref([]);
@@ -88,6 +52,8 @@ onMounted(() => {
                     return defaultDay;
                 }
             });
+
+            onInitialPageLoaded.value = true;
         })
         .catch((error) => {
             console.error(
@@ -347,7 +313,7 @@ onMounted(() => {
                             Heure d'arrivée
                         </h3>
                         <button
-                            :disabled="isArrivalRecordedForToday"
+                            :disabled="!onInitialPageLoaded || isArrivalRecordedForToday"
                             ref="arrivalButtonRef"
                             id="arrivalButton"
                             @click="openModal('arrival')"
@@ -386,7 +352,7 @@ onMounted(() => {
                             Heure de départ
                         </h3>
                         <button
-                            :disabled="isDepartureRecordedForToday"
+                            :disabled="!onInitialPageLoaded || isDepartureRecordedForToday"
                             ref="departureButtonRef"
                             id="departureButton"
                             @click="openModal('departure')"
@@ -415,7 +381,7 @@ onMounted(() => {
                 </div>
 
                 <h3
-                    class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 p-4 text-left font-bold mt-12 mb-4"
+                    class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 px-4 py-2 text-left font-bold mt-12 mb-4"
                 >
                     Cette semaine :
                 </h3>
@@ -484,11 +450,11 @@ onMounted(() => {
                     class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-[rgb(0,85,150)] text-center sm:text-right"
                 >
                     <h3
-                        class="text-white text-base font-semibold flex justify-center sm:justify-end items-center"
+                        class="text-white text-base flex justify-center sm:justify-end items-center"
                     >
                         <i class="fas fa-calendar-week text-white mr-2"></i>
                         Total de la semaine :
-                        <span class="font-semibold text-white ml-2 text-lg">{{
+                        <span class="font-semibold text-white ml-2 text-base">{{
                             weeklyTotal
                         }}</span>
                     </h3>
