@@ -78,10 +78,30 @@ const months = [
 function filteredDaysForMonth(monthIndex) {
     return props.days.filter((day) => {
         const dayDate = new Date(day.date);
-        return dayDate.getFullYear() === selectedYear.value && (dayDate.getMonth() + 1) === monthIndex;
+        return (
+            dayDate.getFullYear() === selectedYear.value &&
+            dayDate.getMonth() + 1 === monthIndex
+        );
     });
 }
 
+// Calcul du total des heures travaillées pour un mois donné
+function formattedTotalHoursForMonth(monthIndex) {
+    const totalMinutesForMonth = filteredDaysForMonth(monthIndex).reduce(
+        (total, day) => {
+            if (day.total) {
+                const [hours, minutes] = day.total.split("h").map(Number);
+                total += hours * 60 + minutes;
+            }
+            return total;
+        },
+        0
+    );
+
+    const hours = Math.floor(totalMinutesForMonth / 60);
+    const minutes = totalMinutesForMonth % 60;
+    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+}
 </script>
 
 <template>
@@ -106,7 +126,7 @@ function filteredDaysForMonth(monthIndex) {
                 >
                     <!-- Section informations sur le total des heures et des jours enregistrés -->
                     <div
-                        class="flex flex-col items-start space-y-2 text-gray-700 w-full lg:w-auto"
+                        class="flex flex-col  items-start space-y-2 text-gray-700 w-full lg:w-auto "
                     >
                         <div class="flex items-center text-sm">
                             <i class="fas fa-clock text-blue-500 mr-2"></i>
@@ -183,16 +203,19 @@ function filteredDaysForMonth(monthIndex) {
                 <template v-if="selectedMonth === 0">
                     <div v-for="monthIndex in 12" :key="monthIndex">
                         <!-- Filtrer les jours du mois actuel -->
-                        <div v-if="filteredDaysForMonth(monthIndex).length > 0" class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto">
+                        <div
+                            v-if="filteredDaysForMonth(monthIndex).length > 0"
+                            class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto"
+                        >
                             <h3
-                                class="py-4 text-lg font-bold px-6 text-center bg-[rgb(0,85,150)] text-gray-100"
+                                class="py-4 text-lg font-bold px-6 text-center bg-[rgb(0,85,150)] text-gray-100 overflow-x-auto"
                             >
                                 {{ months[monthIndex].name }} {{ selectedYear }}
                             </h3>
                             <table
                                 class="min-w-full divide-y divide-gray-200 mb-8"
                             >
-                                <thead class="">
+                                <thead>
                                     <tr>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
@@ -239,9 +262,9 @@ function filteredDaysForMonth(monthIndex) {
                                         </td>
                                     </tr>
                                     <template
-                                        v-for="(
-                                            day
-                                        ) in filteredDaysForMonth(monthIndex)"
+                                        v-for="day in filteredDaysForMonth(
+                                            monthIndex
+                                        )"
                                         :key="day.id"
                                     >
                                         <tr
@@ -282,6 +305,50 @@ function filteredDaysForMonth(monthIndex) {
                                     </template>
                                 </tbody>
                             </table>
+
+                            <!-- Affichage du total des heures et du nombre de jours prestés pour chaque mois -->
+                            <div
+                                class="bg-gray-50 px-6 py-4 text-gray-800 border-t border-gray-300 rounded-b-lg"
+                            >
+                                <div
+                                    class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0"
+                                >
+                                    <p class="text-sm font-medium">
+                                        <i
+                                            class="fas fa-clock text-blue-500 mr-2"
+                                        ></i>
+                                        Total des heures pour
+                                        <span class="font-bold"
+                                            >{{ months[monthIndex].name }}
+                                            {{ selectedYear }}</span
+                                        >
+                                        :
+                                        <span
+                                            class="font-semibold text-[rgb(0,85,150)]"
+                                        >
+                                            {{
+                                                formattedTotalHoursForMonth(
+                                                    monthIndex
+                                                )
+                                            }}
+                                        </span>
+                                    </p>
+                                    <p class="text-sm font-medium">
+                                        <i
+                                            class="fas fa-calendar-alt text-green-500 mr-2"
+                                        ></i>
+                                        Nombre de jours prestés :
+                                        <span
+                                            class="font-semibold text-gray-900"
+                                        >
+                                            {{
+                                                filteredDaysForMonth(monthIndex)
+                                                    .length
+                                            }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -291,24 +358,74 @@ function filteredDaysForMonth(monthIndex) {
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-[rgb(0,85,150)]">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Jour</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Arrivée</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Départ</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider">Total</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                >
+                                    Jour
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                >
+                                    Date
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                >
+                                    Arrivée
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                >
+                                    Départ
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                >
+                                    Total
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-if="filteredDays.length === 0">
-                                <td colspan="5" class="px-6 py-4 text-center text-sm md:text-base">Aucun pointage trouvé pour la période sélectionnée.</td>
+                                <td
+                                    colspan="5"
+                                    class="px-6 py-4 text-center text-sm md:text-base"
+                                >
+                                    Aucun pointage trouvé pour la période
+                                    sélectionnée.
+                                </td>
                             </tr>
                             <template v-for="day in filteredDays" :key="day.id">
                                 <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">{{ day.day }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm md:text-base">{{ new Date(day.date).toLocaleDateString("fr-FR") }}</td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.arrival) }}</td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.departure) }}</td>
-                                    <td class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base">{{ day.total || "--:--" }}</td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                    >
+                                        {{ day.day }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                    >
+                                        {{
+                                            new Date(
+                                                day.date
+                                            ).toLocaleDateString("fr-FR")
+                                        }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                    >
+                                        {{ formatTime(day.arrival) }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                    >
+                                        {{ formatTime(day.departure) }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                    >
+                                        {{ day.total || "--:--" }}
+                                    </td>
                                 </tr>
                             </template>
                         </tbody>
@@ -322,7 +439,9 @@ function filteredDaysForMonth(monthIndex) {
                 <h3
                     class="text-white text-base flex justify-center sm:justify-end items-center"
                 >
-                    <i class="fas fa-calendar-week text-gray-100 mr-2 text-sm"></i>
+                    <i
+                        class="fas fa-calendar-week text-gray-100 mr-2 text-sm"
+                    ></i>
                     Total des heures :
                     <span class="font-semibold text-gray-100 ml-2 text-base">{{
                         formattedTotalHours
@@ -351,8 +470,7 @@ function filteredDaysForMonth(monthIndex) {
 }
 
 .month-table {
-  margin-top: 4px;
-  margin-bottom: 12px
+    margin-top: 4px;
+    margin-bottom: 12px;
 }
-
 </style>
