@@ -47,6 +47,7 @@ onMounted(() => {
                 if (dbDay) {
                     dbDay.arrival = formatDatabaseTime(dbDay.arrival);
                     dbDay.departure = formatDatabaseTime(dbDay.departure);
+                    dbDay.total = calculateDailyTotal(dbDay.arrival, dbDay.departure); // Calcul dynamique
                     return { ...defaultDay, ...dbDay };
                 } else {
                     return defaultDay;
@@ -62,6 +63,26 @@ onMounted(() => {
             );
         });
 });
+
+function calculateDailyTotal(arrival, departure) {
+    if (!arrival || !departure) return "00h00";
+
+    const [arrivalHour, arrivalMinute] = arrival.split(":").map(Number);
+    const [departureHour, departureMinute] = departure.split(":").map(Number);
+
+    let totalMinutes =
+        departureHour * 60 +
+        departureMinute -
+        (arrivalHour * 60 + arrivalMinute);
+
+    // Gérer les cas où le départ est le lendemain
+    if (totalMinutes < 0) totalMinutes += 24 * 60;
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+}
 
 const arrivalButtonRef = ref(null);
 const departureButtonRef = ref(null);
