@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -12,8 +12,45 @@ const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(0); // 0 pour "Tous les mois"
 
 // Filtrer les jours en fonction de l'année et du mois sélectionnés
-const filteredDays = computed(() => {
-    return props.days.filter((day) => {
+const filteredDays = ref([]);
+const totalMinutesWorked = ref(0); // Stocke le total des minutes
+
+// Fonction pour calculer la différence entre l'heure d'arrivée et l'heure de départ
+const calculateDailyTotal = (arrival, departure) => {
+    if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante
+
+    const [arrivalHours, arrivalMinutes] = arrival.split(":").map(Number);
+    const [departureHours, departureMinutes] = departure.split(":").map(Number);
+
+    const arrivalDate = new Date();
+    arrivalDate.setHours(arrivalHours, arrivalMinutes, 0);
+
+    const departureDate = new Date();
+    departureDate.setHours(departureHours, departureMinutes, 0);
+
+    // Calcul de la différence en minutes
+    const differenceInMinutes = (departureDate - arrivalDate) / 1000 / 60;
+
+    if (differenceInMinutes < 0) {
+        return "0h00"; // Retourne 0 si l'heure de départ est avant l'arrivée
+    }
+
+    const hours = Math.floor(differenceInMinutes / 60);
+    const minutes = differenceInMinutes % 60;
+    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+};
+
+// Fonction pour filtrer les jours en fonction de l'année et du mois sélectionnés
+const filterDays = () => {
+    filteredDays.value = props.days.map((day) => {
+        // Calculer le total dynamique en fonction des heures d'arrivée et de départ
+        const total = calculateDailyTotal(day.arrival, day.departure);
+
+        return {
+            ...day,
+            total, // Mettre à jour le champ total avec le calcul dynamique
+        };
+    }).filter((day) => {
         const dayDate = new Date(day.date);
         const isSameYear = dayDate.getFullYear() === selectedYear.value;
         const isSameMonth =
@@ -21,31 +58,35 @@ const filteredDays = computed(() => {
             dayDate.getMonth() + 1 === selectedMonth.value;
         return isSameYear && isSameMonth;
     });
-});
+};
 
-// Calcul du total des heures travaillées en fonction du filtre
-const totalHoursWorked = computed(() => {
-    return filteredDays.value.reduce((total, day) => {
+// Fonction pour calculer le total des minutes travaillées
+const calculateTotalMinutes = () => {
+    totalMinutesWorked.value = filteredDays.value.reduce((total, day) => {
         if (day.total) {
             const [hours, minutes] = day.total.split("h").map(Number);
             total += hours * 60 + minutes;
         }
         return total;
     }, 0);
-});
+};
 
-// Conversion du total des minutes en heures et minutes
+// Watch sur les filtres pour recalculer les jours filtrés et les heures
+watch([selectedYear, selectedMonth, () => props.days], () => {
+    filterDays();
+    calculateTotalMinutes();
+}, { immediate: true });
+
+// Formater le total des heures et minutes
 const formattedTotalHours = computed(() => {
-    const totalMinutes = totalHoursWorked.value;
+    const totalMinutes = totalMinutesWorked.value;
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 });
 
 // Nombre de jours enregistrés
-const totalDaysRecorded = computed(() => {
-    return filteredDays.value.length;
-});
+const totalDaysRecorded = computed(() => filteredDays.value.length);
 
 // Fonction pour reformater l'heure et retirer les secondes
 function formatTime(time) {
@@ -74,7 +115,7 @@ const months = [
     { value: 12, name: "Décembre" },
 ];
 
-//Filter les jours pour le mois sélectionné
+// Filter les jours pour le mois sélectionné
 function filteredDaysForMonth(monthIndex) {
     return props.days.filter((day) => {
         const dayDate = new Date(day.date);
@@ -89,10 +130,9 @@ function filteredDaysForMonth(monthIndex) {
 function formattedTotalHoursForMonth(monthIndex) {
     const totalMinutesForMonth = filteredDaysForMonth(monthIndex).reduce(
         (total, day) => {
-            if (day.total) {
-                const [hours, minutes] = day.total.split("h").map(Number);
-                total += hours * 60 + minutes;
-            }
+            const calculatedTotal = calculateDailyTotal(day.arrival, day.departure);
+            const [hours, minutes] = calculatedTotal.split("h").map(Number);
+            total += hours * 60 + minutes;
             return total;
         },
         0
@@ -103,6 +143,7 @@ function formattedTotalHoursForMonth(monthIndex) {
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 }
 </script>
+
 
 <template>
     <Head title="Historique des pointages" />
@@ -303,7 +344,7 @@ function formattedTotalHoursForMonth(monthIndex) {
                                             <td
                                                 class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
                                             >
-                                                {{ day.total || "--:--" }}
+                                            {{ calculateDailyTotal(day.arrival, day.departure) }}
                                             </td>
                                         </tr>
                                     </template>
@@ -428,7 +469,7 @@ function formattedTotalHoursForMonth(monthIndex) {
                                     <td
                                         class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
                                     >
-                                        {{ day.total || "--:--" }}
+                                    {{ calculateDailyTotal(day.arrival, day.departure) }}
                                     </td>
                                 </tr>
                             </template>
