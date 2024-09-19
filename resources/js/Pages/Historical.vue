@@ -15,7 +15,7 @@ const selectedMonth = ref(0); // 0 pour "Tous les mois"
 const filteredDays = ref([]);
 const totalMinutesWorked = ref(0); // Stocke le total des minutes
 
-// Fonction pour calculer la différence entre l'heure d'arrivée et l'heure de départ
+// Fonction pour calculer la différence entre l'heure d'arrivée et de départ
 const calculateDailyTotal = (arrival, departure) => {
     if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante
 
@@ -28,54 +28,108 @@ const calculateDailyTotal = (arrival, departure) => {
     const departureDate = new Date();
     departureDate.setHours(departureHours, departureMinutes, 0);
 
-    // Calcul de la différence en minutes
     const differenceInMinutes = (departureDate - arrivalDate) / 1000 / 60;
 
     if (differenceInMinutes < 0) {
         return "0h00"; // Retourne 0 si l'heure de départ est avant l'arrivée
     }
 
-    const hours = Math.floor(differenceInMinutes / 60);
-    const minutes = differenceInMinutes % 60;
-    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+    return formatMinutesToHours(differenceInMinutes); // Utiliser la fonction pour formater le total
 };
+
+
+const calculateWeeklyTotals = (weeks, days) => {
+    return weeks.map((week) => {
+        const totalMinutes = week.reduce((total, day) => {
+            const dayData = days.find(d => d.date === day.toISOString().split('T')[0]);
+            if (dayData && dayData.arrival && dayData.departure) {
+                // Calculer la différence en minutes seulement si les deux heures sont valides
+                const [arrivalHours, arrivalMinutes] = dayData.arrival.split(':').map(Number);
+                const [departureHours, departureMinutes] = dayData.departure.split(':').map(Number);
+                
+                if (!isNaN(arrivalHours) && !isNaN(departureHours) && !isNaN(arrivalMinutes) && !isNaN(departureMinutes)) {
+                    const arrivalDate = new Date();
+                    arrivalDate.setHours(arrivalHours, arrivalMinutes, 0);
+                    
+                    const departureDate = new Date();
+                    departureDate.setHours(departureHours, departureMinutes, 0);
+
+                    const dailyTotalMinutes = (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
+
+                    if (dailyTotalMinutes > 0) { 
+                        total += dailyTotalMinutes;
+                    }
+                }
+            }
+            return total;
+        }, 0);
+
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return {
+            week,
+            totalHours: `${hours}h${minutes.toString().padStart(2, '0')}`,
+            dateRange: `${formatDate(week[0])} au ${formatDate(week[week.length - 1])}`
+        };
+    });
+};
+
+
 
 // Fonction pour filtrer les jours en fonction de l'année et du mois sélectionnés
 const filterDays = () => {
-    filteredDays.value = props.days.map((day) => {
-        // Calculer le total dynamique en fonction des heures d'arrivée et de départ
-        const total = calculateDailyTotal(day.arrival, day.departure);
+    filteredDays.value = props.days
+        .map((day) => {
+            // Calculer le total dynamique en fonction des heures d'arrivée et de départ
+            const total = calculateDailyTotal(day.arrival, day.departure);
 
-        return {
-            ...day,
-            total, // Mettre à jour le champ total avec le calcul dynamique
-        };
-    }).filter((day) => {
-        const dayDate = new Date(day.date);
-        const isSameYear = dayDate.getFullYear() === selectedYear.value;
-        const isSameMonth =
-            selectedMonth.value === 0 ||
-            dayDate.getMonth() + 1 === selectedMonth.value;
-        return isSameYear && isSameMonth;
-    });
+            return {
+                ...day,
+                total, // Mettre à jour le champ total avec le calcul dynamique
+            };
+        })
+        .filter((day) => {
+            const dayDate = new Date(day.date);
+            const isSameYear = dayDate.getFullYear() === selectedYear.value;
+            const isSameMonth =
+                selectedMonth.value === 0 ||
+                dayDate.getMonth() + 1 === selectedMonth.value;
+            return isSameYear && isSameMonth;
+        });
 };
 
 // Fonction pour calculer le total des minutes travaillées
 const calculateTotalMinutes = () => {
     totalMinutesWorked.value = filteredDays.value.reduce((total, day) => {
-        if (day.total) {
+        if (day.total && typeof day.total === 'string') {
             const [hours, minutes] = day.total.split("h").map(Number);
-            total += hours * 60 + minutes;
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                total += hours * 60 + minutes;
+            }
         }
         return total;
     }, 0);
 };
 
+
+const formatMinutesToHours = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}h${minutes.toString().padStart(2, "0")}`;
+};
+
+
+
 // Watch sur les filtres pour recalculer les jours filtrés et les heures
-watch([selectedYear, selectedMonth, () => props.days], () => {
-    filterDays();
-    calculateTotalMinutes();
-}, { immediate: true });
+watch(
+    [selectedYear, selectedMonth, () => props.days],
+    () => {
+        filterDays();
+        calculateTotalMinutes();
+    },
+    { immediate: true }
+);
 
 // Formater le total des heures et minutes
 const formattedTotalHours = computed(() => {
@@ -115,35 +169,55 @@ const months = [
     { value: 12, name: "Décembre" },
 ];
 
-// Filter les jours pour le mois sélectionné
-function filteredDaysForMonth(monthIndex) {
-    return props.days.filter((day) => {
-        const dayDate = new Date(day.date);
-        return (
-            dayDate.getFullYear() === selectedYear.value &&
-            dayDate.getMonth() + 1 === monthIndex
-        );
+// Fonction pour récupérer toutes les semaines d'un mois
+const getAllWeeksInMonth = (year, monthIndex) => {
+    const weeks = [];
+    const firstDay = new Date(year, monthIndex - 1, 1);
+    const lastDay = new Date(year, monthIndex, 0); // Dernier jour du mois
+
+    let currentDay = new Date(firstDay);
+
+    // Semaine 1 : Commence le premier jour du mois et se termine le premier vendredi
+    let week1 = [];
+    while (currentDay <= lastDay && currentDay.getDay() !== 6) {
+        // Se termine vendredi (getDay() === 5)
+        week1.push(new Date(currentDay)); // Stocker en tant qu'objet Date
+        currentDay.setDate(currentDay.getDate() + 1);
+    }
+    weeks.push(week1);
+
+    // Semaines suivantes : du lundi au vendredi
+    while (currentDay <= lastDay) {
+        // Passer au lundi si ce n'est pas un lundi
+        if (currentDay.getDay() !== 1) {
+            const daysToMonday = (1 - currentDay.getDay() + 7) % 7;
+            currentDay.setDate(currentDay.getDate() + daysToMonday);
+            if (currentDay > lastDay) break;
+        }
+
+        let week = [];
+        for (let i = 0; i < 5; i++) {
+            // Lundi à vendredi
+            if (currentDay > lastDay) break;
+            week.push(new Date(currentDay)); // Stocker les objets Date
+            currentDay.setDate(currentDay.getDate() + 1);
+        }
+        weeks.push(week);
+    }
+
+    return weeks;
+};
+
+// Fonction pour formater les dates en format DD/MM/YYYY
+const formatDate = (dateObj) => {
+    if (!dateObj) return "Invalid Date";
+    return dateObj.toLocaleDateString("fr-FR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
     });
-}
-
-// Calcul du total des heures travaillées pour un mois donné
-function formattedTotalHoursForMonth(monthIndex) {
-    const totalMinutesForMonth = filteredDaysForMonth(monthIndex).reduce(
-        (total, day) => {
-            const calculatedTotal = calculateDailyTotal(day.arrival, day.departure);
-            const [hours, minutes] = calculatedTotal.split("h").map(Number);
-            total += hours * 60 + minutes;
-            return total;
-        },
-        0
-    );
-
-    const hours = Math.floor(totalMinutesForMonth / 60);
-    const minutes = totalMinutesForMonth % 60;
-    return `${hours}h${minutes.toString().padStart(2, "0")}`;
-}
+};
 </script>
-
 
 <template>
     <Head title="Historique des pointages" />
@@ -165,7 +239,7 @@ function formattedTotalHoursForMonth(monthIndex) {
                 <div
                     class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-6 rounded-lg shadow-md space-y-6 md:space-y-0"
                 >
-                    <!-- Section informations sur le total des heures et des jours enregistrés -->
+                    <!-- Informations sur le total des heures et des jours enregistrés -->
                     <div
                         class="flex flex-col items-start space-y-2 text-gray-700 w-full lg:w-auto"
                     >
@@ -187,7 +261,7 @@ function formattedTotalHoursForMonth(monthIndex) {
                         </div>
                     </div>
 
-                    <!-- Filtres par année et mois sur la même ligne que les informations pour tablette et desktop -->
+                    <!-- Filtres par année et mois -->
                     <div
                         class="flex flex-col sm:flex-row md:flex-row items-start md:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto lg:ml-auto"
                     >
@@ -240,165 +314,43 @@ function formattedTotalHoursForMonth(monthIndex) {
             <div
                 class="w-full max-w-4xl mx-auto overflow-x-auto bg-white shadow-md rounded-lg"
             >
-                <!-- Si selectedMonth === 0, on boucle sur les mois et répète la table -->
+                <!-- Si selectedMonth === 0, afficher toutes les semaines de tous les mois -->
                 <template v-if="selectedMonth === 0">
-                    <div v-for="monthIndex in 12" :key="monthIndex">
-                        <!-- Filtrer les jours du mois actuel -->
-                        <div
-                            v-if="filteredDaysForMonth(monthIndex).length > 0"
-                            class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto"
-                        >
-                            <div class="bg-[rgb(0,85,150)] w-[200%] md:w-full">
-                                <h3
-                                    class="py-4 text-lg font-bold px-6 text-left md:text-center text-gray-100"
-                                >
-                                    {{ months[monthIndex].name }}
-                                    {{ selectedYear }}
-                                </h3>
-                            </div>
+    <div v-for="monthIndex in 12" :key="monthIndex">
+        <div v-if="getAllWeeksInMonth(selectedYear, monthIndex).length > 0" class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto">
+            <div class="bg-[rgb(0,85,150)] w-full">
+                <h3 class="py-4 text-lg font-bold px-6 text-left md:text-center text-gray-100">
+                    {{ months[monthIndex].name }} {{ selectedYear }}
+                </h3>
+            </div>
 
-                            <table
-                                class="min-w-full divide-y divide-gray-200 mb-8"
-                            >
-                                <thead>
-                                    <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Jour
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Date
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Arrivée
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Départ
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-right text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Total
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody
-                                    class="bg-white divide-y divide-gray-200"
-                                >
-                                    <tr
-                                        v-if="
-                                            filteredDaysForMonth(monthIndex)
-                                                .length === 0
-                                        "
-                                    >
-                                        <td
-                                            colspan="5"
-                                            class="px-6 py-4 text-center text-sm md:text-base"
-                                        >
-                                            Aucun pointage trouvé pour
-                                            {{ months[monthIndex].name }}.
-                                        </td>
-                                    </tr>
-                                    <template
-                                        v-for="day in filteredDaysForMonth(
-                                            monthIndex
-                                        )"
-                                        :key="day.id"
-                                    >
-                                        <tr
-                                            class="hover:bg-gray-50 transition-colors"
-                                        >
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-lg md:text-base"
-                                            >
-                                                {{ day.day }}
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
-                                            >
-                                                {{
-                                                    new Date(
-                                                        day.date
-                                                    ).toLocaleDateString(
-                                                        "fr-FR"
-                                                    )
-                                                }}
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
-                                            >
-                                                {{ formatTime(day.arrival) }}
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
-                                            >
-                                                {{ formatTime(day.departure) }}
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
-                                            >
-                                            {{ calculateDailyTotal(day.arrival, day.departure) }}
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
+            <table class="min-w-full divide-y divide-gray-200 mb-8">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Semaine</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Dates</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-800 uppercase tracking-wider">Total des heures</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <template v-for="(week, index) in calculateWeeklyTotals(getAllWeeksInMonth(selectedYear, monthIndex), props.days)" :key="index">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg md:text-base">Semaine {{ index + 1 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg md:text-base">
+                                {{ week.dateRange }}
+                            </td>
+                            <td class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base">{{ week.totalHours }}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
 
-                            <!-- Affichage du total des heures et du nombre de jours prestés pour chaque mois -->
-                            <div
-                                class="bg-gray-50 px-6 py-4 text-gray-800 border-t border-gray-300 rounded-b-lg w-[200%] md:w-full"
-                            >
-                                <div
-                                    class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0"
-                                >
-                                    <p class="text-sm font-medium">
-                                        <i
-                                            class="fas fa-clock text-blue-500 mr-2"
-                                        ></i>
-                                        Total des heures pour
-                                        <span class="font-bold"
-                                            >{{ months[monthIndex].name }}
-                                            {{ selectedYear }}</span
-                                        >
-                                        :
-                                        <span
-                                            class="font-semibold text-[rgb(0,85,150)]"
-                                        >
-                                            {{
-                                                formattedTotalHoursForMonth(
-                                                    monthIndex
-                                                )
-                                            }}
-                                        </span>
-                                    </p>
-                                    <p class="text-sm font-medium">
-                                        <i
-                                            class="fas fa-calendar-alt text-green-500 mr-2"
-                                        ></i>
-                                        Nombre de jours prestés :
-                                        <span
-                                            class="font-semibold text-gray-900"
-                                        >
-                                            {{
-                                                filteredDaysForMonth(monthIndex)
-                                                    .length
-                                            }}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </template>
 
-                <!-- Si selectedMonth !== 0, on garde l'affichage actuel -->
+
+                <!-- Si selectedMonth !== 0, afficher les jours filtrés -->
                 <template v-else>
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-[rgb(0,85,150)]">
@@ -469,7 +421,12 @@ function formattedTotalHoursForMonth(monthIndex) {
                                     <td
                                         class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
                                     >
-                                    {{ calculateDailyTotal(day.arrival, day.departure) }}
+                                        {{
+                                            calculateDailyTotal(
+                                                day.arrival,
+                                                day.departure
+                                            )
+                                        }}
                                     </td>
                                 </tr>
                             </template>
