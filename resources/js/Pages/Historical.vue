@@ -126,7 +126,7 @@ function formattedTotalHoursForMonth(monthIndex) {
                 >
                     <!-- Section informations sur le total des heures et des jours enregistrés -->
                     <div
-                        class="flex flex-col  items-start space-y-2 text-gray-700 w-full lg:w-auto "
+                        class="flex flex-col items-start space-y-2 text-gray-700 w-full lg:w-auto"
                     >
                         <div class="flex items-center text-sm">
                             <i class="fas fa-clock text-blue-500 mr-2"></i>
@@ -207,11 +207,15 @@ function formattedTotalHoursForMonth(monthIndex) {
                             v-if="filteredDaysForMonth(monthIndex).length > 0"
                             class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto"
                         >
-                            <h3
-                                class="py-4 text-lg font-bold px-6 text-center bg-[rgb(0,85,150)] text-gray-100 overflow-x-auto"
-                            >
-                                {{ months[monthIndex].name }} {{ selectedYear }}
-                            </h3>
+                            <div class="bg-[rgb(0,85,150)] w-[200%] md:w-full">
+                                <h3
+                                    class="py-4 text-lg font-bold px-6 text-left md:text-center text-gray-100"
+                                >
+                                    {{ months[monthIndex].name }}
+                                    {{ selectedYear }}
+                                </h3>
+                            </div>
+
                             <table
                                 class="min-w-full divide-y divide-gray-200 mb-8"
                             >
@@ -308,7 +312,7 @@ function formattedTotalHoursForMonth(monthIndex) {
 
                             <!-- Affichage du total des heures et du nombre de jours prestés pour chaque mois -->
                             <div
-                                class="bg-gray-50 px-6 py-4 text-gray-800 border-t border-gray-300 rounded-b-lg"
+                                class="bg-gray-50 px-6 py-4 text-gray-800 border-t border-gray-300 rounded-b-lg w-[200%] md:w-full"
                             >
                                 <div
                                     class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0"
