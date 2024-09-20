@@ -1,11 +1,13 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, defineProps } from "vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import Footer from "@/Components/Footer.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+
+const page = usePage();
 
 const showingNavigationDropdown = ref(false);
 
@@ -53,12 +55,19 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 >
                                     Calendrier
                                 </NavLink>
-                                <NavLink
-                                    :href="route('employes')"
-                                    :active="route().current('employes')"
+                                <template
+                                    v-if="
+                                        page.props.auth.roles &&
+                                        page.props.auth.roles.includes('Admin')
+                                    "
                                 >
-                                    Liste des employés
-                                </NavLink>
+                                    <NavLink
+                                        :href="route('employes')"
+                                        :active="route().current('employes')"
+                                    >
+                                        Liste des employés
+                                    </NavLink>
+                                </template>
                             </div>
                         </div>
 

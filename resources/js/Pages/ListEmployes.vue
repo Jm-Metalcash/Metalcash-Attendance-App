@@ -1,10 +1,19 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
-import { defineProps } from 'vue'
+import { Head, router, usePage } from "@inertiajs/vue3";
+import { defineProps, onMounted } from 'vue'
 
 const props = defineProps({
   users: Array 
+})
+
+const page = usePage();
+
+// Vérifier les rôles et rediriger si l'utilisateur n'est pas admin
+onMounted(() => {
+  if (!page.props.auth.roles.includes('Admin')) {
+    router.get(route('dashboard')) 
+  }
 })
 </script>
 
