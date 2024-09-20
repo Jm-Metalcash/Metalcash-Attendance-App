@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DayController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\HistoricalController;
+use App\Http\Controllers\EmployeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -41,9 +42,11 @@ Route::get('/dashboard/days', [DayController::class, 'index']);
 
 Route::middleware(['auth'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
 
-Route::get('/liste-des-employes', function () {
-    return Inertia::render('ListEmployes');
-})->middleware(['auth', 'verified'])->name('employes');
+
+
+Route::middleware(['auth'])->get('/liste-des-employes', [EmployeController::class, 'index'])->name('employes');
+
+
 
 
 
