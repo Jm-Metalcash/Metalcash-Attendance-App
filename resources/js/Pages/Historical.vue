@@ -37,26 +37,38 @@ const calculateDailyTotal = (arrival, departure) => {
     return formatMinutesToHours(differenceInMinutes); // Utiliser la fonction pour formater le total
 };
 
-
+//Fonction pour calculer le total des heures de la semaine du mois
 const calculateWeeklyTotals = (weeks, days) => {
     return weeks.map((week) => {
         const totalMinutes = week.reduce((total, day) => {
-            const dayData = days.find(d => d.date === day.toISOString().split('T')[0]);
+            // Utiliser toLocaleDateString pour éviter les problèmes de fuseau horaire
+            const dayString = day.toLocaleDateString("fr-CA"); // 'YYYY-MM-DD'
+            const dayData = days.find((d) => d.date === dayString);
+
             if (dayData && dayData.arrival && dayData.departure) {
-                // Calculer la différence en minutes seulement si les deux heures sont valides
-                const [arrivalHours, arrivalMinutes] = dayData.arrival.split(':').map(Number);
-                const [departureHours, departureMinutes] = dayData.departure.split(':').map(Number);
-                
-                if (!isNaN(arrivalHours) && !isNaN(departureHours) && !isNaN(arrivalMinutes) && !isNaN(departureMinutes)) {
+                const [arrivalHours, arrivalMinutes] = dayData.arrival
+                    .split(":")
+                    .map(Number);
+                const [departureHours, departureMinutes] = dayData.departure
+                    .split(":")
+                    .map(Number);
+
+                if (
+                    !isNaN(arrivalHours) &&
+                    !isNaN(departureHours) &&
+                    !isNaN(arrivalMinutes) &&
+                    !isNaN(departureMinutes)
+                ) {
                     const arrivalDate = new Date();
                     arrivalDate.setHours(arrivalHours, arrivalMinutes, 0);
-                    
+
                     const departureDate = new Date();
                     departureDate.setHours(departureHours, departureMinutes, 0);
 
-                    const dailyTotalMinutes = (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
+                    const dailyTotalMinutes =
+                        (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
 
-                    if (dailyTotalMinutes > 0) { 
+                    if (dailyTotalMinutes > 0) {
                         total += dailyTotalMinutes;
                     }
                 }
@@ -69,13 +81,13 @@ const calculateWeeklyTotals = (weeks, days) => {
 
         return {
             week,
-            totalHours: `${hours}h${minutes.toString().padStart(2, '0')}`,
-            dateRange: `${formatDate(week[0])} au ${formatDate(week[week.length - 1])}`
+            totalHours: `${hours}h${minutes.toString().padStart(2, "0")}`,
+            dateRange: `${formatDate(week[0])} au ${formatDate(
+                week[week.length - 1]
+            )}`,
         };
     });
 };
-
-
 
 // Fonction pour filtrer les jours en fonction de l'année et du mois sélectionnés
 const filterDays = () => {
@@ -102,7 +114,7 @@ const filterDays = () => {
 // Fonction pour calculer le total des minutes travaillées
 const calculateTotalMinutes = () => {
     totalMinutesWorked.value = filteredDays.value.reduce((total, day) => {
-        if (day.total && typeof day.total === 'string') {
+        if (day.total && typeof day.total === "string") {
             const [hours, minutes] = day.total.split("h").map(Number);
             if (!isNaN(hours) && !isNaN(minutes)) {
                 total += hours * 60 + minutes;
@@ -112,14 +124,11 @@ const calculateTotalMinutes = () => {
     }, 0);
 };
 
-
 const formatMinutesToHours = (totalMinutes) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 };
-
-
 
 // Watch sur les filtres pour recalculer les jours filtrés et les heures
 watch(
@@ -180,9 +189,14 @@ const getAllWeeksInMonth = (year, monthIndex) => {
     // Semaine 1 : Commence le premier jour du mois et se termine le premier vendredi
     let week1 = [];
     while (currentDay <= lastDay && currentDay.getDay() !== 6) {
-        // Se termine vendredi (getDay() === 5)
+        // Ajouter le jour au tableau tant qu'on est avant ou sur vendredi (getDay() === 5)
         week1.push(new Date(currentDay)); // Stocker en tant qu'objet Date
         currentDay.setDate(currentDay.getDate() + 1);
+    }
+    // Ajouter le vendredi si nécessaire (getDay() === 5)
+    if (currentDay.getDay() === 5) {
+        week1.push(new Date(currentDay));
+        currentDay.setDate(currentDay.getDate() + 1); // Passer au jour suivant
     }
     weeks.push(week1);
 
@@ -197,7 +211,7 @@ const getAllWeeksInMonth = (year, monthIndex) => {
 
         let week = [];
         for (let i = 0; i < 5; i++) {
-            // Lundi à vendredi
+            // Lundi à vendredi (assurer qu'on inclut bien vendredi)
             if (currentDay > lastDay) break;
             week.push(new Date(currentDay)); // Stocker les objets Date
             currentDay.setDate(currentDay.getDate() + 1);
@@ -316,39 +330,83 @@ const formatDate = (dateObj) => {
             >
                 <!-- Si selectedMonth === 0, afficher toutes les semaines de tous les mois -->
                 <template v-if="selectedMonth === 0">
-    <div v-for="monthIndex in 12" :key="monthIndex">
-        <div v-if="getAllWeeksInMonth(selectedYear, monthIndex).length > 0" class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto">
-            <div class="bg-[rgb(0,85,150)] w-full">
-                <h3 class="py-4 text-lg font-bold px-6 text-left md:text-center text-gray-100">
-                    {{ months[monthIndex].name }} {{ selectedYear }}
-                </h3>
-            </div>
+                    <div v-for="monthIndex in 12" :key="monthIndex">
+                        <div
+                            v-if="
+                                getAllWeeksInMonth(selectedYear, monthIndex)
+                                    .length > 0
+                            "
+                            class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto"
+                        >
+                            <div class="bg-[rgb(0,85,150)] w-full">
+                                <h3
+                                    class="py-4 text-lg font-bold px-6 text-left md:text-center text-gray-100"
+                                >
+                                    {{ months[monthIndex].name }}
+                                    {{ selectedYear }}
+                                </h3>
+                            </div>
 
-            <table class="min-w-full divide-y divide-gray-200 mb-8">
-                <thead>
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Semaine</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Dates</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-800 uppercase tracking-wider">Total des heures</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <template v-for="(week, index) in calculateWeeklyTotals(getAllWeeksInMonth(selectedYear, monthIndex), props.days)" :key="index">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-lg md:text-base">Semaine {{ index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-lg md:text-base">
-                                {{ week.dateRange }}
-                            </td>
-                            <td class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base">{{ week.totalHours }}</td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</template>
-
-
+                            <table
+                                class="min-w-full divide-y divide-gray-200 mb-8"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                                        >
+                                            Semaine
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                                        >
+                                            Date
+                                        </th>
+                                        <th
+                                            class="px-6 py-3 text-right text-xs font-medium text-gray-800 uppercase tracking-wider"
+                                        >
+                                            Total des heures
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody
+                                    class="bg-white divide-y divide-gray-200"
+                                >
+                                    <template
+                                        v-for="(
+                                            week, index
+                                        ) in calculateWeeklyTotals(
+                                            getAllWeeksInMonth(
+                                                selectedYear,
+                                                monthIndex
+                                            ),
+                                            props.days
+                                        )"
+                                        :key="index"
+                                    >
+                                        <tr>
+                                            <td
+                                                class="px-6 py-4 whitespace-nowrap text-lg md:text-base"
+                                            >
+                                                Semaine {{ index + 1 }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 whitespace-nowrap text-lg md:text-base"
+                                            >
+                                                {{ week.dateRange }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                            >
+                                                {{ week.totalHours }}
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
 
                 <!-- Si selectedMonth !== 0, afficher les jours filtrés -->
                 <template v-else>
