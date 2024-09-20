@@ -55,19 +55,17 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 >
                                     Calendrier
                                 </NavLink>
-                                <template
+
+                                <NavLink
                                     v-if="
                                         page.props.auth.roles &&
                                         page.props.auth.roles.includes('Admin')
                                     "
+                                    :href="route('employes')"
+                                    :active="route().current('employes')"
                                 >
-                                    <NavLink
-                                        :href="route('employes')"
-                                        :active="route().current('employes')"
-                                    >
-                                        Liste des employés
-                                    </NavLink>
-                                </template>
+                                    Gestion des employés
+                                </NavLink>
                             </div>
                         </div>
 
@@ -188,10 +186,14 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             Calendrier
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
+                            v-if="
+                                page.props.auth.roles &&
+                                page.props.auth.roles.includes('Admin')
+                            "
                             :href="route('employes')"
                             :active="route().current('employes')"
                         >
-                            Liste des employés
+                            Gestion des employés
                         </ResponsiveNavLink>
                     </div>
 

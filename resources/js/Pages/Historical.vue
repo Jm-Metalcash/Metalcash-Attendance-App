@@ -298,7 +298,7 @@ const getTotalHoursForMonth = (monthIndex, year) => {
         </template>
 
         <section
-            class="attendance-section w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20"
+            class="attendance-section w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20"
         >
             <!-- Statistiques et actions -->
             <div class="w-full max-w-4xl mx-auto mb-8">

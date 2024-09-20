@@ -9,10 +9,10 @@ class EmployeController extends Controller
 {
     public function index()
     {
-        // Récupérer tous les utilisateurs avec leurs jours (`days`) associés
-        $users = User::with('days')->get();
+        // Récupérer tous les utilisateurs avec leurs jours et leurs rôles associés
+        $users = User::with('days', 'roles')->get();
 
-        // Envoyer les utilisateurs et leurs `days` à la vue Inertia
+        // Envoyer les utilisateurs avec leurs `days` et `roles` à la vue Inertia
         return Inertia::render('ListEmployes', [
             'users' => $users
         ]);
