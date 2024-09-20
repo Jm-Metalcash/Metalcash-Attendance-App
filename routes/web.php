@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DayController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\HistoricalController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
@@ -20,10 +21,11 @@ Route::get('/dashboard', function () {
 
 
 
+Route::middleware(['auth', 'verified'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/historique', [HistoricalController::class, 'index'])->name('historique');
 });
-
 
 Route::get('/calendrier', function () {
     return Inertia::render('Calendrier');
@@ -36,6 +38,8 @@ Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
 //Récupère les données des jours du user dans la db
 Route::get('/dashboard/days', [DayController::class, 'index']);
 
+
+Route::middleware(['auth'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
 
 
 

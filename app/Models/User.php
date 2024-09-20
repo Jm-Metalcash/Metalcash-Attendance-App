@@ -49,4 +49,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Day::class);
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+     // Vérifier si l'utilisateur a un rôle particulier
+     public function hasRole(string $role): bool
+     {
+         return $this->roles()->where('name', $role)->exists();
+     }
 }
