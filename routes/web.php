@@ -41,6 +41,10 @@ Route::get('/dashboard/days', [DayController::class, 'index']);
 
 Route::middleware(['auth'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
 
+Route::get('/liste-des-employes', function () {
+    return Inertia::render('ListEmployes');
+})->middleware(['auth', 'verified'])->name('employes');
+
 
 
 

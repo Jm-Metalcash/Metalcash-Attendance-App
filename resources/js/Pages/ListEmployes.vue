@@ -6,12 +6,12 @@ import { Head } from "@inertiajs/vue3";
 </script>
 
 <template>
-    <Head title="Calendrier" />
+    <Head title="Liste des employés" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
-                Calendrier
+                Liste des employés
             </h2>
         </template>
 

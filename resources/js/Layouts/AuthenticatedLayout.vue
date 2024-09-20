@@ -53,6 +53,12 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 >
                                     Calendrier
                                 </NavLink>
+                                <NavLink
+                                    :href="route('employes')"
+                                    :active="route().current('employes')"
+                                >
+                                    Liste des employés
+                                </NavLink>
                             </div>
                         </div>
 
@@ -171,6 +177,12 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             :active="route().current('calendrier')"
                         >
                             Calendrier
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('employes')"
+                            :active="route().current('employes')"
+                        >
+                            Liste des employés
                         </ResponsiveNavLink>
                     </div>
 
