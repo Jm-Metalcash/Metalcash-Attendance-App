@@ -468,7 +468,7 @@ const getTotalHoursForMonth = (monthIndex, year) => {
 
                             <!-- Affichage du total des jours et des heures pour chaque mois -->
                             <div
-                                class="bg-gray-100 text-gray-800 p-3 sm:p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0"
+                                class="bg-gray-100 text-gray-800 p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0"
                             >
                                 <div class="flex items-center space-x-4">
                                     <i
@@ -509,103 +509,123 @@ const getTotalHoursForMonth = (monthIndex, year) => {
 
                 <!-- Si selectedMonth !== 0, afficher les jours filtrés -->
                 <template v-else>
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-[rgb(0,85,150)]">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
-                                    Jour
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
-                                    Date
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
-                                    Arrivée
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
-                                    Départ
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
-                                    Total
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-if="filteredDays.length === 0">
-                                <td
-                                    colspan="5"
-                                    class="px-6 py-4 text-center text-sm md:text-base"
-                                >
-                                    Aucun pointage trouvé pour la période
-                                    sélectionnée.
-                                </td>
-                            </tr>
-                            <template v-for="day in filteredDays" :key="day.id">
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                    <!-- Conteneur pour gérer le défilement horizontal -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-[rgb(0,85,150)]">
+                                <tr>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
                                     >
-                                        {{ day.day }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm md:text-base"
+                                        Jour
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
                                     >
-                                        {{
-                                            new Date(
-                                                day.date
-                                            ).toLocaleDateString("fr-FR")
-                                        }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        Date
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
                                     >
-                                        {{ formatTime(day.arrival) }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        Arrivée
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
                                     >
-                                        {{ formatTime(day.departure) }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                        Départ
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
                                     >
-                                        {{
-                                            calculateDailyTotal(
-                                                day.arrival,
-                                                day.departure
-                                            )
-                                        }}
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-if="filteredDays.length === 0">
+                                    <td
+                                        colspan="5"
+                                        class="px-4 sm:px-6 py-4 text-center text-sm md:text-base"
+                                    >
+                                        Aucun pointage trouvé pour la période
+                                        sélectionnée.
                                     </td>
                                 </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </template>
-            </div>
+                                <template
+                                    v-for="day in filteredDays"
+                                    :key="day.id"
+                                >
+                                    <tr
+                                        class="hover:bg-gray-50 transition-colors"
+                                    >
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ day.day }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{
+                                                new Date(
+                                                    day.date
+                                                ).toLocaleDateString("fr-FR")
+                                            }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ formatTime(day.arrival) }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ formatTime(day.departure) }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{
+                                                calculateDailyTotal(
+                                                    day.arrival,
+                                                    day.departure
+                                                )
+                                            }}
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <div
-                class="totalHour max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-gray-800 text-center sm:text-right"
-            >
-                <h3
-                    class="text-white text-base flex justify-center sm:justify-end items-center"
-                >
-                    <i
-                        class="fas fa-calendar-week text-gray-100 mr-2 text-sm"
-                    ></i>
-                    Total des heures :
-                    <span class="font-semibold text-gray-100 ml-2 text-base">{{
-                        formattedTotalHours
-                    }}</span>
-                </h3>
+                    <!-- Affichage du total des jours et des heures pour chaque mois -->
+                    <div
+                        class="bg-gray-100 text-gray-800 p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 mt-4"
+                    >
+                        <div class="flex items-center space-x-4">
+                            <i
+                                class="fas fa-calendar-alt text-green-500 mr-0 text-xs sm:text-sm"
+                            ></i>
+                            <span class="font-semibold text-xs sm:text-sm">
+                                Jours enregistrés :
+                                {{
+                                   formattedTotalHours
+                                }}
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <i
+                                class="fas fa-clock text-blue-500 mr-0 text-xs sm:text-sm"
+                            ></i>
+                            <span class="font-semibold text-xs sm:text-sm">
+                                Total des heures :
+                                {{
+                                    totalDaysRecorded
+                                }}
+                            </span>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <!-- Retour au Dashboard -->
