@@ -231,6 +231,58 @@ const formatDate = (dateObj) => {
         day: "2-digit",
     });
 };
+
+// Calcul du nombre total de jours prestés pour un mois donné
+const getTotalDaysForMonth = (monthIndex, year) => {
+    const filteredDays = props.days.filter((day) => {
+        const dayDate = new Date(day.date);
+        return (
+            dayDate.getFullYear() === year &&
+            dayDate.getMonth() + 1 === monthIndex
+        );
+    });
+    return filteredDays.length; // Retourne le nombre de jours prestés
+};
+
+// Calcul du total des heures prestées pour un mois donné
+const getTotalHoursForMonth = (monthIndex, year) => {
+    const filteredDays = props.days.filter((day) => {
+        const dayDate = new Date(day.date);
+        return (
+            dayDate.getFullYear() === year &&
+            dayDate.getMonth() + 1 === monthIndex
+        );
+    });
+
+    // Calcul du total des minutes travaillées pour le mois
+    const totalMinutes = filteredDays.reduce((total, day) => {
+        if (day.arrival && day.departure) {
+            const [arrivalHours, arrivalMinutes] = day.arrival
+                .split(":")
+                .map(Number);
+            const [departureHours, departureMinutes] = day.departure
+                .split(":")
+                .map(Number);
+
+            const arrivalDate = new Date();
+            arrivalDate.setHours(arrivalHours, arrivalMinutes, 0);
+
+            const departureDate = new Date();
+            departureDate.setHours(departureHours, departureMinutes, 0);
+
+            const dailyTotalMinutes = (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
+
+            if (dailyTotalMinutes > 0) {
+                total += dailyTotalMinutes;
+            }
+        }
+        return total;
+    }, 0);
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}h${minutes.toString().padStart(2, "0")}`; // Retourne les heures et minutes formatées
+};
 </script>
 
 <template>
@@ -330,80 +382,127 @@ const formatDate = (dateObj) => {
             >
                 <!-- Si selectedMonth === 0, afficher toutes les semaines de tous les mois -->
                 <template v-if="selectedMonth === 0">
-                    <div v-for="monthIndex in 12" :key="monthIndex">
+                    <div
+                        v-for="monthIndex in 12"
+                        :key="monthIndex"
+                        class="mb-12"
+                    >
                         <div
                             v-if="
                                 getAllWeeksInMonth(selectedYear, monthIndex)
                                     .length > 0
                             "
-                            class="month-table max-w-4xl pt-0 border border-gray-800 overflow-x-auto"
+                            class="min-w-full pt-0 border border-gray-800"
                         >
-                            <div class="bg-[rgb(0,85,150)] w-full">
-                                <h3
-                                    class="py-4 text-lg font-bold px-6 text-left md:text-center text-gray-100"
+                            <!-- Conteneur avec overflow-x-auto pour le défilement horizontal -->
+                            <div class="overflow-x-auto">
+                                <table
+                                    class="min-w-full divide-y divide-gray-200 mb-8"
                                 >
-                                    {{ months[monthIndex].name }}
-                                    {{ selectedYear }}
-                                </h3>
+                                    <thead class="bg-[rgb(0,85,150)]">
+                                        <tr>
+                                            <th
+                                                class="py-4 text-sm sm:text-base font-bold px-4 sm:px-6 text-left md:text-center text-gray-100"
+                                                colspan="3"
+                                            >
+                                                {{ months[monthIndex].name }}
+                                                {{ selectedYear }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
+                                            >
+                                                Semaine
+                                            </th>
+                                            <th
+                                                class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider"
+                                            >
+                                                Date
+                                            </th>
+                                            <th
+                                                class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-800 uppercase tracking-wider"
+                                            >
+                                                Total des heures
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody
+                                        class="bg-white divide-y divide-gray-200"
+                                    >
+                                        <template
+                                            v-for="(
+                                                week, index
+                                            ) in calculateWeeklyTotals(
+                                                getAllWeeksInMonth(
+                                                    selectedYear,
+                                                    monthIndex
+                                                ),
+                                                props.days
+                                            )"
+                                            :key="index"
+                                        >
+                                            <tr class="transition-colors">
+                                                <td
+                                                    class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
+                                                >
+                                                    Semaine {{ index + 1 }}
+                                                </td>
+                                                <td
+                                                    class="px-4 sm:px-6 text-center py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
+                                                >
+                                                    {{ week.dateRange }}
+                                                </td>
+                                                <td
+                                                    class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                                >
+                                                    {{ week.totalHours }}
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
                             </div>
 
-                            <table
-                                class="min-w-full divide-y divide-gray-200 mb-8"
+                            <!-- Affichage du total des jours et des heures pour chaque mois -->
+                            <div
+                                class="bg-gray-100 text-gray-800 p-3 sm:p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0"
                             >
-                                <thead>
-                                    <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Semaine
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Date
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-right text-xs font-medium text-gray-800 uppercase tracking-wider"
-                                        >
-                                            Total des heures
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody
-                                    class="bg-white divide-y divide-gray-200"
-                                >
-                                    <template
-                                        v-for="(
-                                            week, index
-                                        ) in calculateWeeklyTotals(
-                                            getAllWeeksInMonth(
-                                                selectedYear,
-                                                monthIndex
-                                            ),
-                                            props.days
-                                        )"
-                                        :key="index"
+                                <div class="flex items-center space-x-4">
+                                    <i
+                                        class="fas fa-calendar-alt text-green-500 mr-0 text-xs sm:text-sm"
+                                    ></i>
+                                    <span
+                                        class="font-semibold text-xs sm:text-sm"
                                     >
-                                        <tr>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-lg md:text-base"
-                                            >
-                                                Semaine {{ index + 1 }}
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-lg md:text-base"
-                                            >
-                                                {{ week.dateRange }}
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 text-right whitespace-nowrap text-sm md:text-base"
-                                            >
-                                                {{ week.totalHours }}
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
+                                        Jours enregistrés :
+                                        {{
+                                            getTotalDaysForMonth(
+                                                monthIndex,
+                                                selectedYear
+                                            )
+                                        }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <i
+                                        class="fas fa-clock text-blue-500 mr-0 text-xs sm:text-sm"
+                                    ></i>
+                                    <span
+                                        class="font-semibold text-xs sm:text-sm"
+                                    >
+                                        Total des heures :
+                                        {{
+                                            getTotalHoursForMonth(
+                                                monthIndex,
+                                                selectedYear
+                                            )
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
