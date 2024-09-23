@@ -46,7 +46,7 @@ Route::middleware(['auth'])->get('/dashboard', [RoleController::class, 'index'])
 
 Route::middleware(['auth'])->get('/liste-des-employes', [EmployeController::class, 'index'])->name('employes');
 
-
+Route::middleware(['auth'])->post('/ajouter-un-employe', [EmployeController::class, 'store'])->name('employees.store');
 
 
 
