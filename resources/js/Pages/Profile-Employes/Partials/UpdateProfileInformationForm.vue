@@ -39,7 +39,7 @@ const form = useForm({
             class="bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] text-gray-100 py-2 px-6 font-semibold
                    lg:absolute lg:top-0 lg:right-0 sm:relative sm:mt-6 w-full sm:w-auto mt-8 lg:mt-0 text-xs lg:text-sm uppercase"
         >
-            Afficher les pointages
+            Afficher l'historique des pointages
         </button>
     </Link>
 </header>

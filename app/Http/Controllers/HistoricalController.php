@@ -25,10 +25,16 @@ class HistoricalController extends Controller
     // Récupérer les jours de pointage pour l'utilisateur spécifié par l'ID
     $days = Day::where('user_id', $id)->orderBy('date', 'asc')->get();
 
+    // Récupérer le rôle de l'utilisateur connecté
+    $currentUser = Auth::user();
+    $currentUserRole = $currentUser->roles->pluck('name');
+
     // Retourner la vue Inertia avec les données des jours pour cet utilisateur
     return inertia('Historical', [
         'days' => $days,
         'user' => User::find($id), // Renvoyer également les informations de l'utilisateur
+        'currentUserId' => $currentUser->id, // Renvoyer l'ID de l'utilisateur connecté
+        'currentUserRole' => $currentUserRole, // Envoyer également le rôle de l'utilisateur connecté
     ]);
 }
 
