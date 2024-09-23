@@ -9,7 +9,11 @@ class RoleSeeder extends Seeder
 {
     public function run()
     {
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'Employé']);
+        // Utiliser firstOrCreate pour éviter la duplication en cas de rôles déjà existants
+        Role::firstOrCreate(['name' => 'Admin']);
+        Role::firstOrCreate(['name' => 'Employé']);
+        Role::firstOrCreate(['name' => 'Comptabilité']);
+        Role::firstOrCreate(['name' => 'Informatique']);
+        Role::firstOrCreate(['name' => 'Ouvrier']);
     }
 }

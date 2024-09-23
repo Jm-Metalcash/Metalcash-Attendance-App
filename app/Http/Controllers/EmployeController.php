@@ -31,7 +31,7 @@ class EmployeController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|string|in:Admin,Employé',
+            'role' => 'required|string|in:Admin,Employé,Informatique,Comptabilité,Ouvrier',
         ]);
 
         // Création du nouvel utilisateur
@@ -49,5 +49,74 @@ class EmployeController extends Controller
 
         // Redirection ou réponse Inertia
         return redirect()->back()->with('success', 'Employé ajouté avec succès!');
+    }
+
+
+    // Function pour modifier un employé
+    public function edit($id)
+{
+    // Récupérer l'utilisateur avec ses rôles associés
+    $user = User::with('roles')->findOrFail($id);
+
+    // Récupérer tous les rôles disponibles
+    $roles = Role::all();
+
+    // Renvoyer l'utilisateur et la liste des rôles comme props
+    return Inertia::render('Profile-Employes/Edit', [
+        'user' => $user,  // Envoyer l'utilisateur comme prop
+        'roles' => $roles,  // Envoyer tous les rôles disponibles comme prop explicite
+    ]);
+}
+
+    
+    
+
+
+    // Mettre à jour les informations du profil
+    public function update(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+    
+    // Valider les informations du formulaire, incluant le rôle
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        'role' => 'required|exists:roles,id', // Valider que le rôle existe
+    ]);
+
+    // Mettre à jour le nom et l'email de l'utilisateur
+    $user->update($request->only('name', 'email'));
+
+    // Mettre à jour le rôle dans la table pivot role_user
+    $user->roles()->sync([$request->role]); // Mettre à jour le rôle avec l'ID fourni
+
+    // Rediriger avec un message de succès
+    return redirect()->back()->with('success', 'Profil et rôle mis à jour avec succès.');
+}
+
+
+    // Mettre à jour le mot de passe de l'employé
+    public function updatePassword(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->back()->with('success', 'Mot de passe mis à jour avec succès.');
+    }
+
+    // Supprimer un employé
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('employes')->with('success', 'Employé supprimé avec succès.');
     }
 }

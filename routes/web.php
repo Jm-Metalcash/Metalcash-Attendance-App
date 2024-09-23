@@ -43,10 +43,16 @@ Route::get('/dashboard/days', [DayController::class, 'index']);
 Route::middleware(['auth'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
 
 
+// Gestion des routes pour les employés - accessibles uniquement aux rôles Admin et Informatique
+Route::middleware(['auth', 'role:Admin,Informatique'])->group(function () {
+    Route::get('/liste-des-employes', [EmployeController::class, 'index'])->name('employes');
+    Route::post('/ajouter-un-employe', [EmployeController::class, 'store'])->name('employees.store');
+    Route::get('/employes/{id}/profil', [EmployeController::class, 'edit'])->name('employees.profile');
+    Route::patch('/employes/{id}/profil', [EmployeController::class, 'update'])->name('employees.update');
+    Route::patch('/employes/{id}/password', [EmployeController::class, 'updatePassword'])->name('employees.password.update');
+    Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy');
+});
 
-Route::middleware(['auth'])->get('/liste-des-employes', [EmployeController::class, 'index'])->name('employes');
-
-Route::middleware(['auth'])->post('/ajouter-un-employe', [EmployeController::class, 'store'])->name('employees.store');
 
 
 

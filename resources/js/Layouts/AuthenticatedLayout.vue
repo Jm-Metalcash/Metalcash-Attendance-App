@@ -59,7 +59,12 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 <NavLink
                                     v-if="
                                         page.props.auth.roles &&
-                                        page.props.auth.roles.includes('Admin')
+                                        (page.props.auth.roles.includes(
+                                            'Admin'
+                                        ) ||
+                                            page.props.auth.roles.includes(
+                                                'Informatique'
+                                            ))
                                     "
                                     :href="route('employes')"
                                     :active="route().current('employes')"
@@ -188,7 +193,10 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                         <ResponsiveNavLink
                             v-if="
                                 page.props.auth.roles &&
-                                page.props.auth.roles.includes('Admin')
+                                (page.props.auth.roles.includes('Admin') ||
+                                    page.props.auth.roles.includes(
+                                        'Informatique'
+                                    ))
                             "
                             :href="route('employes')"
                             :active="route().current('employes')"
