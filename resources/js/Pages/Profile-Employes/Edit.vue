@@ -14,7 +14,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <Head title="Gestion de profil de {{ user.name }}" />
+    <Head :title="`Gestion de profil de ${user.name}`" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -29,7 +29,7 @@ const props = defineProps({
                         :user="user" 
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
-                        class="max-w-xl"
+                        class="w-full"
                     />
                 </div>
 
