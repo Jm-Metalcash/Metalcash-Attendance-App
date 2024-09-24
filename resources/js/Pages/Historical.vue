@@ -290,9 +290,10 @@ const isModalOpen = ref(false);
 
 // Ouvrir le modal pour modifier un jour
 const openModal = (day) => {
-    selectedDay.value = { ...day }; // Faire une copie des données du jour
+    selectedDay.value = { ...day };
     isModalOpen.value = true;
 };
+
 
 // Fermer le modal
 const closeModal = () => {
@@ -300,14 +301,57 @@ const closeModal = () => {
     selectedDay.value = null;
 };
 
+const showSuccessToast = ref(false);
+
 // Sauvegarder les modifications du jour
-const saveDayChanges = () => {
-    const dayIndex = props.days.findIndex((day) => day.id === selectedDay.value.id);
-    if (dayIndex !== -1) {
-        props.days[dayIndex] = { ...selectedDay.value };
+const saveDayChanges = async () => {
+    if (!selectedDay.value || !selectedDay.value.id) {
+        console.error("ID du jour manquant !");
+        return;
     }
-    closeModal();
+
+    // S'assurer que les heures ont le bon format 'HH:MM:SS'
+    const formattedArrival = selectedDay.value.arrival.length === 5 ? `${selectedDay.value.arrival}:00` : selectedDay.value.arrival;
+    const formattedDeparture = selectedDay.value.departure.length === 5 ? `${selectedDay.value.departure}:00` : selectedDay.value.departure;
+
+    try {
+        // Envoi des modifications avec les heures formatées
+        await axios.post(`/update-day/${selectedDay.value.id}`, {
+            arrival: formattedArrival,
+            departure: formattedDeparture,
+        });
+
+        // Mettre à jour directement les heures dans le tableau filteredDays
+        const dayToUpdate = filteredDays.value.find(day => day.id === selectedDay.value.id);
+        if (dayToUpdate) {
+            dayToUpdate.arrival = formattedArrival;
+            dayToUpdate.departure = formattedDeparture;
+            dayToUpdate.total = calculateDailyTotal(formattedArrival, formattedDeparture); // Met à jour le total pour ce jour
+        }
+
+        // Recalculer le total des heures pour le mois
+        calculateTotalMinutes();
+
+        // Afficher le toast de succès
+        showSuccessToast.value = true;
+        setTimeout(() => {
+            showSuccessToast.value = false;
+        }, 5000);
+
+        // Fermer le modal après la mise à jour
+        closeModal();
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde des modifications :", error);
+    }
 };
+
+
+
+
+
+
+
+
 </script>
 
 <template>
@@ -322,9 +366,18 @@ const saveDayChanges = () => {
             </h2>
         </template>
 
+
         <section
             class="attendance-section w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20"
         >
+
+            <!-- Flashmessage pour l'enregistrement des jours -->
+            <div v-if="showSuccessToast" 
+                class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100">
+                L'heure a bien été sauvegardée avec succès !
+            </div>
+
+
             <!-- Statistiques et actions -->
             <div class="w-full max-w-4xl mx-auto mb-8">
                 <div
@@ -635,7 +688,7 @@ const saveDayChanges = () => {
                             <span class="font-semibold text-xs sm:text-sm">
                                 Jours enregistrés :
                                 {{
-                                   formattedTotalHours
+                                   totalDaysRecorded
                                 }}
                             </span>
                         </div>
@@ -646,7 +699,7 @@ const saveDayChanges = () => {
                             <span class="font-semibold text-xs sm:text-sm">
                                 Total des heures :
                                 {{
-                                    totalDaysRecorded
+                                    formattedTotalHours
                                 }}
                             </span>
                         </div>
@@ -672,41 +725,44 @@ const saveDayChanges = () => {
                         Modifier le jour : {{ new Date(selectedDay.date).toLocaleDateString("fr-FR") }}
                     </h2>
 
-                <!-- Champ pour modifier l'heure d'arrivée -->
-                <div class="mb-4">
-                    <label for="arrival" class="block text-sm font-medium text-gray-700">
-                        Heure d'arrivée
-                    </label>
-                    <input
-                        id="arrival"
-                        type="time"
-                        v-model="selectedDay.arrival"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                </div>
+                    <!-- Champ pour modifier l'heure d'arrivée -->
+                    <div class="mb-4">
+                        <label for="arrival" class="block text-sm font-medium text-gray-700">
+                            Heure d'arrivée
+                        </label>
+                        <input
+                            id="arrival"
+                            type="time"
+                            v-model="selectedDay.arrival"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
 
-                <!-- Champ pour modifier l'heure de départ -->
-                <div class="mb-4">
-                    <label for="departure" class="block text-sm font-medium text-gray-700">
-                        Heure de départ
-                    </label>
-                    <input
-                        id="departure"
-                        type="time"
-                        v-model="selectedDay.departure"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                </div>
+                    <!-- Champ pour modifier l'heure de départ -->
+                    <div class="mb-4">
+                        <label for="departure" class="block text-sm font-medium text-gray-700">
+                            Heure de départ
+                        </label>
+                        <input
+                            id="departure"
+                            type="time"
+                            v-model="selectedDay.departure"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
 
-                <!-- Boutons pour annuler ou sauvegarder -->
-                <div class="flex justify-end space-x-4">
-                    <button @click="closeModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">Annuler</button>
-                    <PrimaryButton @click="saveDayChanges">
-                        Enregistrer
-                    </PrimaryButton>
-                </div>
+                    <!-- Boutons pour annuler ou sauvegarder -->
+                    <div class="flex justify-end space-x-4">
+                        <button @click="closeModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
+                            Annuler
+                        </button>
+                        <PrimaryButton @click="saveDayChanges">
+                            Enregistrer
+                        </PrimaryButton>
+                    </div>
                 </div>
             </div>
+
 
         </section>
     </AuthenticatedLayout>
