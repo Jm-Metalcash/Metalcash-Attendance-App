@@ -5,7 +5,7 @@ import { Head, Link } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 
 // Les données des jours sont passées à partir du contrôleur Laravel via Inertia
-const props = defineProps(["days", "isShow"]);
+const props = defineProps(["days", "isShow", "user"]);
 
 // Filtre sélectionné pour l'année et le mois
 const selectedYear = ref(new Date().getFullYear());
@@ -373,12 +373,14 @@ const saveDayChanges = async () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
-                Historique des pointages
-            </h2>
-        </template>
+    <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
+        <!-- Si isShow est vrai, afficher "Historique des pointages du user cliqué" -->
+        <span v-if="isShow">Historique des pointages de {{ user.name }}</span>
+        <!-- Sinon, garder le texte par défaut -->
+        <span v-else>Historique des pointages</span>
+    </h2>
+</template>
+
 
 
         <section
@@ -721,15 +723,22 @@ const saveDayChanges = async () => {
                 </template>
             </div>
 
-            <!-- Retour au Dashboard -->
+            <!-- Retour au Dashboard ou à la gestion des employés -->
             <div class="pt-16 flex justify-center">
-                <Link :href="route('dashboard')">
+                <!-- Si isShow est vrai, afficher le bouton avec la route "employes" -->
+                <Link v-if="isShow" :href="route('employes')">
                     <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à
-                        l'accueil
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la gestion des employés
+                    </PrimaryButton>
+                </Link>
+                <!-- Sinon, afficher le bouton pour retourner au dashboard -->
+                <Link v-else :href="route('dashboard')">
+                    <PrimaryButton>
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à l'accueil
                     </PrimaryButton>
                 </Link>
             </div>
+
 
             <!-- Modal pour modifier les jours -->
             <div v-if="isModalOpen" class="fixed z-50 inset-0 flex items-center justify-center">
