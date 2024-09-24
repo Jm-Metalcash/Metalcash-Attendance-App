@@ -52,6 +52,8 @@ Route::middleware(['auth', 'role:Admin,Informatique'])->group(function () {
     Route::patch('/employes/{id}/password', [EmployeController::class, 'updatePassword'])->name('employees.password.update');
     Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy');
     Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('update-day');
+    Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('add-day');
+
 
     
     // Route pour afficher les pointages d'un employé spécifique, accessible uniquement pour "Admin" ou "Informatique"

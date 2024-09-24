@@ -366,6 +366,46 @@ const saveDayChanges = async () => {
     }
 };
 
+// Variables pour le modal d'ajout
+const isAddDayModalOpen = ref(false);
+const newDay = ref({
+    day: 'Lundi', // Par défaut Lundi
+    date: '',
+    arrival: '',
+    departure: ''
+});
+
+// Ouvrir le modal pour ajouter un jour
+const openAddDayModal = () => {
+    isAddDayModalOpen.value = true;
+};
+
+// Fermer le modal d'ajout
+const closeAddDayModal = () => {
+    isAddDayModalOpen.value = false;
+    newDay.value = { day: 'Lundi', date: '', arrival: '', departure: '' }; // Réinitialiser les champs
+};
+
+// Fonction pour ajouter un nouveau jour
+const addDay = async () => {
+    try {
+        await axios.post('/add-day', {
+            user_id: props.user.id, // Récupérer l'ID de l'utilisateur cliqué
+            day: newDay.value.day,
+            date: newDay.value.date,
+            arrival: `${newDay.value.arrival}:00`,
+            departure: `${newDay.value.departure}:00`,
+        });
+
+        // Fermer le modal après succès
+        closeAddDayModal();
+        // Rafraîchir la liste des jours après l'ajout
+        window.location.reload(); // Pour l'instant, recharger la page
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout du jour :', error);
+    }
+};
+
 </script>
 
 <template>
@@ -476,6 +516,12 @@ const saveDayChanges = async () => {
             >
                 <!-- Si selectedMonth === 0, afficher toutes les semaines de tous les mois -->
                 <template v-if="selectedMonth === 0">
+                    <!-- Bouton pour ajouter un jour -->
+                    <div v-if="isShow" class="pt-6 flex justify-start mb-4">
+                        <PrimaryButton @click="openAddDayModal">
+                            <i class="fas fa-plus mr-2"></i> Ajouter un jour
+                        </PrimaryButton>
+                    </div>
                     <div
                         v-for="monthIndex in 12"
                         :key="monthIndex"
@@ -603,6 +649,13 @@ const saveDayChanges = async () => {
 
                 <!-- Si selectedMonth !== 0, afficher les jours filtrés -->
                 <template v-else>
+                    <!-- Bouton pour ajouter un jour -->
+                    <div v-if="isShow" class="pt-6 flex justify-start mb-4">
+                        <PrimaryButton @click="openAddDayModal">
+                            <i class="fas fa-plus mr-2"></i> Ajouter un jour
+                        </PrimaryButton>
+                    </div>
+                    
                     <!-- Conteneur pour gérer le défilement horizontal -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -781,6 +834,71 @@ const saveDayChanges = async () => {
                         </button>
                         <PrimaryButton @click="saveDayChanges">
                             Enregistrer
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal pour ajouter un nouveau jour -->
+            <div v-if="isAddDayModalOpen" class="fixed z-50 inset-0 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <!-- Formulaire pour ajouter un jour -->
+                    <h2 class="text-xl font-semibold mb-4">Ajouter un jour</h2>
+
+                    <!-- Champ pour sélectionner le jour de la semaine -->
+                    <div class="mb-4">
+                        <label for="day" class="block text-sm font-medium text-gray-700">Jour</label>
+                        <select
+                            id="day"
+                            v-model="newDay.day"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        >
+                            <option value="Lundi">Lundi</option>
+                            <option value="Mardi">Mardi</option>
+                            <option value="Mercredi">Mercredi</option>
+                            <option value="Jeudi">Jeudi</option>
+                            <option value="Vendredi">Vendredi</option>
+                        </select>
+                    </div>
+
+                    <!-- Champ pour sélectionner la date -->
+                    <div class="mb-4">
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                        <input
+                            id="date"
+                            type="date"
+                            v-model="newDay.date"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
+
+                    <!-- Champ pour l'heure d'arrivée -->
+                    <div class="mb-4">
+                        <label for="arrival" class="block text-sm font-medium text-gray-700">Heure d'arrivée</label>
+                        <input
+                            id="arrival"
+                            type="time"
+                            v-model="newDay.arrival"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
+
+                    <!-- Champ pour l'heure de départ -->
+                    <div class="mb-4">
+                        <label for="departure" class="block text-sm font-medium text-gray-700">Heure de départ</label>
+                        <input
+                            id="departure"
+                            type="time"
+                            v-model="newDay.departure"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
+
+                    <!-- Boutons pour annuler ou ajouter -->
+                    <div class="flex justify-end space-x-4">
+                        <button @click="closeAddDayModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">Annuler</button>
+                        <PrimaryButton @click="addDay">
+                            Ajouter
                         </PrimaryButton>
                     </div>
                 </div>
