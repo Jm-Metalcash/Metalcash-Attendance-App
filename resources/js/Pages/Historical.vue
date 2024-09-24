@@ -386,6 +386,9 @@ const closeAddDayModal = () => {
     newDay.value = { day: 'Lundi', date: '', arrival: '', departure: '' }; // Réinitialiser les champs
 };
 
+// Variable pour le toast de succès
+const showSuccessAdd = ref(false);
+
 // Fonction pour ajouter un nouveau jour
 const addDay = async () => {
     try {
@@ -396,6 +399,12 @@ const addDay = async () => {
             arrival: `${newDay.value.arrival}:00`,
             departure: `${newDay.value.departure}:00`,
         });
+
+        // Afficher le toast de succès
+        showSuccessAdd.value = true;
+        setTimeout(() => {
+            showSuccessAdd.value = false;
+        }, 5000);
 
         // Fermer le modal après succès
         closeAddDayModal();
@@ -413,13 +422,13 @@ const addDay = async () => {
 
     <AuthenticatedLayout>
         <template #header>
-    <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
-        <!-- Si isShow est vrai, afficher "Historique des pointages du user cliqué" -->
-        <span v-if="isShow">Historique des pointages de {{ user.name }}</span>
-        <!-- Sinon, garder le texte par défaut -->
-        <span v-else>Historique des pointages</span>
-    </h2>
-</template>
+            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
+                <!-- Si isShow est vrai, afficher "Historique des pointages du user cliqué" -->
+                <span v-if="isShow">Historique des pointages de {{ user.name }}</span>
+                <!-- Sinon, garder le texte par défaut -->
+                <span v-else>Historique des pointages</span>
+            </h2>
+        </template>
 
 
 
@@ -430,8 +439,14 @@ const addDay = async () => {
             <!-- Flashmessage pour l'enregistrement des jours -->
             <div v-if="showSuccessToast" 
                 class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100">
-                L'heure a bien été sauvegardée avec succès !
+                L'heure a bien été sauvegardée avec succès.
             </div>
+
+            <div v-if="showSuccessAdd" 
+                class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100">
+                Le jour a bien été ajouté avec succès.
+            </div>
+            
 
 
             <!-- Statistiques et actions -->
