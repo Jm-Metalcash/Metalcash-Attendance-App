@@ -33,8 +33,7 @@ class HistoricalController extends Controller
     return inertia('Historical', [
         'days' => $days,
         'user' => User::find($id), // Renvoyer également les informations de l'utilisateur
-        'currentUserId' => $currentUser->id, // Renvoyer l'ID de l'utilisateur connecté
-        'currentUserRole' => $currentUserRole, // Envoyer également le rôle de l'utilisateur connecté
+        'isShow' => true, // Indiquer que la page est une page de visualisation
     ]);
 }
 
