@@ -111,6 +111,27 @@ const filterDays = () => {
         });
 };
 
+// Sauvegarder les filtres dans le localStorage
+const saveFiltersToLocalStorage = () => {
+    localStorage.setItem("selectedYear", selectedYear.value);
+    localStorage.setItem("selectedMonth", selectedMonth.value);
+};
+
+// Charger les filtres depuis le localStorage
+const loadFiltersFromLocalStorage = () => {
+    const savedYear = localStorage.getItem("selectedYear");
+    const savedMonth = localStorage.getItem("selectedMonth");
+
+    if (savedYear) {
+        selectedYear.value = parseInt(savedYear);
+    }
+    if (savedMonth) {
+        selectedMonth.value = parseInt(savedMonth);
+    }
+};
+// Appliquer les filtres du localStorage au démarrage
+loadFiltersFromLocalStorage();
+
 // Fonction pour calculer le total des minutes travaillées
 const calculateTotalMinutes = () => {
     totalMinutesWorked.value = filteredDays.value.reduce((total, day) => {
@@ -132,7 +153,7 @@ const formatMinutesToHours = (totalMinutes) => {
 
 // Watch sur les filtres pour recalculer les jours filtrés et les heures
 watch(
-    [selectedYear, selectedMonth, () => props.days],
+    [saveFiltersToLocalStorage, selectedYear, selectedMonth, () => props.days],
     () => {
         filterDays();
         calculateTotalMinutes();
@@ -344,13 +365,6 @@ const saveDayChanges = async () => {
         console.error("Erreur lors de la sauvegarde des modifications :", error);
     }
 };
-
-
-
-
-
-
-
 
 </script>
 
