@@ -15,7 +15,6 @@ const selectedMonth = ref(0); // 0 pour "Tous les mois"
 const filteredDays = ref([]);
 const totalMinutesWorked = ref(0); // Stocke le total des minutes
 
-
 // Fonction pour calculer la différence entre l'heure d'arrivée et de départ, en prenant en compte le break
 const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
     if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante
@@ -33,8 +32,12 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 
     // Si un break est enregistré, soustraire la durée du break du total
     if (breakStart && breakEnd) {
-        const [breakStartHours, breakStartMinutes] = breakStart.split(":").map(Number);
-        const [breakEndHours, breakEndMinutes] = breakEnd.split(":").map(Number);
+        const [breakStartHours, breakStartMinutes] = breakStart
+            .split(":")
+            .map(Number);
+        const [breakEndHours, breakEndMinutes] = breakEnd
+            .split(":")
+            .map(Number);
 
         const breakStartDate = new Date();
         breakStartDate.setHours(breakStartHours, breakStartMinutes, 0);
@@ -50,7 +53,6 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 
     return formatMinutesToHours(totalMinutes); // Utiliser la fonction pour formater le total
 };
-
 
 //Fonction pour calculer le total des heures de la semaine du mois
 const calculateWeeklyTotals = (weeks, days) => {
@@ -330,7 +332,6 @@ const openModal = (day) => {
     isModalOpen.value = true;
 };
 
-
 // Fermer le modal
 const closeModal = () => {
     isModalOpen.value = false;
@@ -347,22 +348,47 @@ const saveDayChanges = async () => {
     }
 
     // S'assurer que les heures ont le bon format 'HH:MM:SS'
-    const formattedArrival = selectedDay.value.arrival.length === 5 ? `${selectedDay.value.arrival}:00` : selectedDay.value.arrival;
-    const formattedDeparture = selectedDay.value.departure.length === 5 ? `${selectedDay.value.departure}:00` : selectedDay.value.departure;
+    const formattedArrival =
+        selectedDay.value.arrival.length === 5
+            ? `${selectedDay.value.arrival}:00`
+            : selectedDay.value.arrival;
+    const formattedDeparture =
+        selectedDay.value.departure.length === 5
+            ? `${selectedDay.value.departure}:00`
+            : selectedDay.value.departure;
+    const formattedBreakStart =
+        selectedDay.value.break_start?.length === 5
+            ? `${selectedDay.value.break_start}:00`
+            : selectedDay.value.break_start || null;
+    const formattedBreakEnd =
+        selectedDay.value.break_end?.length === 5
+            ? `${selectedDay.value.break_end}:00`
+            : selectedDay.value.break_end || null;
 
     try {
         // Envoi des modifications avec les heures formatées
         await axios.post(`/update-day/${selectedDay.value.id}`, {
             arrival: formattedArrival,
             departure: formattedDeparture,
+            break_start: formattedBreakStart,
+            break_end: formattedBreakEnd,
         });
 
         // Mettre à jour directement les heures dans le tableau filteredDays
-        const dayToUpdate = filteredDays.value.find(day => day.id === selectedDay.value.id);
+        const dayToUpdate = filteredDays.value.find(
+            (day) => day.id === selectedDay.value.id
+        );
         if (dayToUpdate) {
             dayToUpdate.arrival = formattedArrival;
             dayToUpdate.departure = formattedDeparture;
-            dayToUpdate.total = calculateDailyTotal(formattedArrival, formattedDeparture); // Met à jour le total pour ce jour
+            dayToUpdate.break_start = formattedBreakStart;
+            dayToUpdate.break_end = formattedBreakEnd;
+            dayToUpdate.total = calculateDailyTotal(
+                formattedArrival,
+                formattedDeparture,
+                formattedBreakStart,
+                formattedBreakEnd
+            ); // Met à jour le total pour ce jour
         }
 
         // Recalculer le total des heures pour le mois
@@ -377,17 +403,21 @@ const saveDayChanges = async () => {
         // Fermer le modal après la mise à jour
         closeModal();
     } catch (error) {
-        console.error("Erreur lors de la sauvegarde des modifications :", error);
+        console.error(
+            "Erreur lors de la sauvegarde des modifications :",
+            error
+        );
     }
 };
+
 
 // Variables pour le modal d'ajout
 const isAddDayModalOpen = ref(false);
 const newDay = ref({
-    day: 'Lundi', // Par défaut Lundi
-    date: '',
-    arrival: '',
-    departure: ''
+    day: "Lundi", // Par défaut Lundi
+    date: "",
+    arrival: "",
+    departure: "",
 });
 
 // Ouvrir le modal pour ajouter un jour
@@ -398,25 +428,27 @@ const openAddDayModal = () => {
 // Fermer le modal d'ajout
 const closeAddDayModal = () => {
     isAddDayModalOpen.value = false;
-    newDay.value = { day: 'Lundi', date: '', arrival: '', departure: '' }; // Réinitialiser les champs
+    newDay.value = { day: "Lundi", date: "", arrival: "", departure: "" }; // Réinitialiser les champs
 };
 
 // Variable pour le toast de succès
 const showSuccessAdd = ref(false);
 
-
-
 // Fonction pour ajouter un nouveau jour
 const addDay = async () => {
     try {
-        await axios.post('/add-day', {
-            user_id: props.user.id,  // Utiliser l'ID de l'utilisateur
+        await axios.post("/add-day", {
+            user_id: props.user.id, // Utiliser l'ID de l'utilisateur
             day: newDay.value.day,
             date: newDay.value.date,
             arrival: `${newDay.value.arrival}:00`,
             departure: `${newDay.value.departure}:00`,
-            break_start: newDay.value.break_start ? `${newDay.value.break_start}:00` : null,
-            break_end: newDay.value.break_end ? `${newDay.value.break_end}:00` : null,
+            break_start: newDay.value.break_start
+                ? `${newDay.value.break_start}:00`
+                : null,
+            break_end: newDay.value.break_end
+                ? `${newDay.value.break_end}:00`
+                : null,
         });
 
         // Afficher le toast de succès
@@ -429,13 +461,9 @@ const addDay = async () => {
         closeAddDayModal();
         window.location.reload(); // Pour l'instant, recharger la page
     } catch (error) {
-        console.error('Erreur lors de l\'ajout du jour :', error);
+        console.error("Erreur lors de l'ajout du jour :", error);
     }
 };
-
-
-
-
 </script>
 
 <template>
@@ -443,32 +471,35 @@ const addDay = async () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
+            <h2
+                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
+            >
                 <!-- Si isShow est vrai, afficher "Historique des pointages du user cliqué" -->
-                <span v-if="isShow">Historique des pointages de {{ user.name }}</span>
+                <span v-if="isShow"
+                    >Historique des pointages de {{ user.name }}</span
+                >
                 <!-- Sinon, garder le texte par défaut -->
                 <span v-else>Historique des pointages</span>
             </h2>
         </template>
 
-
-
         <section
             class="attendance-section w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20"
         >
-
             <!-- Flashmessage pour l'enregistrement des jours -->
-            <div v-if="showSuccessToast" 
-                class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100">
+            <div
+                v-if="showSuccessToast"
+                class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100"
+            >
                 L'heure a bien été sauvegardée avec succès.
             </div>
 
-            <div v-if="showSuccessAdd" 
-                class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100">
+            <div
+                v-if="showSuccessAdd"
+                class="fixed top-4 right-4 bg-green-800 text-white p-4 rounded-lg shadow-lg transition-opacity duration-500 opacity-100"
+            >
                 Le jour a bien été ajouté avec succès.
             </div>
-            
-
 
             <!-- Statistiques et actions -->
             <div class="w-full max-w-4xl mx-auto mb-8">
@@ -691,39 +722,120 @@ const addDay = async () => {
                             <i class="fas fa-plus mr-2"></i> Ajouter un jour
                         </PrimaryButton>
                     </div>
-                    
+
                     <!-- Conteneur pour gérer le défilement horizontal -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-[rgb(0,85,150)]">
-    <tr>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Jour</th>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Date</th>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Arrivée</th>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Départ</th>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Début du break</th>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Fin du break</th>
-        <th class="px-4 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider">Total</th>
-    </tr>
-</thead>
+                                <tr>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Jour
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Date
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Arrivée
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Départ
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Début de sortie
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Fin de sortie
+                                    </th>
+                                    <th
+                                        class="px-4 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                    >
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
 
-<tbody class="bg-white divide-y divide-gray-200">
-    <tr v-if="filteredDays.length === 0">
-        <td colspan="7" class="px-4 sm:px-6 py-4 text-center text-sm md:text-base">Aucun pointage trouvé pour la période sélectionnée.</td>
-    </tr>
-    <template v-for="day in filteredDays" :key="day.id">
-        <tr :class="['hover:bg-gray-50 transition-colors', isShow ? 'cursor-pointer' : '']" @click="isShow && openModal(day)">
-            <td class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base">{{ day.day }}</td>
-            <td class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base">{{ new Date(day.date).toLocaleDateString('fr-FR') }}</td>
-            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.arrival) }}</td>
-            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.departure) }}</td>
-            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.break_start) }}</td>
-            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.break_end) }}</td>
-            <td class="px-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap text-sm md:text-base">{{ calculateDailyTotal(day.arrival, day.departure, day.break_start, day.break_end) }}</td>
-        </tr>
-    </template>
-</tbody>
-
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-if="filteredDays.length === 0">
+                                    <td
+                                        colspan="7"
+                                        class="px-4 sm:px-6 py-4 text-center text-sm md:text-base"
+                                    >
+                                        Aucun pointage trouvé pour la période
+                                        sélectionnée.
+                                    </td>
+                                </tr>
+                                <template
+                                    v-for="day in filteredDays"
+                                    :key="day.id"
+                                >
+                                    <tr
+                                        :class="[
+                                            'hover:bg-gray-50 transition-colors',
+                                            isShow ? 'cursor-pointer' : '',
+                                        ]"
+                                        @click="isShow && openModal(day)"
+                                    >
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ day.day }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{
+                                                new Date(
+                                                    day.date
+                                                ).toLocaleDateString("fr-FR")
+                                            }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ formatTime(day.arrival) }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ formatTime(day.departure) }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ formatTime(day.break_start) }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{ formatTime(day.break_end) }}
+                                        </td>
+                                        <td
+                                            class="px-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap text-sm md:text-base"
+                                        >
+                                            {{
+                                                calculateDailyTotal(
+                                                    day.arrival,
+                                                    day.departure,
+                                                    day.break_start,
+                                                    day.break_end
+                                                )
+                                            }}
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
                         </table>
                     </div>
 
@@ -737,9 +849,7 @@ const addDay = async () => {
                             ></i>
                             <span class="font-semibold text-xs sm:text-sm">
                                 Jours enregistrés :
-                                {{
-                                   totalDaysRecorded
-                                }}
+                                {{ totalDaysRecorded }}
                             </span>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -748,9 +858,7 @@ const addDay = async () => {
                             ></i>
                             <span class="font-semibold text-xs sm:text-sm">
                                 Total des heures :
-                                {{
-                                    formattedTotalHours
-                                }}
+                                {{ formattedTotalHours }}
                             </span>
                         </div>
                     </div>
@@ -762,73 +870,108 @@ const addDay = async () => {
                 <!-- Si isShow est vrai, afficher le bouton avec la route "employes" -->
                 <Link v-if="isShow" :href="route('employes')">
                     <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à la gestion des employés
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la
+                        gestion des employés
                     </PrimaryButton>
                 </Link>
                 <!-- Sinon, afficher le bouton pour retourner au dashboard -->
                 <Link v-else :href="route('dashboard')">
                     <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à l'accueil
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à
+                        l'accueil
                     </PrimaryButton>
                 </Link>
             </div>
 
-
             <!-- Modal pour modifier les jours -->
-            <div v-if="isModalOpen" class="fixed z-50 inset-0 flex items-center justify-center">
-                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                    <!-- Affichage du jour sélectionné -->
-                    <h2 class="text-xl font-semibold mb-4">
-                        Modifier le jour : {{ new Date(selectedDay.date).toLocaleDateString("fr-FR") }}
-                    </h2>
+<div v-if="isModalOpen" class="fixed z-50 inset-0 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <!-- Affichage du jour sélectionné -->
+        <h2 class="text-xl font-semibold mb-4">
+            Modifier le jour : {{ new Date(selectedDay.date).toLocaleDateString("fr-FR") }}
+        </h2>
 
-                    <!-- Champ pour modifier l'heure d'arrivée -->
-                    <div class="mb-4">
-                        <label for="arrival" class="block text-sm font-medium text-gray-700">
-                            Heure d'arrivée
-                        </label>
-                        <input
-                            id="arrival"
-                            type="time"
-                            v-model="selectedDay.arrival"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        />
-                    </div>
+        <!-- Champ pour modifier l'heure d'arrivée -->
+        <div class="mb-4">
+            <label for="arrival" class="block text-sm font-medium text-gray-700">
+                Heure d'arrivée
+            </label>
+            <input
+                id="arrival"
+                type="time"
+                v-model="selectedDay.arrival"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+        </div>
 
-                    <!-- Champ pour modifier l'heure de départ -->
-                    <div class="mb-4">
-                        <label for="departure" class="block text-sm font-medium text-gray-700">
-                            Heure de départ
-                        </label>
-                        <input
-                            id="departure"
-                            type="time"
-                            v-model="selectedDay.departure"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        />
-                    </div>
+        <!-- Champ pour modifier l'heure de départ -->
+        <div class="mb-4">
+            <label for="departure" class="block text-sm font-medium text-gray-700">
+                Heure de départ
+            </label>
+            <input
+                id="departure"
+                type="time"
+                v-model="selectedDay.departure"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+        </div>
 
-                    <!-- Boutons pour annuler ou sauvegarder -->
-                    <div class="flex justify-end space-x-4">
-                        <button @click="closeModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
-                            Annuler
-                        </button>
-                        <PrimaryButton @click="saveDayChanges">
-                            Enregistrer
-                        </PrimaryButton>
-                    </div>
-                </div>
-            </div>
+        <!-- Champ pour modifier le début de la pause -->
+        <div class="mb-4">
+            <label for="break_start" class="block text-sm font-medium text-gray-700">
+                Début de la sortie
+            </label>
+            <input
+                id="break_start"
+                type="time"
+                v-model="selectedDay.break_start"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+        </div>
+
+        <!-- Champ pour modifier la fin de la pause -->
+        <div class="mb-4">
+            <label for="break_end" class="block text-sm font-medium text-gray-700">
+                Fin de la sortie
+            </label>
+            <input
+                id="break_end"
+                type="time"
+                v-model="selectedDay.break_end"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            />
+        </div>
+
+        <!-- Boutons pour annuler ou sauvegarder -->
+        <div class="flex justify-end space-x-4">
+            <button @click="closeModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
+                Annuler
+            </button>
+            <PrimaryButton @click="saveDayChanges">
+                Enregistrer
+            </PrimaryButton>
+        </div>
+    </div>
+</div>
+
 
             <!-- Modal pour ajouter un nouveau jour -->
-            <div v-if="isAddDayModalOpen" class="fixed z-50 inset-0 flex items-center justify-center">
+            <div
+                v-if="isAddDayModalOpen"
+                class="fixed z-50 inset-0 flex items-center justify-center"
+            >
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                     <!-- Formulaire pour ajouter un jour -->
                     <h2 class="text-xl font-semibold mb-4">Ajouter un jour</h2>
 
                     <!-- Champ pour sélectionner le jour de la semaine -->
                     <div class="mb-4">
-                        <label for="day" class="block text-sm font-medium text-gray-700">Jour</label>
+                        <label
+                            for="day"
+                            class="block text-sm font-medium text-gray-700"
+                            >Jour</label
+                        >
                         <select
                             id="day"
                             v-model="newDay.day"
@@ -844,7 +987,11 @@ const addDay = async () => {
 
                     <!-- Champ pour sélectionner la date -->
                     <div class="mb-4">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                        <label
+                            for="date"
+                            class="block text-sm font-medium text-gray-700"
+                            >Date</label
+                        >
                         <input
                             id="date"
                             type="date"
@@ -855,7 +1002,11 @@ const addDay = async () => {
 
                     <!-- Champ pour l'heure d'arrivée -->
                     <div class="mb-4">
-                        <label for="arrival" class="block text-sm font-medium text-gray-700">Heure d'arrivée</label>
+                        <label
+                            for="arrival"
+                            class="block text-sm font-medium text-gray-700"
+                            >Heure d'arrivée</label
+                        >
                         <input
                             id="arrival"
                             type="time"
@@ -866,7 +1017,11 @@ const addDay = async () => {
 
                     <!-- Champ pour l'heure de départ -->
                     <div class="mb-4">
-                        <label for="departure" class="block text-sm font-medium text-gray-700">Heure de départ</label>
+                        <label
+                            for="departure"
+                            class="block text-sm font-medium text-gray-700"
+                            >Heure de départ</label
+                        >
                         <input
                             id="departure"
                             type="time"
@@ -877,15 +1032,16 @@ const addDay = async () => {
 
                     <!-- Boutons pour annuler ou ajouter -->
                     <div class="flex justify-end space-x-4">
-                        <button @click="closeAddDayModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">Annuler</button>
-                        <PrimaryButton @click="addDay">
-                            Ajouter
-                        </PrimaryButton>
+                        <button
+                            @click="closeAddDayModal"
+                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500"
+                        >
+                            Annuler
+                        </button>
+                        <PrimaryButton @click="addDay"> Ajouter </PrimaryButton>
                     </div>
                 </div>
             </div>
-
-
         </section>
     </AuthenticatedLayout>
 </template>

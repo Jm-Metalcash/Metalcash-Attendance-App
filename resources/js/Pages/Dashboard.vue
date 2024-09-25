@@ -432,7 +432,7 @@ watch(
                     >
                         <h3 class="text-gray-800 text-lg font-semibold">
                             <i class="fas fa-coffee text-yellow-600 mr-2"></i>
-                            Début du break
+                            Début de la sortie
                         </h3>
                         <button
                             :disabled="
@@ -469,7 +469,7 @@ watch(
                     >
                         <h3 class="text-gray-800 text-lg font-semibold">
                             <i class="fas fa-coffee text-yellow-600 mr-2"></i>
-                            Fin du break
+                            Fin de la sortie
                         </h3>
                         <button
                             :disabled="
@@ -534,12 +534,12 @@ watch(
                                 <th
                                     class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
-                                    Début du break
+                                    Début de sortie
                                 </th>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
-                                    Fin du break
+                                    Fin de sortie
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"

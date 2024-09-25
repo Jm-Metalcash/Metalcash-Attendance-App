@@ -41,6 +41,8 @@ class HistoricalController extends Controller
         $request->validate([
             'arrival' => 'required|date_format:H:i:s',
             'departure' => 'required|date_format:H:i:s|after:arrival',
+            'break_start' => 'nullable|date_format:H:i:s',
+            'break_end' => 'nullable|date_format:H:i:s|after:break_start',
         ]);
 
         // Trouver l'entrée à mettre à jour
@@ -53,6 +55,9 @@ class HistoricalController extends Controller
         // Mettre à jour les champs
         $day->arrival = $request->arrival;
         $day->departure = $request->departure;
+        $day->break_start = $request->break_start;
+        $day->break_end = $request->break_end; 
+
         $day->save();
 
         return response()->json(['message' => 'Jour mis à jour avec succès']);
