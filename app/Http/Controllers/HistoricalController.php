@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
 class HistoricalController extends Controller
 {
     public function index()
@@ -61,24 +62,40 @@ class HistoricalController extends Controller
     // Ajoute un nouveau jour
     public function addDay(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'day' => 'required|string',
-            'date' => 'required|date',
-            'arrival' => 'required|date_format:H:i:s',
-            'departure' => 'required|date_format:H:i:s|after:arrival',
-        ]);
-
-        // Créer un nouveau jour dans la base de données
-        Day::create([
-            'user_id' => $request->user_id,
-            'day' => $request->day,
-            'date' => $request->date,
-            'arrival' => $request->arrival,
-            'departure' => $request->departure,
-            'total' => '0h00' // Calcul automatique à gérer plus tard
-        ]);
-
-        return response()->json(['message' => 'Jour ajouté avec succès']);
+        try {
+            // Valider les données reçues
+            $validatedData = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'day' => 'required|string',
+                'date' => 'required|date',
+                'arrival' => 'required|date_format:H:i:s',
+                'departure' => 'required|date_format:H:i:s|after:arrival',
+                'total' => 'nullable|string',
+                'break_start' => 'nullable|date_format:H:i:s',
+                'break_end' => 'nullable|date_format:H:i:s|after:break_start',
+            ]);
+    
+            // Créer un nouveau jour dans la base de données
+            Day::create([
+                'user_id' => $validatedData['user_id'],  // S'assurer que user_id est bien là
+                'day' => $validatedData['day'],
+                'date' => $validatedData['date'],
+                'arrival' => $validatedData['arrival'],
+                'departure' => $validatedData['departure'],
+                'break_start' => $validatedData['break_start'],  // Ce champ peut être `null`
+                'break_end' => $validatedData['break_end'],  // Ce champ peut être `null`
+                'total' => $validatedData['total'] ?? '0h00',  // Ce champ peut être `null`
+            ]);
+    
+            return response()->json(['message' => 'Jour ajouté avec succès'], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+    
+
+    
+    
+    
+
 }

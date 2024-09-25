@@ -15,8 +15,9 @@ const selectedMonth = ref(0); // 0 pour "Tous les mois"
 const filteredDays = ref([]);
 const totalMinutesWorked = ref(0); // Stocke le total des minutes
 
-// Fonction pour calculer la différence entre l'heure d'arrivée et de départ
-const calculateDailyTotal = (arrival, departure) => {
+
+// Fonction pour calculer la différence entre l'heure d'arrivée et de départ, en prenant en compte le break
+const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
     if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante
 
     const [arrivalHours, arrivalMinutes] = arrival.split(":").map(Number);
@@ -28,14 +29,28 @@ const calculateDailyTotal = (arrival, departure) => {
     const departureDate = new Date();
     departureDate.setHours(departureHours, departureMinutes, 0);
 
-    const differenceInMinutes = (departureDate - arrivalDate) / 1000 / 60;
+    let totalMinutes = (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
 
-    if (differenceInMinutes < 0) {
-        return "0h00"; // Retourne 0 si l'heure de départ est avant l'arrivée
+    // Si un break est enregistré, soustraire la durée du break du total
+    if (breakStart && breakEnd) {
+        const [breakStartHours, breakStartMinutes] = breakStart.split(":").map(Number);
+        const [breakEndHours, breakEndMinutes] = breakEnd.split(":").map(Number);
+
+        const breakStartDate = new Date();
+        breakStartDate.setHours(breakStartHours, breakStartMinutes, 0);
+
+        const breakEndDate = new Date();
+        breakEndDate.setHours(breakEndHours, breakEndMinutes, 0);
+
+        const breakMinutes = (breakEndDate - breakStartDate) / 1000 / 60;
+        totalMinutes -= breakMinutes; // Soustraire les minutes du break
     }
 
-    return formatMinutesToHours(differenceInMinutes); // Utiliser la fonction pour formater le total
+    if (totalMinutes < 0) return "0h00"; // Retourne 0 si l'heure de départ est avant l'arrivée
+
+    return formatMinutesToHours(totalMinutes); // Utiliser la fonction pour formater le total
 };
+
 
 //Fonction pour calculer le total des heures de la semaine du mois
 const calculateWeeklyTotals = (weeks, days) => {
@@ -389,15 +404,19 @@ const closeAddDayModal = () => {
 // Variable pour le toast de succès
 const showSuccessAdd = ref(false);
 
+
+
 // Fonction pour ajouter un nouveau jour
 const addDay = async () => {
     try {
         await axios.post('/add-day', {
-            user_id: props.user.id, // Récupérer l'ID de l'utilisateur cliqué
+            user_id: props.user.id,  // Utiliser l'ID de l'utilisateur
             day: newDay.value.day,
             date: newDay.value.date,
             arrival: `${newDay.value.arrival}:00`,
             departure: `${newDay.value.departure}:00`,
+            break_start: newDay.value.break_start ? `${newDay.value.break_start}:00` : null,
+            break_end: newDay.value.break_end ? `${newDay.value.break_end}:00` : null,
         });
 
         // Afficher le toast de succès
@@ -408,12 +427,14 @@ const addDay = async () => {
 
         // Fermer le modal après succès
         closeAddDayModal();
-        // Rafraîchir la liste des jours après l'ajout
         window.location.reload(); // Pour l'instant, recharger la page
     } catch (error) {
         console.error('Erreur lors de l\'ajout du jour :', error);
     }
 };
+
+
+
 
 </script>
 
@@ -675,89 +696,34 @@ const addDay = async () => {
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-[rgb(0,85,150)]">
-                                <tr>
-                                    <th
-                                        class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                    >
-                                        Jour
-                                    </th>
-                                    <th
-                                        class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                    >
-                                        Date
-                                    </th>
-                                    <th
-                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                    >
-                                        Arrivée
-                                    </th>
-                                    <th
-                                        class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                    >
-                                        Départ
-                                    </th>
-                                    <th
-                                        class="px-4 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                    >
-                                        Total
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-if="filteredDays.length === 0">
-                                    <td
-                                        colspan="5"
-                                        class="px-4 sm:px-6 py-4 text-center text-sm md:text-base"
-                                    >
-                                        Aucun pointage trouvé pour la période
-                                        sélectionnée.
-                                    </td>
-                                </tr>
-                                <template
-                                    v-for="day in filteredDays"
-                                    :key="day.id"
-                                >
-                                    <tr
-                                        :class="['hover:bg-gray-50 transition-colors', isShow ? 'cursor-pointer' : '']"
-                                        @click="isShow && openModal(day)"
-                                    >
-                                        <td
-                                            class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
-                                        >
-                                            {{ day.day }}
-                                        </td>
-                                        <td
-                                            class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
-                                        >
-                                            {{
-                                                new Date(
-                                                    day.date
-                                                ).toLocaleDateString("fr-FR")
-                                            }}
-                                        </td>
-                                        <td
-                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
-                                        >
-                                            {{ formatTime(day.arrival) }}
-                                        </td>
-                                        <td
-                                            class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base"
-                                        >
-                                            {{ formatTime(day.departure) }}
-                                        </td>
-                                        <td
-                                            class="px-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap text-sm md:text-base"
-                                        >
-                                            {{
-                                                calculateDailyTotal(
-                                                    day.arrival,
-                                                    day.departure
-                                                )
-                                            }}
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
+    <tr>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Jour</th>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Date</th>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Arrivée</th>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Départ</th>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Début du break</th>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-center text-xs font-medium text-gray-100 uppercase tracking-wider">Fin du break</th>
+        <th class="px-4 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider">Total</th>
+    </tr>
+</thead>
+
+<tbody class="bg-white divide-y divide-gray-200">
+    <tr v-if="filteredDays.length === 0">
+        <td colspan="7" class="px-4 sm:px-6 py-4 text-center text-sm md:text-base">Aucun pointage trouvé pour la période sélectionnée.</td>
+    </tr>
+    <template v-for="day in filteredDays" :key="day.id">
+        <tr :class="['hover:bg-gray-50 transition-colors', isShow ? 'cursor-pointer' : '']" @click="isShow && openModal(day)">
+            <td class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base">{{ day.day }}</td>
+            <td class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base">{{ new Date(day.date).toLocaleDateString('fr-FR') }}</td>
+            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.arrival) }}</td>
+            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.departure) }}</td>
+            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.break_start) }}</td>
+            <td class="px-4 sm:px-6 py-2 sm:py-4 text-center whitespace-nowrap text-sm md:text-base">{{ formatTime(day.break_end) }}</td>
+            <td class="px-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap text-sm md:text-base">{{ calculateDailyTotal(day.arrival, day.departure, day.break_start, day.break_end) }}</td>
+        </tr>
+    </template>
+</tbody>
+
                         </table>
                     </div>
 
@@ -939,4 +905,4 @@ const addDay = async () => {
 .fixed {
     background-color: rgba(0, 0, 0, 0.5);
 }
-</style
+</style>

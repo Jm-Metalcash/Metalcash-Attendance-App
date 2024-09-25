@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-
 class DayController extends Controller
 {
     public function store(Request $request)
@@ -18,6 +17,8 @@ class DayController extends Controller
             'date' => 'required|date',
             'arrival' => 'nullable|date_format:H:i',
             'departure' => 'nullable|date_format:H:i',
+            'break_start' => 'nullable|date_format:H:i',
+            'break_end' => 'nullable|date_format:H:i',
             'total' => 'nullable|string',
         ]);
 
@@ -28,12 +29,13 @@ class DayController extends Controller
                 'day' => $validated['day'],
                 'arrival' => $validated['arrival'],
                 'departure' => $validated['departure'],
-                'total' => $validated['total']
+                'break_start' => $validated['break_start'],
+                'break_end' => $validated['break_end'],
+                'total' => $validated['total'],
             ]
         );
 
         return response()->json(['message' => 'Données enregistrées avec succès !'], 200);
-        
     }
 
     public function index()

@@ -6,18 +6,21 @@ import { Head, Link } from "@inertiajs/vue3";
 import ModalDashboard from "@/Components/ModalDashboard.vue";
 import axios from "axios";
 
-
+// Variables réactives
 const onInitialPageLoaded = ref(false);
-
-// Créer une référence pour les jours de la semaine
 const days = ref([]);
+const showModal = ref(false);
+const actionType = ref(""); // Peut être "arrival", "departure", "break_start", "break_end"
+let currentTime = "";
+const weeklyTotal = ref("00h00");
 
-// Reformater les heures de la base de données pour qu'elles soient au format HH:mm
-function formatDatabaseTime(time) {
-    if (!time) return null; // Si l'heure est null, retourner null
-    const [hour, minute] = time.split(":"); // Prendre uniquement les heures et minutes
-    return `${hour}:${minute}`; // Retourner l'heure au format HH:mm
-}
+// Stocker l'heure actuelle sous forme réactive
+const currentTimeReactive = ref(
+    new Date().toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+    })
+);
 
 // Charger les données depuis la base de données
 onMounted(() => {
@@ -29,6 +32,8 @@ onMounted(() => {
             arrival: "",
             departure: "",
             total: "",
+            break_start: "",
+            break_end: "",
         });
     }
 
@@ -47,7 +52,14 @@ onMounted(() => {
                 if (dbDay) {
                     dbDay.arrival = formatDatabaseTime(dbDay.arrival);
                     dbDay.departure = formatDatabaseTime(dbDay.departure);
-                    dbDay.total = calculateDailyTotal(dbDay.arrival, dbDay.departure); // Calcul dynamique
+                    dbDay.break_start = formatDatabaseTime(dbDay.break_start);
+                    dbDay.break_end = formatDatabaseTime(dbDay.break_end);
+                    dbDay.total = calculateDailyTotal(
+                        dbDay.arrival,
+                        dbDay.departure,
+                        dbDay.break_start,
+                        dbDay.break_end
+                    );
                     return { ...defaultDay, ...dbDay };
                 } else {
                     return defaultDay;
@@ -64,44 +76,6 @@ onMounted(() => {
         });
 });
 
-function calculateDailyTotal(arrival, departure) {
-    if (!arrival || !departure) return "00h00";
-
-    const [arrivalHour, arrivalMinute] = arrival.split(":").map(Number);
-    const [departureHour, departureMinute] = departure.split(":").map(Number);
-
-    let totalMinutes =
-        departureHour * 60 +
-        departureMinute -
-        (arrivalHour * 60 + arrivalMinute);
-
-    // Gérer les cas où le départ est le lendemain
-    if (totalMinutes < 0) totalMinutes += 24 * 60;
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    return `${hours}h${minutes.toString().padStart(2, "0")}`;
-}
-
-const arrivalButtonRef = ref(null);
-const departureButtonRef = ref(null);
-
-// Variable qui stocke le total des heures de travail de la semaine
-const weeklyTotal = ref("00h00");
-
-// Variables pour le modal
-const showModal = ref(false);
-const actionType = ref("");
-let currentTime = "";
-// Variable réactive pour stocker l'heure actuelle
-const currentTimeReactive = ref(
-    new Date().toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit",
-    })
-);
-
 // Ouvrir le modal
 function openModal(type) {
     actionType.value = type;
@@ -112,9 +86,67 @@ function openModal(type) {
     showModal.value = true;
 }
 
-// Fonction pour calculer la différence entre l'heure d'arrivée et de départ
-function calculateTotal(arrival, departure) {
-    if (!arrival || !departure) return "00:00";
+// Confirmer l'action dans le modal et enregistrer les données
+function confirmAction() {
+    const today = new Date().toLocaleDateString("fr-FR");
+    const dayInfo = days.value.find((day) => day.date === today);
+
+    if (actionType.value === "arrival") {
+        dayInfo.arrival = formatTimeToHoursMinutes(currentTime);
+    } else if (actionType.value === "departure") {
+        dayInfo.departure = formatTimeToHoursMinutes(currentTime);
+        dayInfo.total = calculateDailyTotal(
+            dayInfo.arrival,
+            dayInfo.departure,
+            dayInfo.break_start,
+            dayInfo.break_end
+        );
+    } else if (actionType.value === "break_start") {
+        dayInfo.break_start = formatTimeToHoursMinutes(currentTime);
+    } else if (actionType.value === "break_end") {
+        dayInfo.break_end = formatTimeToHoursMinutes(currentTime);
+        dayInfo.total = calculateDailyTotal(
+            dayInfo.arrival,
+            dayInfo.departure,
+            dayInfo.break_start,
+            dayInfo.break_end
+        );
+    }
+
+    const formattedDate = formatDateForBackend(dayInfo.date);
+
+    // Envoi des données à la base de données
+    axios
+        .post("/days/store", {
+            day: dayInfo.day,
+            date: formattedDate,
+            arrival: dayInfo.arrival,
+            departure: dayInfo.departure,
+            break_start: dayInfo.break_start,
+            break_end: dayInfo.break_end,
+            total: dayInfo.total,
+        })
+        .then((response) => {
+            console.log(response.data.message);
+        })
+        .catch((error) => {
+            console.error(
+                "Erreur lors de l'enregistrement des données :",
+                error
+            );
+        });
+
+    showModal.value = false;
+}
+
+// Annuler l'action
+function cancelAction() {
+    showModal.value = false;
+}
+
+// Calculer le total des heures travaillées en soustrayant les heures de break
+function calculateDailyTotal(arrival, departure, breakStart, breakEnd) {
+    if (!arrival || !departure) return "00h00";
 
     const [arrivalHour, arrivalMinute] = arrival.split(":").map(Number);
     const [departureHour, departureMinute] = departure.split(":").map(Number);
@@ -124,7 +156,21 @@ function calculateTotal(arrival, departure) {
         departureMinute -
         (arrivalHour * 60 + arrivalMinute);
 
-    // Gérer les cas où le départ est le lendemain
+    // Soustraire le temps de break s'il est défini
+    if (breakStart && breakEnd) {
+        const [breakStartHour, breakStartMinute] = breakStart
+            .split(":")
+            .map(Number);
+        const [breakEndHour, breakEndMinute] = breakEnd.split(":").map(Number);
+
+        const breakMinutes =
+            breakEndHour * 60 +
+            breakEndMinute -
+            (breakStartHour * 60 + breakStartMinute);
+
+        totalMinutes -= breakMinutes;
+    }
+
     if (totalMinutes < 0) totalMinutes += 24 * 60;
 
     const hours = Math.floor(totalMinutes / 60);
@@ -133,7 +179,7 @@ function calculateTotal(arrival, departure) {
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 }
 
-// Fonction pour calculer le total de la semaine
+// Calculer le total de la semaine
 function calculateWeeklyTotal() {
     let totalMinutes = 0;
 
@@ -150,78 +196,7 @@ function calculateWeeklyTotal() {
     return `${totalHours}h${remainingMinutes.toString().padStart(2, "0")}`;
 }
 
-function formatDateForBackend(date) {
-    const [day, month, year] = date.split("/");
-    return `${year}-${month}-${day}`; // Retourne la date au format Y-m-d
-}
-
-// Fonction pour reformater l'heure au format HH:mm
-function formatTimeToHoursMinutes(time) {
-    if (!time) return null;
-    const [hour, minute] = time.split(":");
-    return `${hour}:${minute}`; // Retourne l'heure au format HH:mm
-}
-
-// Confirmer l'action et enregistrer l'heure
-function confirmAction() {
-    const today = new Date().toLocaleDateString("fr-FR");
-    const dayInfo = days.value.find((day) => day.date === today);
-
-    if (actionType.value === "arrival") {
-        // Reformater l'heure avant de l'enregistrer
-        dayInfo.arrival = formatTimeToHoursMinutes(currentTime);
-    } else if (actionType.value === "departure") {
-        // Reformater l'heure avant de l'enregistrer
-        dayInfo.departure = formatTimeToHoursMinutes(currentTime);
-        dayInfo.total = calculateTotal(dayInfo.arrival, dayInfo.departure);
-    }
-
-    // Conversion de la date au format 'Y-m-d' avant de l'envoyer à la base de données
-    const formattedDate = formatDateForBackend(dayInfo.date);
-
-    axios
-        .post("/days/store", {
-            day: dayInfo.day,
-            date: formattedDate, // Utiliser la date au format 'Y-m-d'
-            arrival: dayInfo.arrival,
-            departure: dayInfo.departure,
-            total: dayInfo.total,
-        })
-        .then((response) => {
-            console.log(response.data.message);
-        })
-        .catch((error) => {
-            if (error.response && error.response.status === 422) {
-                console.error(
-                    "Erreur de validation : ",
-                    error.response.data.errors
-                );
-            } else {
-                console.error(
-                    "Erreur lors de l'enregistrement des données :",
-                    error
-                );
-            }
-        });
-
-    showModal.value = false;
-}
-
-// Annuler l'action
-function cancelAction() {
-    showModal.value = false;
-}
-
-// Met à jour le total de la semaine chaque fois que les heures d'un jour sont modifiées
-watch(
-    days,
-    () => {
-        weeklyTotal.value = calculateWeeklyTotal();
-    },
-    { deep: true }
-);
-
-// Fonction pour obtenir la date de la semaine
+// Obtenir la date de la semaine
 function getWeekDate(dayIndex) {
     const today = new Date();
     const currentDayOfWeek = today.getDay();
@@ -235,7 +210,58 @@ function getWeekDate(dayIndex) {
     return date.toLocaleDateString("fr-FR");
 }
 
-// Fonction pour obtenir la date au format "jj mois année"
+// Formatter l'heure au format HH:mm
+function formatTimeToHoursMinutes(time) {
+    if (!time) return null;
+    const [hour, minute] = time.split(":");
+    return `${hour}:${minute}`;
+}
+
+// Formatter les heures de la base de données
+function formatDatabaseTime(time) {
+    if (!time) return null;
+    const [hour, minute] = time.split(":");
+    return `${hour}:${minute}`;
+}
+
+// Formatter la date pour l'envoyer au backend
+function formatDateForBackend(date) {
+    const [day, month, year] = date.split("/");
+    return `${year}-${month}-${day}`;
+}
+
+// Vérifier si l'arrivée est déjà enregistrée pour aujourd'hui
+const today = new Date().toLocaleDateString("fr-FR");
+const isArrivalRecordedForToday = computed(() => {
+    const dayInfo = days.value.find((day) => day.date === today);
+    return dayInfo ? dayInfo.arrival !== null && dayInfo.arrival !== "" : false;
+});
+
+// Vérifier si le départ est déjà enregistré pour aujourd'hui
+const isDepartureRecordedForToday = computed(() => {
+    const dayInfo = days.value.find((day) => day.date === today);
+    return dayInfo
+        ? dayInfo.departure !== null && dayInfo.departure !== ""
+        : false;
+});
+
+// Vérifier si le début de break est déjà enregistré pour aujourd'hui
+const isBreakStartRecordedForToday = computed(() => {
+    const dayInfo = days.value.find((day) => day.date === today);
+    return dayInfo
+        ? dayInfo.break_start !== null && dayInfo.break_start !== ""
+        : false;
+});
+
+// Vérifier si la fin de break est déjà enregistrée pour aujourd'hui
+const isBreakEndRecordedForToday = computed(() => {
+    const dayInfo = days.value.find((day) => day.date === today);
+    return dayInfo
+        ? dayInfo.break_end !== null && dayInfo.break_end !== ""
+        : false;
+});
+
+// Fonction pour formater la date au format "jj mois année"
 function formatDateVerbose(date) {
     const options = {
         day: "numeric",
@@ -244,22 +270,6 @@ function formatDateVerbose(date) {
     };
     return date.toLocaleDateString("fr-FR", options);
 }
-
-// Fonction pour vérifier si l'arrivée a déjà été enregistrée pour aujourd'hui
-const today = new Date().toLocaleDateString("fr-FR");
-// Vérifier si une arrivée est enregistrée pour aujourd'hui
-const isArrivalRecordedForToday = computed(() => {
-    const dayInfo = days.value.find((day) => day.date === today);
-    return dayInfo ? dayInfo.arrival !== null && dayInfo.arrival !== "" : false;
-});
-
-// Fonction pour vérifier si le départ a déjà été enregistré pour aujourd'hui
-const isDepartureRecordedForToday = computed(() => {
-    const dayInfo = days.value.find((day) => day.date === today);
-    return dayInfo
-        ? dayInfo.departure !== null && dayInfo.departure !== ""
-        : false;
-});
 
 // Mettre à jour l'heure actuelle chaque seconde
 onMounted(() => {
@@ -274,6 +284,15 @@ onMounted(() => {
         clearInterval(intervalId);
     });
 });
+
+// Mettre à jour le total de la semaine lorsque les heures changent
+watch(
+    days,
+    () => {
+        weeklyTotal.value = calculateWeeklyTotal();
+    },
+    { deep: true }
+);
 </script>
 
 <template>
@@ -334,7 +353,10 @@ onMounted(() => {
                             Heure d'arrivée
                         </h3>
                         <button
-                            :disabled="!onInitialPageLoaded || isArrivalRecordedForToday"
+                            :disabled="
+                                !onInitialPageLoaded ||
+                                isArrivalRecordedForToday
+                            "
                             ref="arrivalButtonRef"
                             id="arrivalButton"
                             @click="openModal('arrival')"
@@ -373,7 +395,10 @@ onMounted(() => {
                             Heure de départ
                         </h3>
                         <button
-                            :disabled="!onInitialPageLoaded || isDepartureRecordedForToday"
+                            :disabled="
+                                !onInitialPageLoaded ||
+                                isDepartureRecordedForToday
+                            "
                             ref="departureButtonRef"
                             id="departureButton"
                             @click="openModal('departure')"
@@ -393,11 +418,86 @@ onMounted(() => {
                         <span
                             id="hourDepartureToday"
                             class="block text-lg mt-2 font-semibold text-gray-600"
-                            >{{
+                        >
+                            {{
                                 days.find((day) => day.date === today)
                                     ?.departure || "Non enregistré"
-                            }}</span
+                            }}
+                        </span>
+                    </div>
+
+                    <!-- Début du break -->
+                    <div
+                        class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 text-center"
+                    >
+                        <h3 class="text-gray-800 text-lg font-semibold">
+                            <i class="fas fa-coffee text-yellow-600 mr-2"></i>
+                            Début du break
+                        </h3>
+                        <button
+                            :disabled="
+                                !onInitialPageLoaded ||
+                                isBreakStartRecordedForToday
+                            "
+                            @click="openModal('break_start')"
+                            :class="{
+                                'bg-yellow-700 text-white cursor-not-allowed':
+                                    isBreakStartRecordedForToday,
+                                'text-yellow-700 border border-yellow-700 bg-white hover:text-white hover:bg-yellow-800 cursor-pointer':
+                                    !isBreakStartRecordedForToday,
+                            }"
+                            class="mt-4 transition-colors duration-300 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-6 py-3"
                         >
+                            <i class="fas fa-arrow-right"></i> Enregistrer
+                        </button>
+                        <p class="mt-2 text-gray-600 text-sm">
+                            Heure du début du break
+                        </p>
+                        <span
+                            class="block text-lg mt-2 font-semibold text-gray-600"
+                        >
+                            {{
+                                days.find((day) => day.date === today)
+                                    ?.break_start || "Non enregistré"
+                            }}
+                        </span>
+                    </div>
+
+                    <!-- Fin du break -->
+                    <div
+                        class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 text-center"
+                    >
+                        <h3 class="text-gray-800 text-lg font-semibold">
+                            <i class="fas fa-coffee text-yellow-600 mr-2"></i>
+                            Fin du break
+                        </h3>
+                        <button
+                            :disabled="
+                                !onInitialPageLoaded ||
+                                isBreakEndRecordedForToday
+                            "
+                            @click="openModal('break_end')"
+                            :class="{
+                                'bg-yellow-700 text-white cursor-not-allowed':
+                                    isBreakEndRecordedForToday,
+                                'text-yellow-700 border border-yellow-700 bg-white hover:text-white hover:bg-yellow-800 cursor-pointer':
+                                    !isBreakEndRecordedForToday,
+                            }"
+                            class="mt-4 transition-colors duration-300 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-6 py-3"
+                        >
+                            <i class="fas fa-arrow-left"></i> Enregistrer
+                        </button>
+                        <p class="mt-2 text-gray-600 text-sm">
+                            Heure de fin du break
+                        </p>
+                        <span
+                            class="block text-lg mt-2 font-semibold text-gray-600"
+                        >
+                            {{
+                                days.find((day) => day.date === today)
+                                    ?.break_end || "Non enregistré"
+                            }}
+                        </span>
                     </div>
                 </div>
 
@@ -432,6 +532,16 @@ onMounted(() => {
                                     Départ
                                 </th>
                                 <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Début du break
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Fin du break
+                                </th>
+                                <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Total
@@ -457,6 +567,16 @@ onMounted(() => {
                                     {{ day.departure || "--:--" }}
                                 </td>
                                 <td
+                                    class="px-4 py-4 whitespace-nowrap text-center"
+                                >
+                                    {{ day.break_start || "--:--" }}
+                                </td>
+                                <td
+                                    class="px-4 py-4 whitespace-nowrap text-center"
+                                >
+                                    {{ day.break_end || "--:--" }}
+                                </td>
+                                <td
                                     class="px-4 py-4 whitespace-nowrap text-right"
                                 >
                                     {{ day.total || "--:--" }}
@@ -475,9 +595,10 @@ onMounted(() => {
                     >
                         <i class="fas fa-calendar-week text-gray-100 mr-2"></i>
                         Total de la semaine :
-                        <span class="font-semibold text-gray-100 ml-2 text-base">{{
-                            weeklyTotal
-                        }}</span>
+                        <span
+                            class="font-semibold text-gray-100 ml-2 text-base"
+                            >{{ weeklyTotal }}</span
+                        >
                     </h3>
                 </div>
 
