@@ -13,6 +13,7 @@ const showModal = ref(false);
 const actionType = ref(""); // Peut être "arrival", "departure", "break_start", "break_end"
 let currentTime = "";
 const weeklyTotal = ref("00h00");
+const showBreakButtons = ref(false); // Pour afficher ou cacher les boutons de break
 
 // Stocker l'heure actuelle sous forme réactive
 const currentTimeReactive = ref(
@@ -230,6 +231,11 @@ function formatDateForBackend(date) {
     return `${year}-${month}-${day}`;
 }
 
+// Toggler l'affichage des boutons de sortie
+function toggleBreakButtons() {
+    showBreakButtons.value = !showBreakButtons.value; // Modifier la valeur
+}
+
 // Vérifier si l'arrivée est déjà enregistrée pour aujourd'hui
 const today = new Date().toLocaleDateString("fr-FR");
 const isArrivalRecordedForToday = computed(() => {
@@ -357,8 +363,6 @@ watch(
                                 !onInitialPageLoaded ||
                                 isArrivalRecordedForToday
                             "
-                            ref="arrivalButtonRef"
-                            id="arrivalButton"
                             @click="openModal('arrival')"
                             :class="{
                                 'bg-green-700 text-white cursor-not-allowed':
@@ -371,10 +375,9 @@ watch(
                             <i class="fas fa-arrow-right"></i> Enregistrer
                         </button>
                         <p class="mt-2 text-gray-600 text-sm">
-                            Heure d'arrivée enregistrée pour aujourd'hui
+                            Heure d'arrivée enregistrée
                         </p>
                         <span
-                            id="hourArrivalToday"
                             class="block text-lg mt-2 font-semibold text-gray-600"
                         >
                             {{
@@ -399,8 +402,6 @@ watch(
                                 !onInitialPageLoaded ||
                                 isDepartureRecordedForToday
                             "
-                            ref="departureButtonRef"
-                            id="departureButton"
                             @click="openModal('departure')"
                             :class="{
                                 'bg-red-700 text-white cursor-not-allowed':
@@ -413,10 +414,9 @@ watch(
                             <i class="fas fa-arrow-left"></i> Enregistrer
                         </button>
                         <p class="mt-2 text-gray-600 text-sm">
-                            Heure de départ enregistrée pour aujourd'hui
+                            Heure de départ enregistrée
                         </p>
                         <span
-                            id="hourDepartureToday"
                             class="block text-lg mt-2 font-semibold text-gray-600"
                         >
                             {{
@@ -425,14 +425,40 @@ watch(
                             }}
                         </span>
                     </div>
+                </div>
 
-                    <!-- Début du break -->
+                <!-- Bouton pour afficher/masquer les boutons de sortie -->
+                <div class="mt-6">
+                    <button
+                        @click="toggleBreakButtons"
+                        class="px-4 py-2 bg-gray-700 text-white text-sm font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring focus:ring-gray-500 flex items-center"
+                    >
+                        <span v-if="!showBreakButtons"
+                            >Enregistrer une sortie en dehors des heures de
+                            travail <i class="fa-solid fa-arrow-right ml-2"></i></span
+                        >
+                        <span v-else
+                            >Enregistrer une sortie en dehors des heures de
+                            travail <i class="fa-solid fa-arrow-down ml-2"></i></span
+                        >
+                        
+                    </button>
+                </div>
+
+                <!-- Boutons de début et fin de sortie (affichés uniquement si showBreakButtons est vrai) -->
+                <div
+                    v-if="showBreakButtons"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg mt-6 pb-12"
+                >
+                    <!-- Début de la sortie -->
                     <div
                         class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 text-center"
                     >
                         <h3 class="text-gray-800 text-lg font-semibold">
-                            <i class="fas fa-coffee text-yellow-600 mr-2"></i>
-                            Début de la sortie
+                            <i
+                                class="fa-solid fa-door-open text-yellow-600 mr-2"
+                            ></i>
+                            Début de sortie
                         </h3>
                         <button
                             :disabled="
@@ -451,7 +477,7 @@ watch(
                             <i class="fas fa-arrow-right"></i> Enregistrer
                         </button>
                         <p class="mt-2 text-gray-600 text-sm">
-                            Heure du début du break
+                            Début de sortie enregistré
                         </p>
                         <span
                             class="block text-lg mt-2 font-semibold text-gray-600"
@@ -463,13 +489,15 @@ watch(
                         </span>
                     </div>
 
-                    <!-- Fin du break -->
+                    <!-- Fin de la sortie -->
                     <div
                         class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 text-center"
                     >
                         <h3 class="text-gray-800 text-lg font-semibold">
-                            <i class="fas fa-coffee text-yellow-600 mr-2"></i>
-                            Fin de la sortie
+                            <i
+                                class="fa-solid fa-door-closed text-yellow-600 mr-2"
+                            ></i>
+                            Fin de sortie
                         </h3>
                         <button
                             :disabled="
@@ -488,7 +516,7 @@ watch(
                             <i class="fas fa-arrow-left"></i> Enregistrer
                         </button>
                         <p class="mt-2 text-gray-600 text-sm">
-                            Heure de fin du break
+                            Fin de sortie enregistrée
                         </p>
                         <span
                             class="block text-lg mt-2 font-semibold text-gray-600"
@@ -500,13 +528,14 @@ watch(
                         </span>
                     </div>
                 </div>
-
+                
+                <!-- TABLEAU CETTE SEMAINE -->
                 <h3
                     class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 px-4 py-2 text-left font-bold mt-12 mb-4"
                 >
                     Cette semaine :
                 </h3>
-                <!-- Table des heures de la semaine -->
+            
                 <div class="w-full max-w-4xl mx-auto overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
@@ -588,15 +617,15 @@ watch(
 
                 <!-- Total des heures de la semaine -->
                 <div
-                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-gray-800 text-center sm:text-right"
+                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-gray-100 text-gray-800 text-center sm:text-right"
                 >
                     <h3
-                        class="text-white text-base flex justify-center sm:justify-end items-center"
+                        class="text-base flex justify-center sm:justify-end items-center"
                     >
-                        <i class="fas fa-calendar-week text-gray-100 mr-2"></i>
+                        <i class="fas fa-calendar-week mr-2"></i>
                         Total de la semaine :
                         <span
-                            class="font-semibold text-gray-100 ml-2 text-base"
+                            class="font-semibold ml-2 text-base"
                             >{{ weeklyTotal }}</span
                         >
                     </h3>
