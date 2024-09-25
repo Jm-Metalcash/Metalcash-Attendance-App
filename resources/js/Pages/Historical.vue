@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, defineProps } from "vue";
+import { ref, computed, watch, defineProps, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -58,36 +58,26 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 const calculateWeeklyTotals = (weeks, days) => {
     return weeks.map((week) => {
         const totalMinutes = week.reduce((total, day) => {
-            // Utiliser toLocaleDateString pour éviter les problèmes de fuseau horaire
-            const dayString = day.toLocaleDateString("fr-CA"); // 'YYYY-MM-DD'
+            const dayString = day.toLocaleDateString("fr-CA"); // Format 'YYYY-MM-DD'
             const dayData = days.find((d) => d.date === dayString);
 
             if (dayData && dayData.arrival && dayData.departure) {
-                const [arrivalHours, arrivalMinutes] = dayData.arrival
-                    .split(":")
+                // Utiliser la fonction calculateDailyTotal pour prendre en compte les breaks
+                const dailyTotal = calculateDailyTotal(
+                    dayData.arrival,
+                    dayData.departure,
+                    dayData.break_start,
+                    dayData.break_end
+                );
+
+                // Extraire les heures et minutes à partir du résultat de calculateDailyTotal
+                const [hours, minutes] = dailyTotal
+                    .replace('h', ':')
+                    .split(':')
                     .map(Number);
-                const [departureHours, departureMinutes] = dayData.departure
-                    .split(":")
-                    .map(Number);
 
-                if (
-                    !isNaN(arrivalHours) &&
-                    !isNaN(departureHours) &&
-                    !isNaN(arrivalMinutes) &&
-                    !isNaN(departureMinutes)
-                ) {
-                    const arrivalDate = new Date();
-                    arrivalDate.setHours(arrivalHours, arrivalMinutes, 0);
-
-                    const departureDate = new Date();
-                    departureDate.setHours(departureHours, departureMinutes, 0);
-
-                    const dailyTotalMinutes =
-                        (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
-
-                    if (dailyTotalMinutes > 0) {
-                        total += dailyTotalMinutes;
-                    }
+                if (!isNaN(hours) && !isNaN(minutes)) {
+                    total += hours * 60 + minutes; // Ajouter le total en minutes
                 }
             }
             return total;
@@ -105,6 +95,7 @@ const calculateWeeklyTotals = (weeks, days) => {
         };
     });
 };
+
 
 // Fonction pour filtrer les jours en fonction de l'année et du mois sélectionnés
 const filterDays = () => {
@@ -374,41 +365,31 @@ const saveDayChanges = async () => {
             break_end: formattedBreakEnd,
         });
 
-        // Mettre à jour directement les heures dans le tableau filteredDays
-        const dayToUpdate = filteredDays.value.find(
-            (day) => day.id === selectedDay.value.id
-        );
-        if (dayToUpdate) {
-            dayToUpdate.arrival = formattedArrival;
-            dayToUpdate.departure = formattedDeparture;
-            dayToUpdate.break_start = formattedBreakStart;
-            dayToUpdate.break_end = formattedBreakEnd;
-            dayToUpdate.total = calculateDailyTotal(
-                formattedArrival,
-                formattedDeparture,
-                formattedBreakStart,
-                formattedBreakEnd
-            ); // Met à jour le total pour ce jour
-        }
+        // Sauvegarder une variable de succès dans localStorage avant de recharger la page
+        localStorage.setItem('dayUpdateSuccess', 'true');
 
-        // Recalculer le total des heures pour le mois
-        calculateTotalMinutes();
+        // Recharger la page après la mise à jour
+        window.location.reload();
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde des modifications :", error);
+    }
+};
 
-        // Afficher le toast de succès
+// Dans onMounted, afficher le toast si la mise à jour s'est bien passée
+onMounted(() => {
+    const success = localStorage.getItem('dayUpdateSuccess');
+    if (success === 'true') {
         showSuccessToast.value = true;
+
+        // Nettoyer localStorage après avoir montré le toast
+        localStorage.removeItem('dayUpdateSuccess');
+
         setTimeout(() => {
             showSuccessToast.value = false;
         }, 5000);
-
-        // Fermer le modal après la mise à jour
-        closeModal();
-    } catch (error) {
-        console.error(
-            "Erreur lors de la sauvegarde des modifications :",
-            error
-        );
     }
-};
+});
+
 
 
 // Variables pour le modal d'ajout
