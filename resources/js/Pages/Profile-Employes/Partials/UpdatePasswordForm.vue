@@ -5,6 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, defineProps } from 'vue';
+import axios from 'axios';
 
 // Recevoir l'utilisateur via les props
 const props = defineProps({
@@ -21,16 +22,19 @@ const successMessage = ref('');
 const showSuccessMessage = ref(false);
 const showErrorMessage = ref(false);
 
-// Fonction pour simuler l'envoi d'un lien de réinitialisation
-const sendResetLink = () => {
-    if (form.email === props.user.email) {
-        successMessage.value = "Le lien de réinitialisation a été envoyé avec succès à l'adresse " + form.email;
+// Fonction pour envoyer l'e-mail de réinitialisation
+const sendResetLink = async () => {
+    try {
+        const response = await axios.post('/send-reset-link', {
+            email: form.email,
+        });
+        successMessage.value = response.data.success;
         showSuccessMessage.value = true;
-        showErrorMessage.value = false; // Masquer le message d'erreur si le succès est affiché
-    } else {
-        form.errors.email = "L'adresse e-mail ne correspond pas à l'utilisateur sélectionné.";
+        showErrorMessage.value = false; // Masquer l'erreur s'il y a succès
+    } catch (error) {
+        form.errors.email = error.response.data.error;
         showErrorMessage.value = true;
-        showSuccessMessage.value = false; // Masquer le message de succès si une erreur est affichée
+        showSuccessMessage.value = false; // Masquer le succès s'il y a une erreur
     }
 };
 </script>
@@ -58,31 +62,13 @@ const sendResetLink = () => {
                 />
 
                 <!-- Message d'erreur -->
-                <Transition
-                    enter-active-class="transition ease-out duration-300"
-                    enter-from-class="opacity-0 transform scale-95"
-                    enter-to-class="opacity-100 transform scale-100"
-                    leave-active-class="transition ease-in duration-300"
-                    leave-from-class="opacity-100 transform scale-100"
-                    leave-to-class="opacity-0 transform scale-95"
-                >
-                    <InputError v-if="showErrorMessage" class="mt-2" :message="form.errors.email" />
-                </Transition>
+                <InputError v-if="showErrorMessage" class="mt-2" :message="form.errors.email" />
             </div>
 
             <!-- Message de succès -->
-            <Transition
-                enter-active-class="transition ease-out duration-300"
-                enter-from-class="opacity-0 transform scale-95"
-                enter-to-class="opacity-100 transform scale-100"
-                leave-active-class="transition ease-in duration-300"
-                leave-from-class="opacity-100 transform scale-100"
-                leave-to-class="opacity-0 transform scale-95"
-            >
-                <div v-if="showSuccessMessage" class="text-green-600 text-sm mt-2">
-                    {{ successMessage }}
-                </div>
-            </Transition>
+            <div v-if="showSuccessMessage" class="text-green-600 text-sm mt-2">
+                {{ successMessage }}
+            </div>
 
             <!-- Bouton pour envoyer le lien de réinitialisation -->
             <div class="flex items-center gap-4">

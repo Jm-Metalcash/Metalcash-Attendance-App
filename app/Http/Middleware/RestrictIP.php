@@ -16,7 +16,7 @@ class RestrictIP
             '109.137.81.79' //IPV4
         ];
 
-        // Récupérer l'IP réelle de l'utilisateur (Ngrok peut la transmettre via X-Forwarded-For)
+        // Récupérer l'IP réelle de l'utilisateur
         $clientIp = $request->header('X-Forwarded-For') ?? $request->ip();
 
         // Vérifier si l'IP de l'utilisateur est dans la liste des IP autorisées

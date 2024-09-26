@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Auth\NewPasswordController;
+
 
 Route::get('/', function () {
     return Auth::check()
@@ -60,6 +64,11 @@ Route::middleware(['auth', 'role:Admin,Informatique'])->group(function () {
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 });
 
+
+
+//Reset du mot de passe par e-mail
+Route::post('/send-reset-link', [PasswordResetController::class, 'sendResetLink'])->name('password.send-link');
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 
 
 
