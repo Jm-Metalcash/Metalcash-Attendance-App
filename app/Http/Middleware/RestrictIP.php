@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RestrictIP
 {
@@ -12,8 +13,8 @@ class RestrictIP
         // Liste des adresses IP autorisées
         $allowedIps = [
             '127.0.0.1', //IP LOCALHOST
-            '2a02:a03f:ad7d:6a00:bd0a:ae5b:ecc5:864', //IPV6 TEMPORAIRE
-            '109.137.81.79' //IPV4
+            '109.137.81.79', //IPV4 METALCASH
+            '91.180.115.83', //IP HOME WORK
         ];
 
         // Récupérer l'IP réelle de l'utilisateur
