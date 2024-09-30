@@ -60,7 +60,7 @@ const closeModal = () => {
     <AuthenticatedLayout>
         <template #header>
             <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight text-center"
+                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
             >
                 Gestion des employés
             </h2>
