@@ -456,6 +456,12 @@ const addDay = async () => {
     }
 };
 
+const handleWeekClick = (year, month) => {
+    selectedYear.value = year;
+    selectedMonth.value = month; // Le mois sélectionné, moisIndex dans ce cas
+};
+
+
 </script>
 
 <template>
@@ -643,7 +649,7 @@ const addDay = async () => {
                                             )"
                                             :key="index"
                                         >
-                                            <tr class="transition-colors">
+                                            <tr class="transition-colors cursor-pointer" @click="handleWeekClick(selectedYear, monthIndex)">
                                                 <td
                                                     class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
                                                 >
