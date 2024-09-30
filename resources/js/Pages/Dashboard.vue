@@ -145,7 +145,7 @@ function cancelAction() {
     showModal.value = false;
 }
 
-// Calculer le total des heures travaillées en soustrayant les heures de break
+// Calculer le total des heures travaillées en soustrayant 1h pour la pause midi et les heures de break
 function calculateDailyTotal(arrival, departure, breakStart, breakEnd) {
     if (!arrival || !departure) return "00h00";
 
@@ -172,6 +172,9 @@ function calculateDailyTotal(arrival, departure, breakStart, breakEnd) {
         totalMinutes -= breakMinutes;
     }
 
+    // Soustraire 1 heure pour la pause déjeuner
+    totalMinutes -= 60;
+
     if (totalMinutes < 0) totalMinutes += 24 * 60;
 
     const hours = Math.floor(totalMinutes / 60);
@@ -179,6 +182,7 @@ function calculateDailyTotal(arrival, departure, breakStart, breakEnd) {
 
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 }
+
 
 // Calculer le total de la semaine
 function calculateWeeklyTotal() {

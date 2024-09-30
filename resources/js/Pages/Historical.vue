@@ -45,14 +45,26 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
         totalMinutes -= breakMinutes; // Soustraire les minutes du break
     }
 
+<<<<<<< HEAD
     // Empêcher un total négatif
     if (totalMinutes < 0) return "0h00"; // Retourner 0h00 si les heures ne sont pas correctes
 
+=======
+    // Soustraire une heure pour la pause déjeuner (60 minutes)
+    totalMinutes -= 60;
+
+    // Empêcher un total négatif
+    if (totalMinutes < 0) return "0h00";
+
+>>>>>>> 6c9af1e9016e77af3a9a5bf8312680ca14b3804d
     return formatMinutesToHours(totalMinutes); // Formater le total en heures et minutes
 };
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6c9af1e9016e77af3a9a5bf8312680ca14b3804d
 //Fonction pour calculer le total des heures de la semaine du mois
 const calculateWeeklyTotals = (weeks, days) => {
     return weeks.map((week) => {
@@ -456,6 +468,15 @@ const addDay = async () => {
     }
 };
 
+<<<<<<< HEAD
+=======
+const handleWeekClick = (year, month) => {
+    selectedYear.value = year;
+    selectedMonth.value = month; // Le mois sélectionné, moisIndex dans ce cas
+};
+
+
+>>>>>>> 6c9af1e9016e77af3a9a5bf8312680ca14b3804d
 </script>
 
 <template>
@@ -643,7 +664,7 @@ const addDay = async () => {
                                             )"
                                             :key="index"
                                         >
-                                            <tr class="transition-colors">
+                                            <tr class="transition-colors cursor-pointer" @click="handleWeekClick(selectedYear, monthIndex)">
                                                 <td
                                                     class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
                                                 >
