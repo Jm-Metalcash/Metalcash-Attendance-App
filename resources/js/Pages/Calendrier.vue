@@ -16,7 +16,7 @@ import { Head } from "@inertiajs/vue3";
         </template>
 
         <div class="text-center text-4xl mt-44">
-            En cours de construction...
+            Calendrier en cours de développement...
         </div>
     </AuthenticatedLayout>
 </template>
