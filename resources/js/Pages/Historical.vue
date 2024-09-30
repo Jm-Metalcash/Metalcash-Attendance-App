@@ -17,7 +17,7 @@ const totalMinutesWorked = ref(0); // Stocke le total des minutes
 
 // Fonction pour calculer la différence entre l'heure d'arrivée et de départ, en prenant en compte le break
 const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
-    if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante, retourner 0h00
+    if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante
 
     const [arrivalHours, arrivalMinutes] = arrival.split(":").map(Number);
     const [departureHours, departureMinutes] = departure.split(":").map(Number);
@@ -45,12 +45,14 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
         totalMinutes -= breakMinutes; // Soustraire les minutes du break
     }
 
+    // Soustraire une heure pour la pause déjeuner (60 minutes)
+    totalMinutes -= 60;
+
     // Empêcher un total négatif
-    if (totalMinutes < 0) return "0h00"; // Retourner 0h00 si les heures ne sont pas correctes
+    if (totalMinutes < 0) return "0h00";
 
     return formatMinutesToHours(totalMinutes); // Formater le total en heures et minutes
 };
-
 
 
 //Fonction pour calculer le total des heures de la semaine du mois
