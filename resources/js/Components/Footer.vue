@@ -1,6 +1,8 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage} from "@inertiajs/vue3";
 import { computed } from "vue";
+
+const page = usePage();
 
 const logoUrl = computed(() => "/images/logo-HD.png");
 </script>
@@ -34,9 +36,21 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             >
                         </li>
                         <li>
-                            <Link :href="route('calendrier')" class="hover:underline me-4 md:me-6"
-                                >Calendrier</Link
-                            >
+                            <Link
+                                    v-if="
+                                        page.props.auth.roles &&
+                                        (page.props.auth.roles.includes(
+                                            'Admin'
+                                        ) ||
+                                            page.props.auth.roles.includes(
+                                                'Informatique'
+                                            ))
+                                    "
+                                    :href="route('employes')"
+                                    :active="route().current('employes')"
+                                >
+                                    Gestion des employés
+                                </Link>
                         </li>
                     </ul>
                 </div>

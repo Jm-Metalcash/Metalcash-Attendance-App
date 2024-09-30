@@ -49,12 +49,6 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 >
                                     Historique
                                 </NavLink>
-                                <NavLink
-                                    :href="route('calendrier')"
-                                    :active="route().current('calendrier')"
-                                >
-                                    Calendrier
-                                </NavLink>
 
                                 <NavLink
                                     v-if="
@@ -183,12 +177,6 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             :active="route().current('historique')"
                         >
                             Historique
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('calendrier')"
-                            :active="route().current('calendrier')"
-                        >
-                            Calendrier
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             v-if="
