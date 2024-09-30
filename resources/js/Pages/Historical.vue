@@ -17,7 +17,7 @@ const totalMinutesWorked = ref(0); // Stocke le total des minutes
 
 // Fonction pour calculer la différence entre l'heure d'arrivée et de départ, en prenant en compte le break
 const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
-    if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante
+    if (!arrival || !departure) return "0h00"; // Si l'une des heures est manquante, retourner 0h00
 
     const [arrivalHours, arrivalMinutes] = arrival.split(":").map(Number);
     const [departureHours, departureMinutes] = departure.split(":").map(Number);
@@ -32,12 +32,8 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 
     // Si un break est enregistré, soustraire la durée du break du total
     if (breakStart && breakEnd) {
-        const [breakStartHours, breakStartMinutes] = breakStart
-            .split(":")
-            .map(Number);
-        const [breakEndHours, breakEndMinutes] = breakEnd
-            .split(":")
-            .map(Number);
+        const [breakStartHours, breakStartMinutes] = breakStart.split(":").map(Number);
+        const [breakEndHours, breakEndMinutes] = breakEnd.split(":").map(Number);
 
         const breakStartDate = new Date();
         breakStartDate.setHours(breakStartHours, breakStartMinutes, 0);
@@ -49,10 +45,13 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
         totalMinutes -= breakMinutes; // Soustraire les minutes du break
     }
 
-    if (totalMinutes < 0) return "0h00"; // Retourne 0 si l'heure de départ est avant l'arrivée
+    // Empêcher un total négatif
+    if (totalMinutes < 0) return "0h00"; // Retourner 0h00 si les heures ne sont pas correctes
 
-    return formatMinutesToHours(totalMinutes); // Utiliser la fonction pour formater le total
+    return formatMinutesToHours(totalMinutes); // Formater le total en heures et minutes
 };
+
+
 
 //Fonction pour calculer le total des heures de la semaine du mois
 const calculateWeeklyTotals = (weeks, days) => {
@@ -143,21 +142,30 @@ loadFiltersFromLocalStorage();
 // Fonction pour calculer le total des minutes travaillées
 const calculateTotalMinutes = () => {
     totalMinutesWorked.value = filteredDays.value.reduce((total, day) => {
-        if (day.total && typeof day.total === "string") {
-            const [hours, minutes] = day.total.split("h").map(Number);
-            if (!isNaN(hours) && !isNaN(minutes)) {
-                total += hours * 60 + minutes;
-            }
+        if (day.arrival && day.departure) {
+            // Utiliser calculateDailyTotal pour prendre en compte les pauses
+            const dailyTotal = calculateDailyTotal(
+                day.arrival,
+                day.departure,
+                day.break_start,
+                day.break_end
+            );
+
+            // Extraire les heures et minutes du résultat de calculateDailyTotal
+            const [hours, minutes] = dailyTotal.split("h").map(Number);
+            total += hours * 60 + minutes; // Ajouter le total en minutes
         }
         return total;
     }, 0);
 };
+
 
 const formatMinutesToHours = (totalMinutes) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 };
+
 
 // Watch sur les filtres pour recalculer les jours filtrés et les heures
 watch(
@@ -176,6 +184,7 @@ const formattedTotalHours = computed(() => {
     const minutes = totalMinutes % 60;
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 });
+
 
 // Nombre de jours enregistrés
 const totalDaysRecorded = computed(() => filteredDays.value.length);
@@ -283,35 +292,29 @@ const getTotalHoursForMonth = (monthIndex, year) => {
         );
     });
 
-    // Calcul du total des minutes travaillées pour le mois
+    // Calcul du total des minutes travaillées pour le mois en tenant compte des pauses
     const totalMinutes = filteredDays.reduce((total, day) => {
         if (day.arrival && day.departure) {
-            const [arrivalHours, arrivalMinutes] = day.arrival
-                .split(":")
-                .map(Number);
-            const [departureHours, departureMinutes] = day.departure
-                .split(":")
-                .map(Number);
+            const dailyTotal = calculateDailyTotal(
+                day.arrival,
+                day.departure,
+                day.break_start,
+                day.break_end
+            );
 
-            const arrivalDate = new Date();
-            arrivalDate.setHours(arrivalHours, arrivalMinutes, 0);
-
-            const departureDate = new Date();
-            departureDate.setHours(departureHours, departureMinutes, 0);
-
-            const dailyTotalMinutes = (departureDate - arrivalDate) / 1000 / 60; // Différence en minutes
-
-            if (dailyTotalMinutes > 0) {
-                total += dailyTotalMinutes;
-            }
+            // Extraire les heures et minutes du résultat de calculateDailyTotal
+            const [hours, minutes] = dailyTotal.split("h").map(Number);
+            total += hours * 60 + minutes; // Ajouter les minutes au total
         }
         return total;
     }, 0);
 
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    return `${hours}h${minutes.toString().padStart(2, "0")}`; // Retourne les heures et minutes formatées
+    return `${hours}h${minutes.toString().padStart(2, "0")}`; // Retourner les heures et minutes formatées
 };
+
+
 
 // Variables pour le modal
 const selectedDay = ref(null);
@@ -338,31 +341,27 @@ const saveDayChanges = async () => {
         return;
     }
 
-    // S'assurer que les heures ont le bon format 'HH:MM:SS'
-    const formattedArrival =
-        selectedDay.value.arrival.length === 5
-            ? `${selectedDay.value.arrival}:00`
-            : selectedDay.value.arrival;
-    const formattedDeparture =
-        selectedDay.value.departure.length === 5
-            ? `${selectedDay.value.departure}:00`
-            : selectedDay.value.departure;
-    const formattedBreakStart =
-        selectedDay.value.break_start?.length === 5
-            ? `${selectedDay.value.break_start}:00`
-            : selectedDay.value.break_start || null;
-    const formattedBreakEnd =
-        selectedDay.value.break_end?.length === 5
-            ? `${selectedDay.value.break_end}:00`
-            : selectedDay.value.break_end || null;
+    // Formater les heures seulement si elles sont présentes et valides
+    const formattedArrival = selectedDay.value.arrival && selectedDay.value.arrival.length === 5
+        ? `${selectedDay.value.arrival}:00` // Si l'heure est au format HH:MM, ajouter :00 pour les secondes
+        : selectedDay.value.arrival; // Sinon, laisser null ou correct
+    const formattedDeparture = selectedDay.value.departure && selectedDay.value.departure.length === 5
+        ? `${selectedDay.value.departure}:00`
+        : selectedDay.value.departure;
+    const formattedBreakStart = selectedDay.value.break_start && selectedDay.value.break_start.length === 5
+        ? `${selectedDay.value.break_start}:00`
+        : selectedDay.value.break_start;
+    const formattedBreakEnd = selectedDay.value.break_end && selectedDay.value.break_end.length === 5
+        ? `${selectedDay.value.break_end}:00`
+        : selectedDay.value.break_end;
 
     try {
-        // Envoi des modifications avec les heures formatées
+        // Envoyer la requête de mise à jour avec les champs formatés
         await axios.post(`/update-day/${selectedDay.value.id}`, {
-            arrival: formattedArrival,
-            departure: formattedDeparture,
-            break_start: formattedBreakStart,
-            break_end: formattedBreakEnd,
+            arrival: formattedArrival,  // Peut être null ou correctement formaté
+            departure: formattedDeparture,  // Peut être null ou correctement formaté
+            break_start: formattedBreakStart,  // Peut être null
+            break_end: formattedBreakEnd,  // Peut être null
         });
 
         // Sauvegarder une variable de succès dans localStorage avant de recharger la page
@@ -374,6 +373,7 @@ const saveDayChanges = async () => {
         console.error("Erreur lors de la sauvegarde des modifications :", error);
     }
 };
+
 
 // Dans onMounted, afficher le toast si la mise à jour s'est bien passée
 onMounted(() => {
@@ -418,18 +418,28 @@ const showSuccessAdd = ref(false);
 // Fonction pour ajouter un nouveau jour
 const addDay = async () => {
     try {
+        // Formater les heures seulement si elles sont présentes
+        const formattedArrival = newDay.value.arrival
+            ? `${newDay.value.arrival}:00`
+            : null; // Si vide, le champ sera null
+        const formattedDeparture = newDay.value.departure
+            ? `${newDay.value.departure}:00`
+            : null; // Si vide, le champ sera null
+        const formattedBreakStart = newDay.value.break_start
+            ? `${newDay.value.break_start}:00`
+            : null; // Si vide, le champ sera null
+        const formattedBreakEnd = newDay.value.break_end
+            ? `${newDay.value.break_end}:00`
+            : null; // Si vide, le champ sera null
+
         await axios.post("/add-day", {
-            user_id: props.user.id, // Utiliser l'ID de l'utilisateur
+            user_id: props.user.id,
             day: newDay.value.day,
             date: newDay.value.date,
-            arrival: `${newDay.value.arrival}:00`,
-            departure: `${newDay.value.departure}:00`,
-            break_start: newDay.value.break_start
-                ? `${newDay.value.break_start}:00`
-                : null,
-            break_end: newDay.value.break_end
-                ? `${newDay.value.break_end}:00`
-                : null,
+            arrival: formattedArrival,  // Peut être null
+            departure: formattedDeparture,  // Peut être null
+            break_start: formattedBreakStart,  // Peut être null
+            break_end: formattedBreakEnd,  // Peut être null
         });
 
         // Afficher le toast de succès
@@ -440,11 +450,12 @@ const addDay = async () => {
 
         // Fermer le modal après succès
         closeAddDayModal();
-        window.location.reload(); // Pour l'instant, recharger la page
+        window.location.reload(); // Recharger la page pour refléter les changements
     } catch (error) {
         console.error("Erreur lors de l'ajout du jour :", error);
     }
 };
+
 </script>
 
 <template>

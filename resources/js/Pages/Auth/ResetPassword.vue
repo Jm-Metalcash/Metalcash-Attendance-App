@@ -26,9 +26,9 @@ const form = useForm({
     password_confirmation: '',
 });
 
-// Fonction de soumission du formulaire avec la méthode 'put'
+
 const submit = () => {
-    form.post(route('password.store'), {  // Utiliser 'post' ici
+    form.post(route('password.store'), { 
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
