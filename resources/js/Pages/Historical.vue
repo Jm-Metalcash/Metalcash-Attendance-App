@@ -45,6 +45,10 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
         totalMinutes -= breakMinutes; // Soustraire les minutes du break
     }
 
+    // Empêcher un total négatif
+    if (totalMinutes < 0) return "0h00"; // Retourner 0h00 si les heures ne sont pas correctes
+
+
     // Soustraire une heure pour la pause déjeuner (60 minutes)
     totalMinutes -= 60;
 
@@ -53,7 +57,6 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 
     return formatMinutesToHours(totalMinutes); // Formater le total en heures et minutes
 };
-
 
 //Fonction pour calculer le total des heures de la semaine du mois
 const calculateWeeklyTotals = (weeks, days) => {
@@ -458,10 +461,12 @@ const addDay = async () => {
     }
 };
 
+
 const handleWeekClick = (year, month) => {
     selectedYear.value = year;
     selectedMonth.value = month; // Le mois sélectionné, moisIndex dans ce cas
 };
+
 
 
 </script>
