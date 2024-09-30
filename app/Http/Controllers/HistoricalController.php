@@ -39,30 +39,40 @@ class HistoricalController extends Controller
     {
         // Valider les données envoyées
         $request->validate([
-            'arrival' => 'required|date_format:H:i:s',
-            'departure' => 'required|date_format:H:i:s|after:arrival',
+            'arrival' => 'nullable|date_format:H:i:s',
+            'departure' => [
+                'nullable',
+                'date_format:H:i:s',
+                // Appliquer la règle `after` seulement si `arrival` est présent
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->arrival && $value && strtotime($value) <= strtotime($request->arrival)) {
+                        $fail("L'heure de départ doit être après l'heure d'arrivée.");
+                    }
+                },
+            ],
             'break_start' => 'nullable|date_format:H:i:s',
             'break_end' => 'nullable|date_format:H:i:s|after:break_start',
         ]);
-
+    
         // Trouver l'entrée à mettre à jour
         $day = Day::find($id);
-
+    
         if (!$day) {
             return response()->json(['message' => 'Jour non trouvé'], 404);
         }
-
+    
         // Mettre à jour les champs
-        $day->arrival = $request->arrival;
-        $day->departure = $request->departure;
-        $day->break_start = $request->break_start;
-        $day->break_end = $request->break_end; 
-
+        $day->arrival = $request->arrival;  // Peut être null
+        $day->departure = $request->departure;  // Peut être null
+        $day->break_start = $request->break_start;  // Peut être null
+        $day->break_end = $request->break_end;  // Peut être null
+    
         $day->save();
-
+    
         return response()->json(['message' => 'Jour mis à jour avec succès']);
     }
-
+    
+    
 
     // Ajoute un nouveau jour
     public function addDay(Request $request)
@@ -73,23 +83,23 @@ class HistoricalController extends Controller
                 'user_id' => 'required|exists:users,id',
                 'day' => 'required|string',
                 'date' => 'required|date',
-                'arrival' => 'required|date_format:H:i:s',
-                'departure' => 'required|date_format:H:i:s|after:arrival',
-                'total' => 'nullable|string',
+                'arrival' => 'nullable|date_format:H:i:s',
+                'departure' => 'nullable|date_format:H:i:s|after:arrival',
                 'break_start' => 'nullable|date_format:H:i:s',
                 'break_end' => 'nullable|date_format:H:i:s|after:break_start',
+                'total' => 'nullable|string',
             ]);
     
             // Créer un nouveau jour dans la base de données
             Day::create([
-                'user_id' => $validatedData['user_id'],  // S'assurer que user_id est bien là
+                'user_id' => $validatedData['user_id'],
                 'day' => $validatedData['day'],
                 'date' => $validatedData['date'],
-                'arrival' => $validatedData['arrival'],
-                'departure' => $validatedData['departure'],
-                'break_start' => $validatedData['break_start'],  // Ce champ peut être `null`
-                'break_end' => $validatedData['break_end'],  // Ce champ peut être `null`
-                'total' => $validatedData['total'] ?? '0h00',  // Ce champ peut être `null`
+                'arrival' => $validatedData['arrival'],  // Peut être null
+                'departure' => $validatedData['departure'],  // Peut être null
+                'break_start' => $validatedData['break_start'],  // Peut être null
+                'break_end' => $validatedData['break_end'],  // Peut être null
+                'total' => $validatedData['total'] ?? '0h00',  
             ]);
     
             return response()->json(['message' => 'Jour ajouté avec succès'], 201);
@@ -97,10 +107,6 @@ class HistoricalController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    
-
-    
-    
     
 
 }

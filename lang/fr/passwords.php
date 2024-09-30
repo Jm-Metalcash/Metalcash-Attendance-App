@@ -18,5 +18,6 @@ return [
     'throttled' => 'Veuillez patienter avant de réessayer.',
     'token' => "Ce token de réinitialisation du mot de passe n'est pas valide.",
     'user' => "Nous ne trouvons pas d'utilisateur avec cette adresse e-mail.",
-
+    'reset_subject' => 'Réinitialisation de votre mot de passe',
+    'reset_password_subject' => 'Réinitialisation du mot de passe',
 ];
