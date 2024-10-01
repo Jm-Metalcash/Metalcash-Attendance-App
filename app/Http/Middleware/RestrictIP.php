@@ -24,14 +24,16 @@ class RestrictIP
         $user = Auth::user();
 
         // Si l'utilisateur a le rôle "Admin", bypass la restriction d'IP
-        if ($user->roles->contains('name', 'Admin')) {
+        if ($user->roles->contains(function ($role) {
+            return in_array($role->name, ['Admin', 'Informatique']);
+        })) {
             return $next($request);
         }
 
         // Liste des adresses IP autorisées
         $allowedIps = [
-            // '127.0.0.1', // IP LOCALHOST
-            // '109.137.81.79', // IPV4 METALCASH
+            '127.0.0.1', // IP LOCALHOST
+            '109.137.81.79', // IPV4 METALCASH
             '91.180.115.83', // IP HOME WORK
         ];
 
