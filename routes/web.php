@@ -12,43 +12,31 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Middleware\RestrictIP;
 
-
+// Route de connexion (page de login), accessible à tout le monde
 Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('dashboard')
         : Inertia::render('Auth/Login');
-});
+})->name('login');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-
-
-Route::middleware(['auth', 'verified'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
-
-Route::middleware(['auth'])->group(function () {
+// Route de dashboard après connexion, protégée par 'auth' et 'RestrictIP'
+Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+    
+    // Autres routes nécessitant la restriction d'IP après authentification
     Route::get('/historique', [HistoricalController::class, 'index'])->name('historique');
+    
+    // Envoi des données des jours dans la base de données
+    Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
+    Route::get('/dashboard/days', [DayController::class, 'index']);
 });
 
-Route::get('/calendrier', function () {
-    return Inertia::render('Calendrier');
-})->middleware(['auth', 'verified'])->name('calendrier');
-
-
-//Envoi les données des jours dans la bd
-Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
-
-//Récupère les données des jours du user dans la db
-Route::get('/dashboard/days', [DayController::class, 'index']);
-
-
-Route::middleware(['auth'])->get('/dashboard', [RoleController::class, 'index'])->name('dashboard');
-
-
-// Gestion des routes pour les employés - accessibles uniquement aux rôles Admin et Informatique
-Route::middleware(['auth', 'role:Admin,Informatique'])->group(function () {
+// Routes protégées par l'authentification et les rôles Admin et Informatique
+Route::middleware(['auth', 'role:Admin,Informatique', RestrictIP::class])->group(function () {
     Route::get('/liste-des-employes', [EmployeController::class, 'index'])->name('employes');
     Route::post('/ajouter-un-employe', [EmployeController::class, 'store'])->name('employees.store');
     Route::get('/employes/{id}/profil', [EmployeController::class, 'edit'])->name('employees.profile');
@@ -57,26 +45,21 @@ Route::middleware(['auth', 'role:Admin,Informatique'])->group(function () {
     Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy');
     Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('update-day');
     Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('add-day');
-
-
     
-    // Route pour afficher les pointages d'un employé spécifique, accessible uniquement pour "Admin" ou "Informatique"
+    // Route pour afficher les pointages d'un employé spécifique
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 });
 
-
-
-//Reset du mot de passe par e-mail
+// Routes pour le reset du mot de passe
 Route::post('/send-reset-link', [PasswordResetController::class, 'sendResetLink'])->name('password.send-link');
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 
-
-
-
-Route::middleware('auth')->group(function () {
+// Routes pour la gestion de profil, accessibles uniquement après authentification
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Inclusion des routes d'authentification
 require __DIR__ . '/auth.php';
