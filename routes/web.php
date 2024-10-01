@@ -35,20 +35,22 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::get('/dashboard/days', [DayController::class, 'index']);
 });
 
-// Routes protégées par l'authentification et les rôles Admin et Informatique
-Route::middleware(['auth', 'role:Admin,Informatique', RestrictIP::class])->group(function () {
+
+// Routes protégées par l'authentification et les rôles Admin, Informatique, ou Comptabilité
+Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::class])->group(function () {
     Route::get('/liste-des-employes', [EmployeController::class, 'index'])->name('employes');
-    Route::post('/ajouter-un-employe', [EmployeController::class, 'store'])->name('employees.store');
+    Route::post('/ajouter-un-employe', [EmployeController::class, 'store'])->name('employees.store')->middleware('role:Admin,Informatique');
     Route::get('/employes/{id}/profil', [EmployeController::class, 'edit'])->name('employees.profile');
-    Route::patch('/employes/{id}/profil', [EmployeController::class, 'update'])->name('employees.update');
-    Route::patch('/employes/{id}/password', [EmployeController::class, 'updatePassword'])->name('employees.password.update');
-    Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy');
-    Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('update-day');
-    Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('add-day');
+    Route::patch('/employes/{id}/profil', [EmployeController::class, 'update'])->name('employees.update')->middleware('role:Admin,Informatique');
+    Route::patch('/employes/{id}/password', [EmployeController::class, 'updatePassword'])->name('employees.password.update')->middleware('role:Admin,Informatique');
+    Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy')->middleware('role:Admin,Informatique');
+    Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('update-day')->middleware('role:Admin,Informatique');
+    Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('add-day')->middleware('role:Admin,Informatique');
     
     // Route pour afficher les pointages d'un employé spécifique
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 });
+
 
 // Routes pour le reset du mot de passe
 Route::post('/send-reset-link', [PasswordResetController::class, 'sendResetLink'])->name('password.send-link');

@@ -4,13 +4,15 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, usePage } from "@inertiajs/vue3";
 import { ref, defineProps } from "vue";
 
 // Props pour recevoir les utilisateurs
 const props = defineProps({
     users: Array,
 });
+
+const page = usePage();
 
 // Contrôle du modal
 const isModalOpen = ref(false);
@@ -42,16 +44,15 @@ const openModal = () => (isModalOpen.value = true);
 // Fonction pour réinitialiser le formulaire et fermer le modal
 const closeModal = () => {
     // Réinitialiser manuellement chaque champ
-    form.name = '';
-    form.email = '';
-    form.password = '';
-    form.password_confirmation = '';
-    form.role = 'Employé';
-    
+    form.name = "";
+    form.email = "";
+    form.password = "";
+    form.password_confirmation = "";
+    form.role = "Employé";
+
     // Fermer le modal
     isModalOpen.value = false;
 };
-
 </script>
 
 <template>
@@ -78,7 +79,14 @@ const closeModal = () => {
                 </div>
 
                 <!-- Bouton pour ouvrir le modal -->
-                <PrimaryButton class="mt-8 mb-0" @click="openModal"
+                <PrimaryButton
+                    class="mt-8 mb-0"
+                    @click="openModal"
+                    v-if="
+                        page.props.auth.roles &&
+                        (page.props.auth.roles.includes('Admin') ||
+                            page.props.auth.roles.includes('Informatique'))
+                    "
                     >Ajouter un employé</PrimaryButton
                 >
 
@@ -151,6 +159,28 @@ const closeModal = () => {
                                     class="px-6 py-4 whitespace-nowrap text-center"
                                 >
                                     <button
+                                        v-if="
+                                            page.props.auth.roles.includes(
+                                                'Comptabilité'
+                                            )
+                                        "
+                                        @click="
+                                            () =>
+                                                $inertia.get(
+                                                    route(
+                                                        'users.pointages',
+                                                        user.id
+                                                    )
+                                                )
+                                        "
+                                        class="px-4 py-2 text-sm text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
+                                    >
+                                        <i class="fa-regular fa-eye"></i>
+                                        Voir historique
+                                    </button>
+
+                                    <button
+                                        v-else
                                         @click="
                                             () =>
                                                 $inertia.get(
@@ -268,8 +298,12 @@ const closeModal = () => {
                                     <option value="Employé">Employé</option>
                                     <option value="Ouvrier">Ouvrier</option>
                                     <option value="Admin">Admin</option>
-                                    <option value="Informatique">Informatique</option>
-                                    <option value="Comptabilité">Comptabilité</option>
+                                    <option value="Informatique">
+                                        Informatique
+                                    </option>
+                                    <option value="Comptabilité">
+                                        Comptabilité
+                                    </option>
                                 </select>
                             </div>
 

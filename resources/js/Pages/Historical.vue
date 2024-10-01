@@ -1,11 +1,13 @@
 <script setup>
 import { ref, computed, watch, defineProps, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, usePage } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 
 // Les données des jours sont passées à partir du contrôleur Laravel via Inertia
 const props = defineProps(["days", "isShow", "user"]);
+
+const page = usePage();
 
 // Filtre sélectionné pour l'année et le mois
 const selectedYear = ref(new Date().getFullYear());
@@ -32,8 +34,12 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 
     // Si un break est enregistré, soustraire la durée du break du total
     if (breakStart && breakEnd) {
-        const [breakStartHours, breakStartMinutes] = breakStart.split(":").map(Number);
-        const [breakEndHours, breakEndMinutes] = breakEnd.split(":").map(Number);
+        const [breakStartHours, breakStartMinutes] = breakStart
+            .split(":")
+            .map(Number);
+        const [breakEndHours, breakEndMinutes] = breakEnd
+            .split(":")
+            .map(Number);
 
         const breakStartDate = new Date();
         breakStartDate.setHours(breakStartHours, breakStartMinutes, 0);
@@ -47,7 +53,6 @@ const calculateDailyTotal = (arrival, departure, breakStart, breakEnd) => {
 
     // Empêcher un total négatif
     if (totalMinutes < 0) return "0h00"; // Retourner 0h00 si les heures ne sont pas correctes
-
 
     // Soustraire une heure pour la pause déjeuner (60 minutes)
     totalMinutes -= 60;
@@ -76,8 +81,8 @@ const calculateWeeklyTotals = (weeks, days) => {
 
                 // Extraire les heures et minutes à partir du résultat de calculateDailyTotal
                 const [hours, minutes] = dailyTotal
-                    .replace('h', ':')
-                    .split(':')
+                    .replace("h", ":")
+                    .split(":")
                     .map(Number);
 
                 if (!isNaN(hours) && !isNaN(minutes)) {
@@ -99,7 +104,6 @@ const calculateWeeklyTotals = (weeks, days) => {
         };
     });
 };
-
 
 // Fonction pour filtrer les jours en fonction de l'année et du mois sélectionnés
 const filterDays = () => {
@@ -164,13 +168,11 @@ const calculateTotalMinutes = () => {
     }, 0);
 };
 
-
 const formatMinutesToHours = (totalMinutes) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 };
-
 
 // Watch sur les filtres pour recalculer les jours filtrés et les heures
 watch(
@@ -189,7 +191,6 @@ const formattedTotalHours = computed(() => {
     const minutes = totalMinutes % 60;
     return `${hours}h${minutes.toString().padStart(2, "0")}`;
 });
-
 
 // Nombre de jours enregistrés
 const totalDaysRecorded = computed(() => filteredDays.value.length);
@@ -319,17 +320,27 @@ const getTotalHoursForMonth = (monthIndex, year) => {
     return `${hours}h${minutes.toString().padStart(2, "0")}`; // Retourner les heures et minutes formatées
 };
 
-
-
 // Variables pour le modal
 const selectedDay = ref(null);
 const isModalOpen = ref(false);
 
 // Ouvrir le modal pour modifier un jour
 const openModal = (day) => {
-    selectedDay.value = { ...day };
-    isModalOpen.value = true;
+    // Vérifier si l'utilisateur a le rôle "Admin" ou "Informatique"
+    if (
+        page.props.auth.roles.includes('Admin') ||
+        page.props.auth.roles.includes('Informatique')
+    ) {
+        // Si l'utilisateur est "Admin" ou "Informatique", on peut ouvrir le modal
+        selectedDay.value = { ...day };
+        isModalOpen.value = true;
+    } else {
+        // Sinon, empêcher l'ouverture et afficher un message ou prendre une autre action
+        console.log("Accès refusé : vous n'avez pas les autorisations nécessaires.");
+    }
 };
+
+
 
 // Fermer le modal
 const closeModal = () => {
@@ -347,55 +358,60 @@ const saveDayChanges = async () => {
     }
 
     // Formater les heures seulement si elles sont présentes et valides
-    const formattedArrival = selectedDay.value.arrival && selectedDay.value.arrival.length === 5
-        ? `${selectedDay.value.arrival}:00` // Si l'heure est au format HH:MM, ajouter :00 pour les secondes
-        : selectedDay.value.arrival; // Sinon, laisser null ou correct
-    const formattedDeparture = selectedDay.value.departure && selectedDay.value.departure.length === 5
-        ? `${selectedDay.value.departure}:00`
-        : selectedDay.value.departure;
-    const formattedBreakStart = selectedDay.value.break_start && selectedDay.value.break_start.length === 5
-        ? `${selectedDay.value.break_start}:00`
-        : selectedDay.value.break_start;
-    const formattedBreakEnd = selectedDay.value.break_end && selectedDay.value.break_end.length === 5
-        ? `${selectedDay.value.break_end}:00`
-        : selectedDay.value.break_end;
+    const formattedArrival =
+        selectedDay.value.arrival && selectedDay.value.arrival.length === 5
+            ? `${selectedDay.value.arrival}:00` // Si l'heure est au format HH:MM, ajouter :00 pour les secondes
+            : selectedDay.value.arrival; // Sinon, laisser null ou correct
+    const formattedDeparture =
+        selectedDay.value.departure && selectedDay.value.departure.length === 5
+            ? `${selectedDay.value.departure}:00`
+            : selectedDay.value.departure;
+    const formattedBreakStart =
+        selectedDay.value.break_start &&
+        selectedDay.value.break_start.length === 5
+            ? `${selectedDay.value.break_start}:00`
+            : selectedDay.value.break_start;
+    const formattedBreakEnd =
+        selectedDay.value.break_end && selectedDay.value.break_end.length === 5
+            ? `${selectedDay.value.break_end}:00`
+            : selectedDay.value.break_end;
 
     try {
         // Envoyer la requête de mise à jour avec les champs formatés
         await axios.post(`/update-day/${selectedDay.value.id}`, {
-            arrival: formattedArrival,  // Peut être null ou correctement formaté
-            departure: formattedDeparture,  // Peut être null ou correctement formaté
-            break_start: formattedBreakStart,  // Peut être null
-            break_end: formattedBreakEnd,  // Peut être null
+            arrival: formattedArrival, // Peut être null ou correctement formaté
+            departure: formattedDeparture, // Peut être null ou correctement formaté
+            break_start: formattedBreakStart, // Peut être null
+            break_end: formattedBreakEnd, // Peut être null
         });
 
         // Sauvegarder une variable de succès dans localStorage avant de recharger la page
-        localStorage.setItem('dayUpdateSuccess', 'true');
+        localStorage.setItem("dayUpdateSuccess", "true");
 
         // Recharger la page après la mise à jour
         window.location.reload();
     } catch (error) {
-        console.error("Erreur lors de la sauvegarde des modifications :", error);
+        console.error(
+            "Erreur lors de la sauvegarde des modifications :",
+            error
+        );
     }
 };
 
-
 // Dans onMounted, afficher le toast si la mise à jour s'est bien passée
 onMounted(() => {
-    const success = localStorage.getItem('dayUpdateSuccess');
-    if (success === 'true') {
+    const success = localStorage.getItem("dayUpdateSuccess");
+    if (success === "true") {
         showSuccessToast.value = true;
 
         // Nettoyer localStorage après avoir montré le toast
-        localStorage.removeItem('dayUpdateSuccess');
+        localStorage.removeItem("dayUpdateSuccess");
 
         setTimeout(() => {
             showSuccessToast.value = false;
         }, 5000);
     }
 });
-
-
 
 // Variables pour le modal d'ajout
 const isAddDayModalOpen = ref(false);
@@ -441,10 +457,10 @@ const addDay = async () => {
             user_id: props.user.id,
             day: newDay.value.day,
             date: newDay.value.date,
-            arrival: formattedArrival,  // Peut être null
-            departure: formattedDeparture,  // Peut être null
-            break_start: formattedBreakStart,  // Peut être null
-            break_end: formattedBreakEnd,  // Peut être null
+            arrival: formattedArrival, // Peut être null
+            departure: formattedDeparture, // Peut être null
+            break_start: formattedBreakStart, // Peut être null
+            break_end: formattedBreakEnd, // Peut être null
         });
 
         // Afficher le toast de succès
@@ -461,14 +477,10 @@ const addDay = async () => {
     }
 };
 
-
 const handleWeekClick = (year, month) => {
     selectedYear.value = year;
     selectedMonth.value = month; // Le mois sélectionné, moisIndex dans ce cas
 };
-
-
-
 </script>
 
 <template>
@@ -589,7 +601,15 @@ const handleWeekClick = (year, month) => {
                 <!-- Si selectedMonth === 0, afficher toutes les semaines de tous les mois -->
                 <template v-if="selectedMonth === 0">
                     <!-- Bouton pour ajouter un jour -->
-                    <div v-if="isShow" class="pt-6 flex justify-start mb-4">
+                    <div
+                        v-if="
+                            isShow &&
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes('Informatique'))
+                        "
+                        class="pt-6 flex justify-start mb-4"
+                    >
                         <PrimaryButton @click="openAddDayModal">
                             <i class="fas fa-plus mr-2"></i> Ajouter un jour
                         </PrimaryButton>
@@ -656,7 +676,15 @@ const handleWeekClick = (year, month) => {
                                             )"
                                             :key="index"
                                         >
-                                            <tr class="transition-colors cursor-pointer" @click="handleWeekClick(selectedYear, monthIndex)">
+                                            <tr
+                                                class="transition-colors cursor-pointer"
+                                                @click="
+                                                    handleWeekClick(
+                                                        selectedYear,
+                                                        monthIndex
+                                                    )
+                                                "
+                                            >
                                                 <td
                                                     class="px-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm md:text-base"
                                                 >
@@ -722,7 +750,15 @@ const handleWeekClick = (year, month) => {
                 <!-- Si selectedMonth !== 0, afficher les jours filtrés -->
                 <template v-else>
                     <!-- Bouton pour ajouter un jour -->
-                    <div v-if="isShow" class="pt-6 flex justify-start mb-4">
+                    <div
+                        v-if="
+                            isShow &&
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes('Informatique'))
+                        "
+                        class="pt-6 flex justify-start mb-4"
+                    >
                         <PrimaryButton @click="openAddDayModal">
                             <i class="fas fa-plus mr-2"></i> Ajouter un jour
                         </PrimaryButton>
@@ -889,77 +925,99 @@ const handleWeekClick = (year, month) => {
             </div>
 
             <!-- Modal pour modifier les jours -->
-<div v-if="isModalOpen" class="fixed z-50 inset-0 flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <!-- Affichage du jour sélectionné -->
-        <h2 class="text-xl font-semibold mb-4">
-            Modifier le jour : {{ new Date(selectedDay.date).toLocaleDateString("fr-FR") }}
-        </h2>
+            <div
+                v-if="isModalOpen"
+                class="fixed z-50 inset-0 flex items-center justify-center"
+            >
+                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <!-- Affichage du jour sélectionné -->
+                    <h2 class="text-xl font-semibold mb-4">
+                        Modifier le jour :
+                        {{
+                            new Date(selectedDay.date).toLocaleDateString(
+                                "fr-FR"
+                            )
+                        }}
+                    </h2>
 
-        <!-- Champ pour modifier l'heure d'arrivée -->
-        <div class="mb-4">
-            <label for="arrival" class="block text-sm font-medium text-gray-700">
-                Heure d'arrivée
-            </label>
-            <input
-                id="arrival"
-                type="time"
-                v-model="selectedDay.arrival"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-        </div>
+                    <!-- Champ pour modifier l'heure d'arrivée -->
+                    <div class="mb-4">
+                        <label
+                            for="arrival"
+                            class="block text-sm font-medium text-gray-700"
+                        >
+                            Heure d'arrivée
+                        </label>
+                        <input
+                            id="arrival"
+                            type="time"
+                            v-model="selectedDay.arrival"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
 
-        <!-- Champ pour modifier l'heure de départ -->
-        <div class="mb-4">
-            <label for="departure" class="block text-sm font-medium text-gray-700">
-                Heure de départ
-            </label>
-            <input
-                id="departure"
-                type="time"
-                v-model="selectedDay.departure"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-        </div>
+                    <!-- Champ pour modifier l'heure de départ -->
+                    <div class="mb-4">
+                        <label
+                            for="departure"
+                            class="block text-sm font-medium text-gray-700"
+                        >
+                            Heure de départ
+                        </label>
+                        <input
+                            id="departure"
+                            type="time"
+                            v-model="selectedDay.departure"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
 
-        <!-- Champ pour modifier le début de la pause -->
-        <div class="mb-4">
-            <label for="break_start" class="block text-sm font-medium text-gray-700">
-                Début de la sortie
-            </label>
-            <input
-                id="break_start"
-                type="time"
-                v-model="selectedDay.break_start"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-        </div>
+                    <!-- Champ pour modifier le début de la pause -->
+                    <div class="mb-4">
+                        <label
+                            for="break_start"
+                            class="block text-sm font-medium text-gray-700"
+                        >
+                            Début de la sortie
+                        </label>
+                        <input
+                            id="break_start"
+                            type="time"
+                            v-model="selectedDay.break_start"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
 
-        <!-- Champ pour modifier la fin de la pause -->
-        <div class="mb-4">
-            <label for="break_end" class="block text-sm font-medium text-gray-700">
-                Fin de la sortie
-            </label>
-            <input
-                id="break_end"
-                type="time"
-                v-model="selectedDay.break_end"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-        </div>
+                    <!-- Champ pour modifier la fin de la pause -->
+                    <div class="mb-4">
+                        <label
+                            for="break_end"
+                            class="block text-sm font-medium text-gray-700"
+                        >
+                            Fin de la sortie
+                        </label>
+                        <input
+                            id="break_end"
+                            type="time"
+                            v-model="selectedDay.break_end"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                    </div>
 
-        <!-- Boutons pour annuler ou sauvegarder -->
-        <div class="flex justify-end space-x-4">
-            <button @click="closeModal" class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
-                Annuler
-            </button>
-            <PrimaryButton @click="saveDayChanges">
-                Enregistrer
-            </PrimaryButton>
-        </div>
-    </div>
-</div>
-
+                    <!-- Boutons pour annuler ou sauvegarder -->
+                    <div class="flex justify-end space-x-4">
+                        <button
+                            @click="closeModal"
+                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500"
+                        >
+                            Annuler
+                        </button>
+                        <PrimaryButton @click="saveDayChanges">
+                            Enregistrer
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </div>
 
             <!-- Modal pour ajouter un nouveau jour -->
             <div
