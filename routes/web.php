@@ -19,7 +19,7 @@ Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('dashboard')
         : Inertia::render('Auth/Login');
-})->name('login');
+})->name('home');
 
 // Route de dashboard après connexion, protégée par 'auth' et 'RestrictIP'
 Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
