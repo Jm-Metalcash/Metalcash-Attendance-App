@@ -53,6 +53,21 @@ const closeModal = () => {
     // Fermer le modal
     isModalOpen.value = false;
 };
+
+// Fonction pour vérifier le statut de l'utilisateur
+const checkUserStatus = (days) => {
+    const today = new Date().toISOString().split("T")[0]; // Obtenir la date actuelle au format YYYY-MM-DD
+    // Parcourir tous les jours de l'utilisateur
+    for (let i = 0; i < days.length; i++) {
+        if (days[i].date === today) {
+            // Si on trouve une arrivée et pas encore de départ
+            if (days[i].arrival && !days[i].departure) {
+                return true; // L'utilisateur est actif
+            }
+        }
+    }
+    return false; // L'utilisateur est inactif si aucun jour ne correspond ou si une sortie est enregistrée
+};
 </script>
 
 <template>
@@ -150,11 +165,23 @@ const closeModal = () => {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
+                                        v-if="
+                                            user.days &&
+                                            user.days.length &&
+                                            checkUserStatus(user.days)
+                                        "
                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
                                     >
                                         Actif
                                     </span>
+                                    <span
+                                        v-else
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                                    >
+                                        Inactif
+                                    </span>
                                 </td>
+
                                 <td
                                     class="px-6 py-4 whitespace-nowrap text-center"
                                 >
