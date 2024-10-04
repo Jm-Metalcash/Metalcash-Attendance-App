@@ -53,6 +53,7 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             "
                             :href="route('employes')"
                             :active="route().current('employes')"
+                            class="hover:underline me-4 md:me-6"
                         >
                             Gestion des employés
                         </Link>
