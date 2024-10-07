@@ -19,6 +19,11 @@ const users = ref([
             localite: "Paris",
             pays: "France",
         },
+        historique: [
+            { date: "2024-01-10", type: "Or", poids: "2.5" },
+            { date: "2024-02-15", type: "Argent", poids: "1.2" },
+            { date: "2024-03-05", type: "Platine", poids: "0.8" },
+        ],
     },
     {
         nom: "Martin",
@@ -32,8 +37,11 @@ const users = ref([
             localite: "Bruxelles",
             pays: "Belgique",
         },
+        historique: [
+            { date: "2024-02-20", type: "Or", poids: "3.1" },
+            { date: "2024-04-12", type: "Argent", poids: "2.0" },
+        ],
     },
-    // 10 nouveaux utilisateurs venant de Belgique, Allemagne, Pays-Bas et Angleterre
     {
         nom: "Schneider",
         prenom: "Franz",
@@ -46,6 +54,10 @@ const users = ref([
             localite: "Berlin",
             pays: "Allemagne",
         },
+        historique: [
+            { date: "2024-03-18", type: "Or", poids: "1.8" },
+            { date: "2024-05-22", type: "Argent", poids: "3.4" },
+        ],
     },
     {
         nom: "Jansen",
@@ -59,6 +71,10 @@ const users = ref([
             localite: "Amsterdam",
             pays: "Pays-Bas",
         },
+        historique: [
+            { date: "2024-02-10", type: "Platine", poids: "0.7" },
+            { date: "2024-04-17", type: "Or", poids: "2.2" },
+        ],
     },
     {
         nom: "Smith",
@@ -72,6 +88,10 @@ const users = ref([
             localite: "Londres",
             pays: "Angleterre",
         },
+        historique: [
+            { date: "2024-03-12", type: "Or", poids: "4.0" },
+            { date: "2024-05-14", type: "Argent", poids: "1.7" },
+        ],
     },
     {
         nom: "Vermeulen",
@@ -85,6 +105,10 @@ const users = ref([
             localite: "Bruxelles",
             pays: "Belgique",
         },
+        historique: [
+            { date: "2024-01-28", type: "Or", poids: "2.8" },
+            { date: "2024-03-21", type: "Argent", poids: "1.5" },
+        ],
     },
     {
         nom: "Becker",
@@ -98,6 +122,10 @@ const users = ref([
             localite: "Berlin",
             pays: "Allemagne",
         },
+        historique: [
+            { date: "2024-03-05", type: "Platine", poids: "0.9" },
+            { date: "2024-04-10", type: "Or", poids: "1.9" },
+        ],
     },
     {
         nom: "De Vries",
@@ -111,6 +139,10 @@ const users = ref([
             localite: "Amsterdam",
             pays: "Pays-Bas",
         },
+        historique: [
+            { date: "2024-01-15", type: "Argent", poids: "3.0" },
+            { date: "2024-03-30", type: "Platine", poids: "0.6" },
+        ],
     },
     {
         nom: "Wilson",
@@ -124,6 +156,10 @@ const users = ref([
             localite: "Londres",
             pays: "Angleterre",
         },
+        historique: [
+            { date: "2024-04-07", type: "Or", poids: "2.5" },
+            { date: "2024-06-01", type: "Argent", poids: "1.8" },
+        ],
     },
     {
         nom: "Dupuis",
@@ -137,8 +173,13 @@ const users = ref([
             localite: "Bruxelles",
             pays: "Belgique",
         },
+        historique: [
+            { date: "2024-03-01", type: "Or", poids: "3.4" },
+            { date: "2024-04-25", type: "Argent", poids: "2.1" },
+        ],
     },
 ]);
+
 
 // Terme de recherche
 const searchTerm = ref("");
@@ -194,7 +235,7 @@ watch(searchTerm, () => {
                             <div
                                 class="block text-gray-700 text-lg font-semibold py-2 px-2"
                             >
-                                Rechercher un utilisateur
+                                Rechercher un client
                             </div>
 
                             <!-- BARRE DE RECHERCHE -->
