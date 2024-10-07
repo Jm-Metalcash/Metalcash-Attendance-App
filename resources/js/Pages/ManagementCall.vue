@@ -2,6 +2,8 @@
 import { ref, computed, watch } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
+import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
+import UserList from "./ManagementCall/Partials/UserList.vue";
 
 // Générer des données fictives avec noms, prénoms, pays, et adresses adaptés
 const users = ref([
@@ -220,243 +222,17 @@ watch(searchTerm, () => {
                                 />
                             </div>
 
-                            <!-- LISTE DES UTILISATEURS FILTRÉE -->
-                            <div
-                                v-if="searchTerm.length > 0"
-                                class="py-3 text-sm"
-                            >
-                                <!-- Afficher un message si aucun utilisateur n'est trouvé -->
-                                <div
-                                    v-if="filteredUsers.length === 0"
-                                    class="text-center text-gray-500 py-4"
-                                >
-                                    Aucun utilisateur n'a été trouvé
-                                </div>
-
-                                <!-- Afficher les utilisateurs s'il y en a -->
-                                <div
-                                    v-for="(user, index) in filteredUsers"
-                                    :key="index"
-                                    @click="selectUser(user)"
-                                    class="flex flex-wrap justify-between items-center cursor-pointer text-gray-700 hover:text-blue-400 hover:bg-blue-100 rounded-md px-2 py-2 my-2 w-full"
-                                >
-                                    <!-- Colonne Nom et Prénom (avec indicateur de statut à gauche) -->
-                                    <div
-                                        class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0"
-                                    >
-                                        <span
-                                            class="bg-green-400 h-2 w-2 mr-4 rounded-full"
-                                        ></span>
-                                        <div class="font-medium text-left">
-                                            {{ user.prenom }} {{ user.nom }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Colonne Numéro de Téléphone -->
-                                    <div
-                                        class="flex w-full sm:w-1/6 mb-2 sm:mb-0"
-                                    >
-                                        <div
-                                            class="font-medium text-left w-full"
-                                        >
-                                            {{ user.telephone }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Colonne Pays -->
-                                    <div class="flex w-full sm:w-1/6">
-                                        <div
-                                            class="text-sm font-normal text-left text-gray-500"
-                                        >
-                                            {{ user.country }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Affichage de la liste d'utilisateurs -->
+                            <UserList
+                                v-if="!selectedUser && searchTerm.length > 0"
+                                :filteredUsers="filteredUsers"
+                                :selectUser="selectUser"
+                            />
 
                             <!-- Détails de l'utilisateur sélectionné -->
-                            <div
-                                v-if="selectedUser"
-                                class="bg-white overflow-hidden shadow rounded-lg border mt-8"
-                            >
-                                <div class="px-4 py-5 sm:px-6 bg-gray-100">
-                                    <p
-                                        class="mt-1 max-w-2xl text-sm text-gray-500 font-bold"
-                                    >
-                                        Informations générales sur
-                                        l'utilisateur.
-                                    </p>
-                                </div>
-                                <div
-                                    class="border-t border-gray-200 px-4 py-5 sm:p-0"
-                                >
-                                    <dl class="sm:divide-y sm:divide-gray-200">
-                                        <!-- Première ligne : Prénom & Nom -->
-                                        <div
-                                            class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                                        >
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Prénom
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{ selectedUser.prenom }}
-                                                </dd>
-                                            </div>
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Nom
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{ selectedUser.nom }}
-                                                </dd>
-                                            </div>
-                                        </div>
+                           <UserDetails v-if="selectedUser" :user="selectedUser" />
 
-                                        <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
-                                        <div
-                                            class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                                        >
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    E-mail
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{ selectedUser.email }}
-                                                </dd>
-                                            </div>
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Numéro de téléphone
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{ selectedUser.telephone }}
-                                                </dd>
-                                            </div>
-                                        </div>
 
-                                        <!-- Adresse section avec titre séparé -->
-                                        <div
-                                            class="px-4 py-5 sm:px-6 bg-gray-100"
-                                        >
-                                            <p
-                                                class="mt-1 max-w-2xl text-sm text-gray-500 font-bold"
-                                            >
-                                                Adresse
-                                            </p>
-                                        </div>
-
-                                        <!-- Troisième ligne : Rue et numéro & Code postal -->
-                                        <div
-                                            class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                                        >
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Rue et numéro
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{
-                                                        selectedUser.adresse.rue
-                                                    }}
-                                                </dd>
-                                            </div>
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Code postal
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{
-                                                        selectedUser.adresse
-                                                            .codePostal
-                                                    }}
-                                                </dd>
-                                            </div>
-                                        </div>
-
-                                        <!-- Quatrième ligne : Localité & Pays -->
-                                        <div
-                                            class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                                        >
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Localité
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{
-                                                        selectedUser.adresse
-                                                            .localite
-                                                    }}
-                                                </dd>
-                                            </div>
-                                            <div class="sm:col-span-1">
-                                                <dt
-                                                    class="text-sm font-medium text-gray-500"
-                                                >
-                                                    Pays
-                                                </dt>
-                                                <dd
-                                                    class="mt-1 text-sm text-gray-900 sm:mt-0"
-                                                >
-                                                    {{
-                                                        selectedUser.adresse
-                                                            .pays
-                                                    }}
-                                                </dd>
-                                            </div>
-                                        </div>
-
-                                        <!-- Section Description -->
-                                        <div>
-                                            <div class="px-4 py-5 sm:px-6 bg-gray-100">
-                                                <p
-                                                    class="mt-1 max-w-2xl text-sm text-gray-500 font-bold"
-                                                >
-                                                    Description
-                                                </p>
-                                            </div>
-                                            <div class="py-3 sm:py-5 sm:px-6">
-                                                <p
-                                                    class="text-sm text-gray-700"
-                                                >
-                                                    Aucune description
-                                                    actuellement pour cet
-                                                    utilisateur.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </dl>
-                                </div>
-                            </div>
-
-                            <!-- END Détails utilisateur -->
                         </div>
                     </div>
                 </div>
