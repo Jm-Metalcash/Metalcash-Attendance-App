@@ -68,6 +68,24 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 >
                                     Gestion des employés
                                 </NavLink>
+                                <NavLink
+                                    v-if="
+                                        page.props.auth.roles &&
+                                        (page.props.auth.roles.includes(
+                                            'Admin'
+                                        ) ||
+                                            page.props.auth.roles.includes(
+                                                'Informatique'
+                                            ) ||
+                                            page.props.auth.roles.includes(
+                                                'Comptabilité'
+                                            ))
+                                    "
+                                    :href="route('managementCall')"
+                                    :active="route().current('managementCall')"
+                                >
+                                    Gestion des appels
+                                </NavLink>
                             </div>
                         </div>
 
@@ -196,6 +214,22 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             :active="route().current('employes')"
                         >
                             Gestion des employés
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="
+                                page.props.auth.roles &&
+                                (page.props.auth.roles.includes('Admin') ||
+                                    page.props.auth.roles.includes(
+                                        'Informatique'
+                                    ) ||
+                                    page.props.auth.roles.includes(
+                                        'Comptabilité'
+                                    ))
+                            "
+                            :href="route('managementCall')"
+                            :active="route().current('managementCall')"
+                        >
+                            Gestion des appels
                         </ResponsiveNavLink>
                     </div>
 

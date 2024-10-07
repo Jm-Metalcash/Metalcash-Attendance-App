@@ -49,6 +49,11 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     
     // Route pour afficher les pointages d'un employé spécifique
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
+
+    //Management appel téléphonique
+    Route::get('/gestion-appels-telephoniques', function () {
+        return Inertia::render('ManagementCall');
+    })->name('managementCall');
 });
 
 
