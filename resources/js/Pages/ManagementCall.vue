@@ -184,28 +184,28 @@ const addUser = () => {
             </h2>
         </template>
 
-        <div class="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 max-w-7xl mt-8">
-            <div class="w-full max-w-7xl mt-0 mx-auto px-6">
+        <div class="container mx-auto flex flex-col items-center justify-center px-0 md:px-4 sm:px-8 max-w-7xl mt-2 md:mt-8">
+            <div class="w-full max-w-7xl mt-0 mx-auto px-0">
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
                         <div class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4">
                             <!-- Conteneur pour le texte "Rechercher un client" et le bouton -->
-                            <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-6">
+                            <div class="flex flex-row justify-between items-center mb-1 md:mb-6">
                                 <!-- Rechercher un client -->
-                                <div class="text-gray-700 text-lg font-semibold mb-4 sm:mb-0">
+                                <div class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0">
                                     Rechercher un client
                                 </div>
                                 <!-- Bouton Ajouter un client -->
                                 <button
                                     @click="toggleModal"
-                                    class="text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                    class="text-xs md:text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                                 >
                                     Ajouter un client
                                 </button>
                             </div>
 
                             <!-- BARRE DE RECHERCHE -->
-                            <div class="flex items-center bg-[rgb(237,242,247)] rounded-md">
+                            <div class="flex items-center bg-[rgb(237,242,247)] rounded-md mb-4">
                                 <div class="pl-2">
                                     <svg class="fill-current text-gray-400 w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                         <path class="heroicon-ui" d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" />
@@ -213,10 +213,10 @@ const addUser = () => {
                                 </div>
                                 <input
                                     v-model="searchTerm"
-                                    class="w-full rounded-md bg-[rgb(237,242,247)] text-gray-500 leading-tight focus:outline-none focus:ring-0 border-none py-2 px-2 placeholder-gray-500 placeholder-opacity-60"
+                                    class="w-full rounded-md text-sm md:text-base bg-[rgb(237,242,247)] text-gray-500 leading-tight focus:outline-none focus:ring-0 border-none py-3 px-2 placeholder-gray-500 placeholder-opacity-60"
                                     id="search"
                                     type="text"
-                                    placeholder="Tapez le numéro de téléphone, nom, e-mail ou pays pour rechercher un client"
+                                    placeholder="Tapez le numéro de téléphone, nom, e-mail ou pays pour chercher"
                                 />
                             </div>
 
@@ -235,5 +235,15 @@ const addUser = () => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+/* Pour s'assurer que le bouton reste à droite en version mobile également */
+@media (max-width: 640px) {
+    .flex-row {
+        flex-direction: row;
+    }
+}
+</style>
+
 
 <style scoped></style>
