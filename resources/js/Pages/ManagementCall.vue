@@ -4,6 +4,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
 import UserList from "./ManagementCall/Partials/UserList.vue";
+import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue"; 
 
 // Générer des données fictives avec noms, prénoms, pays, et adresses adaptés
 const users = ref([
@@ -93,93 +94,8 @@ const users = ref([
             { date: "2024-05-14", type: "Argent", poids: "1.7" },
         ],
     },
-    {
-        nom: "Vermeulen",
-        prenom: "Luc",
-        country: "Belgique",
-        telephone: "+32 477 89 12 34",
-        email: "luc.vermeulen@example.com",
-        adresse: {
-            rue: "78 Rue Neuve",
-            codePostal: "1000",
-            localite: "Bruxelles",
-            pays: "Belgique",
-        },
-        historique: [
-            { date: "2024-01-28", type: "Or", poids: "2.8" },
-            { date: "2024-03-21", type: "Argent", poids: "1.5" },
-        ],
-    },
-    {
-        nom: "Becker",
-        prenom: "Hans",
-        country: "Allemagne",
-        telephone: "+49 170 9876543",
-        email: "hans.becker@example.com",
-        adresse: {
-            rue: "56 Unter den Linden",
-            codePostal: "10117",
-            localite: "Berlin",
-            pays: "Allemagne",
-        },
-        historique: [
-            { date: "2024-03-05", type: "Platine", poids: "0.9" },
-            { date: "2024-04-10", type: "Or", poids: "1.9" },
-        ],
-    },
-    {
-        nom: "De Vries",
-        prenom: "Sophie",
-        country: "Pays-Bas",
-        telephone: "+31 6 87654321",
-        email: "sophie.devries@example.com",
-        adresse: {
-            rue: "22 Damstraat",
-            codePostal: "1012",
-            localite: "Amsterdam",
-            pays: "Pays-Bas",
-        },
-        historique: [
-            { date: "2024-01-15", type: "Argent", poids: "3.0" },
-            { date: "2024-03-30", type: "Platine", poids: "0.6" },
-        ],
-    },
-    {
-        nom: "Wilson",
-        prenom: "Emily",
-        country: "Angleterre",
-        telephone: "+44 7700 123456",
-        email: "emily.wilson@example.com",
-        adresse: {
-            rue: "90 Regent Street",
-            codePostal: "W1B 5TH",
-            localite: "Londres",
-            pays: "Angleterre",
-        },
-        historique: [
-            { date: "2024-04-07", type: "Or", poids: "2.5" },
-            { date: "2024-06-01", type: "Argent", poids: "1.8" },
-        ],
-    },
-    {
-        nom: "Dupuis",
-        prenom: "Claire",
-        country: "Belgique",
-        telephone: "+32 478 12 34 56",
-        email: "claire.dupuis@example.com",
-        adresse: {
-            rue: "14 Avenue Louise",
-            codePostal: "1050",
-            localite: "Bruxelles",
-            pays: "Belgique",
-        },
-        historique: [
-            { date: "2024-03-01", type: "Or", poids: "3.4" },
-            { date: "2024-04-25", type: "Argent", poids: "2.1" },
-        ],
-    },
+    // Ajout d'autres utilisateurs fictifs ici...
 ]);
-
 
 // Terme de recherche
 const searchTerm = ref("");
@@ -195,7 +111,12 @@ const filteredUsers = computed(() => {
             user.nom.toLowerCase().includes(searchLower) ||
             user.prenom.toLowerCase().includes(searchLower) ||
             user.country.toLowerCase().includes(searchLower) ||
-            user.telephone.toLowerCase().includes(searchLower)
+            user.telephone.toLowerCase().includes(searchLower) ||
+            user.email.toLowerCase().includes(searchLower) ||
+            user.adresse.rue.toLowerCase().includes(searchLower) ||
+            user.adresse.codePostal.toLowerCase().includes(searchLower) ||
+            user.adresse.localite.toLowerCase().includes(searchLower) ||
+            user.adresse.pays.toLowerCase().includes(searchLower)
         );
     });
 });
@@ -209,6 +130,48 @@ const selectUser = (user) => {
 watch(searchTerm, () => {
     selectedUser.value = null;
 });
+
+// État du modal
+const showModal = ref(false);
+
+// Fonction pour ouvrir et fermer le modal
+const toggleModal = () => {
+    showModal.value = !showModal.value;
+};
+
+// Nouvel utilisateur à ajouter
+const newUser = ref({
+    nom: "",
+    prenom: "",
+    telephone: "",
+    email: "",
+    adresse: {
+        rue: "",
+        codePostal: "",
+        localite: "",
+        pays: "",
+    },
+    historique: [],
+});
+
+// Fonction pour ajouter un nouvel utilisateur
+const addUser = () => {
+    users.value.push({ ...newUser.value });
+    newUser.value = {
+        nom: "",
+        prenom: "",
+        telephone: "",
+        email: "",
+        adresse: {
+            rue: "",
+            codePostal: "",
+            localite: "",
+            pays: "",
+        },
+        historique: [],
+    };
+    toggleModal();
+};
 </script>
 
 <template>
@@ -216,42 +179,36 @@ watch(searchTerm, () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
+            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
                 Gestion des appels téléphoniques
             </h2>
         </template>
 
-        <div
-            class="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 max-w-7xl mt-8"
-        >
+        <div class="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 max-w-7xl mt-8">
             <div class="w-full max-w-7xl mt-0 mx-auto px-6">
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
-                        <div
-                            class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4"
-                        >
-                            <div
-                                class="block text-gray-700 text-lg font-semibold py-2 px-2"
-                            >
-                                Rechercher un client
+                        <div class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4">
+                            <!-- Conteneur pour le texte "Rechercher un client" et le bouton -->
+                            <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-6">
+                                <!-- Rechercher un client -->
+                                <div class="text-gray-700 text-lg font-semibold mb-4 sm:mb-0">
+                                    Rechercher un client
+                                </div>
+                                <!-- Bouton Ajouter un client -->
+                                <button
+                                    @click="toggleModal"
+                                    class="text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    Ajouter un client
+                                </button>
                             </div>
 
                             <!-- BARRE DE RECHERCHE -->
-                            <div
-                                class="flex items-center bg-[rgb(237,242,247)] rounded-md"
-                            >
+                            <div class="flex items-center bg-[rgb(237,242,247)] rounded-md">
                                 <div class="pl-2">
-                                    <svg
-                                        class="fill-current text-gray-400 w-6 h-6"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            class="heroicon-ui"
-                                            d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"
-                                        />
+                                    <svg class="fill-current text-gray-400 w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path class="heroicon-ui" d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" />
                                     </svg>
                                 </div>
                                 <input
@@ -259,21 +216,18 @@ watch(searchTerm, () => {
                                     class="w-full rounded-md bg-[rgb(237,242,247)] text-gray-500 leading-tight focus:outline-none focus:ring-0 border-none py-2 px-2 placeholder-gray-500 placeholder-opacity-60"
                                     id="search"
                                     type="text"
-                                    placeholder="Tapez le nom, numéro ou pays de l'utilisateur"
+                                    placeholder="Tapez le numéro de téléphone, nom, e-mail ou pays pour rechercher un client"
                                 />
                             </div>
 
                             <!-- Affichage de la liste d'utilisateurs -->
-                            <UserList
-                                v-if="!selectedUser && searchTerm.length > 0"
-                                :filteredUsers="filteredUsers"
-                                :selectUser="selectUser"
-                            />
+                            <UserList v-if="!selectedUser && searchTerm.length > 0" :filteredUsers="filteredUsers" :selectUser="selectUser" />
 
                             <!-- Détails de l'utilisateur sélectionné -->
-                           <UserDetails v-if="selectedUser" :user="selectedUser" />
+                            <UserDetails v-if="selectedUser" :user="selectedUser" />
 
-
+                            <!-- Modal d'ajout de client -->
+                            <AddUserModal :showModal="showModal" :newUser="newUser" @toggleModal="toggleModal" @addUser="addUser" />
                         </div>
                     </div>
                 </div>

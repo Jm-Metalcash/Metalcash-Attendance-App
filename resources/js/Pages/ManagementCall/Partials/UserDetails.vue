@@ -5,7 +5,7 @@
     >
         <div class="px-4 py-5 sm:px-6 bg-gray-100">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                Informations générales sur l'utilisateur.
+                Informations générales sur l'utilisateur
             </p>
         </div>
         <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
@@ -101,12 +101,12 @@
                         <p
                             class="mt-1 max-w-2xl text-sm text-gray-500 font-bold"
                         >
-                            Description
+                            Note
                         </p>
                     </div>
                     <div class="py-3 sm:py-5 sm:px-6">
                         <p class="text-sm text-gray-400">
-                            Aucune description actuellement pour cet
+                            Aucune note actuellement pour cet
                             utilisateur.
                         </p>
                     </div>
@@ -115,7 +115,7 @@
         </div>
     </div>
     <!-- Bouton pour voir l'historique des transactions -->
-    <button class="mt-12 text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" @click="toggleHistory">
+    <button class="mt-12 text-sm bg-[rgb(0,85,150)] hover:bg-[rgb(5,121,198)] text-white font-bold py-2 px-4 rounded" @click="toggleHistory">
         {{ showHistory ? "Cacher" : "Voir" }} l'historique des transactions
     </button>
 
@@ -123,19 +123,19 @@
     <div v-if="showHistory" class="overflow-x-auto mt-6">
         <table class="min-w-full bg-white">
             <thead>
-                <tr class="bg-[rgb(0,85,150)]">
+                <tr class="bg-gray-100">
                     <th
-                        class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-100"
+                        class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-800"
                     >
                         Date
                     </th>
                     <th
-                        class="py-2 px-4 border-b text-sm font-semibold text-gray-100 text-center"
+                        class="py-2 px-4 border-b text-sm font-semibold text-gray-800 text-center"
                     >
                         Type de métaux
                     </th>
                     <th
-                        class="py-2 px-4 border-b text-center text-sm font-semibold text-gray-100"
+                        class="py-2 px-4 border-b text-center text-sm font-semibold text-gray-800"
                     >
                         Poids (kg)
                     </th>
@@ -165,7 +165,6 @@
 </template>
 
 <script setup>
-import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { ref } from "vue";
 
 defineProps({
