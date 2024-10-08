@@ -6,7 +6,6 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 
-
 defineProps({
     status: {
         type: String,
@@ -55,9 +54,15 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="flex items-center justify-center mt-4 r">
+            <div class="flex items-center justify-center mt-4 w-full">
                 <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
+                    :class="[
+                        { 'opacity-25': form.processing },
+                        'w-full',
+                        'flex',
+                        'justify-center',
+                        'text-center',
+                    ]"
                     :disabled="form.processing"
                 >
                     Envoyer le lien de réinitialisation
@@ -65,10 +70,12 @@ const submit = () => {
             </div>
         </form>
 
-        
-        <div class="mt-4 text-center text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <div
+            class="mt-4 text-center text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
             <Link :href="route('login')">
-                <i class="fa-solid fa-arrow-left-long"></i> Retour à la page de connexion
+                <i class="fa-solid fa-arrow-left-long"></i> Retour à la page de
+                connexion
             </Link>
         </div>
     </GuestLayout>
