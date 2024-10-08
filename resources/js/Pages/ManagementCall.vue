@@ -20,6 +20,7 @@ const users = ref([
             localite: "Paris",
             pays: "France",
         },
+        note: "Actuellent en déplacement en Allemagne",
         historique: [
             { date: "2024-01-10", type: "Or", poids: "2.5" },
             { date: "2024-02-15", type: "Argent", poids: "1.2" },
@@ -38,6 +39,7 @@ const users = ref([
             localite: "Bruxelles",
             pays: "Belgique",
         },
+        note: "Le fournisseur veut livrer 3,5kg fin de semaine (vendredi)",
         historique: [
             { date: "2024-02-20", type: "Or", poids: "3.1" },
             { date: "2024-04-12", type: "Argent", poids: "2.0" },
@@ -55,6 +57,7 @@ const users = ref([
             localite: "Berlin",
             pays: "Allemagne",
         },
+        note: "Livraison prévue ce jeudi 10/10/2024 (10kg de plomb)",
         historique: [
             
         ],
@@ -71,6 +74,7 @@ const users = ref([
             localite: "Amsterdam",
             pays: "Pays-Bas",
         },
+        note: "Le fournisseur veut un devis (prix) pour sa demande de livraison (10kg de radios)",
         historique: [
             { date: "2024-02-10", type: "Platine", poids: "0.7" },
             { date: "2024-04-17", type: "Or", poids: "2.2" },
@@ -88,6 +92,7 @@ const users = ref([
             localite: "Londres",
             pays: "Angleterre",
         },
+        note: "Le fournisseur veut absolument passer par Nico pour sa demande.",
         historique: [
             { date: "2024-03-12", type: "Or", poids: "4.0" },
             { date: "2024-05-14", type: "Argent", poids: "1.7" },
