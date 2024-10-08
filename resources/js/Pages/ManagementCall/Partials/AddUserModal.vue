@@ -5,7 +5,7 @@
     >
         <div class="bg-white rounded-lg shadow- p-8 w-full max-w-2xl">
             <h2 class="text-2xl font-semibold text-gray-700 mb-6">
-                Ajouter un client
+                Ajouter un fournisseur
             </h2>
 
             <div class="grid grid-cols-2 gap-4 mb-4">

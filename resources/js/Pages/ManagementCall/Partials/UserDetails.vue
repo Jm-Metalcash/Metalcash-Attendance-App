@@ -5,7 +5,7 @@
     >
         <div class="px-4 py-5 sm:px-6 bg-gray-100">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                Informations générales sur l'utilisateur
+                Informations générales sur le fournisseur
             </p>
         </div>
         <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
@@ -110,7 +110,7 @@
                     </div>
                     <div class="py-3 sm:py-5 px-4 md:px-6">
                         <p class="text-sm text-gray-400">
-                            Aucune note actuellement pour cet utilisateur.
+                            Aucune note actuellement pour ce fournisseur.
                         </p>
                     </div>
                 </div>
@@ -170,7 +170,7 @@
                         colspan="3"
                         class="py-5 px-4 border-b text-sm text-center text-gray-500"
                     >
-                        Aucun historique pour cet utilisateur.
+                        Aucun historique pour ce fournisseur.
                     </td>
                 </tr>
             </tbody>

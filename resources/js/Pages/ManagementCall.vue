@@ -192,14 +192,14 @@ const addUser = () => {
                             <div class="flex flex-row justify-between items-center mb-1 md:mb-6">
                                 <!-- Rechercher un client -->
                                 <div class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0">
-                                    Rechercher un client
+                                    Rechercher un fournisseur
                                 </div>
                                 <!-- Bouton Ajouter un client -->
                                 <button
                                     @click="toggleModal"
                                     class="text-xs md:text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                                 >
-                                    Ajouter un client
+                                    Encoder un appel
                                 </button>
                             </div>
 
