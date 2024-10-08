@@ -8,19 +8,19 @@
                 Informations générales sur l'utilisateur
             </p>
         </div>
-        <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
             <dl class="sm:divide-y sm:divide-gray-200">
                 <!-- Première ligne : Prénom & Nom -->
                 <div
                     class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
                 >
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">Prénom</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             {{ user.prenom }}
                         </dd>
                     </div>
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
                         <dt class="text-sm text-gray-500 font-bold">Nom</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             {{ user.nom }}
@@ -30,15 +30,17 @@
 
                 <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
                 <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
+                    class="py-0 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
                 >
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">E-mail</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             {{ user.email }}
                         </dd>
                     </div>
-                    <div class="sm:col-span-1">
+                    <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
                         <dt class="text-sm font-bold text-gray-500">
                             Numéro de téléphone
                         </dt>
@@ -57,7 +59,7 @@
                 <div
                     class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
                 >
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">
                             Rue et numéro
                         </dt>
@@ -65,7 +67,7 @@
                             {{ user.adresse.rue }}
                         </dd>
                     </div>
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
                         <dt class="text-sm font-bold text-gray-500">
                             Code postal
                         </dt>
@@ -77,9 +79,9 @@
 
                 <!-- Quatrième ligne : Localité & Pays -->
                 <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
+                    class="py-0 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
                 >
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">
                             Localité
                         </dt>
@@ -87,7 +89,9 @@
                             {{ user.adresse.localite }}
                         </dd>
                     </div>
-                    <div class="sm:col-span-1">
+                    <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
                         <dt class="text-sm font-bold text-gray-500">Pays</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             {{ user.adresse.pays }}
@@ -104,10 +108,9 @@
                             Note
                         </p>
                     </div>
-                    <div class="py-3 sm:py-5 sm:px-6">
+                    <div class="py-3 sm:py-5 px-4 md:px-6">
                         <p class="text-sm text-gray-400">
-                            Aucune note actuellement pour cet
-                            utilisateur.
+                            Aucune note actuellement pour cet utilisateur.
                         </p>
                     </div>
                 </div>
@@ -115,7 +118,10 @@
         </div>
     </div>
     <!-- Bouton pour voir l'historique des transactions -->
-    <button class="mt-12 text-sm bg-[rgb(0,85,150)] hover:bg-[rgb(5,121,198)] text-white font-bold py-2 px-4 rounded" @click="toggleHistory">
+    <button
+        class="mt-12 text-sm bg-[rgb(0,85,150)] hover:bg-[rgb(5,121,198)] text-white font-bold py-2 px-4 rounded"
+        @click="toggleHistory"
+    >
         {{ showHistory ? "Cacher" : "Voir" }} l'historique des transactions
     </button>
 
