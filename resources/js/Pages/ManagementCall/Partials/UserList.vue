@@ -8,7 +8,10 @@
       >
         <!-- Colonne Nom et Prénom (avec indicateur de statut à gauche) -->
         <div class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0">
-          <span class="bg-green-400 h-2 w-2 mr-4 rounded-full"></span>
+          <span
+          :class="user.historique && user.historique.length > 0 ? 'bg-green-400' : 'bg-red-400'"
+          class="h-2 w-2 mr-4 rounded-full"
+        ></span>
           <div class="font-medium text-left">{{ user.prenom }} {{ user.nom }}</div>
         </div>
   

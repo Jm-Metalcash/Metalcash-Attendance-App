@@ -56,8 +56,7 @@ const users = ref([
             pays: "Allemagne",
         },
         historique: [
-            { date: "2024-03-18", type: "Or", poids: "1.8" },
-            { date: "2024-05-22", type: "Argent", poids: "3.4" },
+            
         ],
     },
     {
