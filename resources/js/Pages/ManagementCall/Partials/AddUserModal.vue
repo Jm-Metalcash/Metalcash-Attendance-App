@@ -1,9 +1,9 @@
 <template>
     <div
         v-if="showModal"
-        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50"
+        class="fixed inset-0 bg-gray-600 bg-opacity-80 flex justify-center items-center z-50 px-4 md:px-0"
     >
-        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl">
+        <div class="bg-white rounded-lg shadow- p-8 w-full max-w-2xl">
             <h2 class="text-2xl font-semibold text-gray-700 mb-6">
                 Ajouter un client
             </h2>
