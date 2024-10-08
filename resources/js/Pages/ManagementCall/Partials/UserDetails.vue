@@ -159,6 +159,14 @@
                         {{ record.poids }}
                     </td>
                 </tr>
+                <tr v-if="!user.historique.length">
+                    <td
+                        colspan="3"
+                        class="py-5 px-4 border-b text-sm text-center text-gray-500"
+                    >
+                        Aucun historique pour cet utilisateur.
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
