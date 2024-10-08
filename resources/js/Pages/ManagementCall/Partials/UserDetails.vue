@@ -28,22 +28,50 @@ const isEditing = reactive({
     nom: false,
     email: false,
     telephone: false,
-    rue: false,
-    codePostal: false,
-    localite: false,
-    pays: false,
+    adresse: {
+        rue: false,
+        codePostal: false,
+        localite: false,
+        pays: false,
+    },
+    note: false,
+});
+
+// Réactif pour afficher les messages de succès
+const successMessages = reactive({
+    prenom: false,
+    nom: false,
+    email: false,
+    telephone: false,
+    adresse: {
+        rue: false,
+        codePostal: false,
+        localite: false,
+        pays: false,
+    },
     note: false,
 });
 
 // Fonction pour activer l'édition d'un champ
 const editField = (field) => {
-    isEditing[field] = true;
+    if (field.includes("adresse")) {
+        const [obj, prop] = field.split(".");
+        isEditing[obj][prop] = true;
+    } else {
+        isEditing[field] = true;
+    }
 };
 
 // Fonction pour fermer tous les champs d'édition
 const closeAllFields = () => {
     Object.keys(isEditing).forEach((field) => {
-        if (isEditing[field]) {
+        if (typeof isEditing[field] === "object") {
+            Object.keys(isEditing[field]).forEach((nestedField) => {
+                if (isEditing[field][nestedField]) {
+                    saveField(`${field}.${nestedField}`);
+                }
+            });
+        } else if (isEditing[field]) {
             saveField(field);
         }
     });
@@ -51,7 +79,24 @@ const closeAllFields = () => {
 
 // Fonction pour sauvegarder le champ et désactiver l'édition
 const saveField = (field) => {
-    isEditing[field] = false;
+    if (field.includes("adresse")) {
+        const [obj, prop] = field.split(".");
+        isEditing[obj][prop] = false;
+        if (editableUser[obj][prop]) {
+            successMessages[obj][prop] = true;
+            setTimeout(() => {
+                successMessages[obj][prop] = false;
+            }, 3000);
+        }
+    } else {
+        isEditing[field] = false;
+        if (editableUser[field]) {
+            successMessages[field] = true;
+            setTimeout(() => {
+                successMessages[field] = false;
+            }, 3000);
+        }
+    }
 };
 
 // Gérer l'affichage de l'historique
@@ -91,7 +136,7 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.prenom"
                                 @click="editField('prenom')"
-                                class="editable-text cursor-cell"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.prenom }}</span
                             >
                             <input
@@ -101,6 +146,12 @@ onBeforeUnmount(() => {
                                 @blur="saveField('prenom')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.prenom"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                     <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
@@ -109,7 +160,7 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.nom"
                                 @click="editField('nom')"
-                                class="editable-text cursor-cell"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.nom }}</span
                             >
                             <input
@@ -119,6 +170,12 @@ onBeforeUnmount(() => {
                                 @blur="saveField('nom')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.nom"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                 </div>
@@ -133,7 +190,7 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.email"
                                 @click="editField('email')"
-                                class="editable-text cursor-cell"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.email }}</span
                             >
                             <input
@@ -143,6 +200,12 @@ onBeforeUnmount(() => {
                                 @blur="saveField('email')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.email"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                     <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
@@ -153,7 +216,7 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.telephone"
                                 @click="editField('telephone')"
-                                class="editable-text cursor-cell"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.telephone }}</span
                             >
                             <input
@@ -163,6 +226,12 @@ onBeforeUnmount(() => {
                                 @blur="saveField('telephone')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.telephone"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                 </div>
@@ -182,18 +251,24 @@ onBeforeUnmount(() => {
                         </dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             <span
-                                v-if="!isEditing.rue"
-                                @click="editField('rue')"
-                                class="editable-text cursor-cell"
+                                v-if="!isEditing.adresse.rue"
+                                @click="editField('adresse.rue')"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.adresse.rue }}</span
                             >
                             <input
                                 v-else
                                 ref="rueInput"
                                 v-model="editableUser.adresse.rue"
-                                @blur="saveField('rue')"
+                                @blur="saveField('adresse.rue')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.adresse.rue"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                     <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
@@ -202,18 +277,24 @@ onBeforeUnmount(() => {
                         </dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             <span
-                                v-if="!isEditing.codePostal"
-                                @click="editField('codePostal')"
-                                class="editable-text cursor-cell"
+                                v-if="!isEditing.adresse.codePostal"
+                                @click="editField('adresse.codePostal')"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.adresse.codePostal }}</span
                             >
                             <input
                                 v-else
                                 ref="codePostalInput"
                                 v-model="editableUser.adresse.codePostal"
-                                @blur="saveField('codePostal')"
+                                @blur="saveField('adresse.codePostal')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.adresse.codePostal"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                 </div>
@@ -228,18 +309,24 @@ onBeforeUnmount(() => {
                         </dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             <span
-                                v-if="!isEditing.localite"
-                                @click="editField('localite')"
-                                class="editable-text cursor-cell"
+                                v-if="!isEditing.adresse.localite"
+                                @click="editField('adresse.localite')"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.adresse.localite }}</span
                             >
                             <input
                                 v-else
                                 ref="localiteInput"
                                 v-model="editableUser.adresse.localite"
-                                @blur="saveField('localite')"
+                                @blur="saveField('adresse.localite')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.adresse.localite"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                     <div
@@ -248,18 +335,24 @@ onBeforeUnmount(() => {
                         <dt class="text-sm font-bold text-gray-500">Pays</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
                             <span
-                                v-if="!isEditing.pays"
-                                @click="editField('pays')"
-                                class="editable-text cursor-cell"
+                                v-if="!isEditing.adresse.pays"
+                                @click="editField('adresse.pays')"
+                                class="editable-text cursor-pointer"
                                 >{{ editableUser.adresse.pays }}</span
                             >
                             <input
                                 v-else
                                 ref="paysInput"
                                 v-model="editableUser.adresse.pays"
-                                @blur="saveField('pays')"
+                                @blur="saveField('adresse.pays')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
+                            <p
+                                v-if="successMessages.adresse.pays"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Modification avec succès
+                            </p>
                         </dd>
                     </div>
                 </div>
@@ -277,7 +370,7 @@ onBeforeUnmount(() => {
                         <span
                             v-if="!isEditing.note"
                             @click="editField('note')"
-                            class="editable-text text-sm text-gray-400 cursor-cell"
+                            class="editable-text text-sm text-gray-400 cursor-pointer"
                             >{{
                                 editableUser.note ||
                                 "Aucune note actuellement pour ce fournisseur."
@@ -290,6 +383,12 @@ onBeforeUnmount(() => {
                             @blur="saveField('note')"
                             class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                         ></textarea>
+                        <p
+                            v-if="successMessages.note"
+                            class="text-green-500 text-xs mt-1 success-message"
+                        >
+                            Modification avec succès
+                        </p>
                     </div>
                 </div>
             </dl>
@@ -360,4 +459,28 @@ onBeforeUnmount(() => {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.success-message {
+    animation: fade-in-out 3s forwards;
+    position: absolute;
+}
+
+@keyframes fade-in-out {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+</style>

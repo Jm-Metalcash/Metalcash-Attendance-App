@@ -43,6 +43,7 @@
                         v-model="newUser.telephone"
                         id="telephone"
                         class="mt-1 block w-full p-2 border-gray-300 rounded-md"
+                        required
                     />
                 </div>
                 <div>
