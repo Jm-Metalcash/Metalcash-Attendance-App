@@ -14,12 +14,12 @@
   
         <!-- Colonne Numéro de Téléphone -->
         <div class="flex w-full sm:w-1/6 mb-2 sm:mb-0">
-          <div class="font-medium text-left w-full">{{ user.telephone }}</div>
+          <div class="font-medium text-left w-full ml-6 md:ml-0">{{ user.telephone }}</div>
         </div>
   
         <!-- Colonne Pays -->
         <div class="flex w-full sm:w-1/6">
-          <div class="text-sm font-normal text-left text-gray-500">{{ user.country }}</div>
+          <div class="text-sm font-normal text-left text-gray-500 ml-6 md:ml-0">{{ user.country }}</div>
         </div>
       </div>
     </div>

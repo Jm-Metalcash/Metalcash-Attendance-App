@@ -94,7 +94,6 @@ const users = ref([
             { date: "2024-05-14", type: "Argent", poids: "1.7" },
         ],
     },
-    // Ajout d'autres utilisateurs fictifs ici...
 ]);
 
 // Terme de recherche
