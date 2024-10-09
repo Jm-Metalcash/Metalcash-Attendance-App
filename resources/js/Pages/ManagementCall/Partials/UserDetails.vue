@@ -215,7 +215,7 @@ onBeforeUnmount(() => {
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white">
                         <thead>
-                            <tr class="bg-gray-100">
+                            <tr class="bg-gray-200">
                                 <th
                                     class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/5"
                                 >
