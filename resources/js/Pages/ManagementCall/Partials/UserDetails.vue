@@ -322,7 +322,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Section Informations Générales -->
-        <div class="px-4 py-5 sm:px-6 bg-gray-100">
+        <div class="px-4 py-5 sm:px-6 bg-gray-200">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
                 Informations générales sur le fournisseur
             </p>
@@ -440,7 +440,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Troisième ligne : Rue et numéro & Code postal -->
-                <div class="px-4 py-5 sm:px-6 bg-gray-100">
+                <div class="px-4 py-5 sm:px-6 bg-gray-200">
                     <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
                         Adresse
                     </p>
@@ -575,7 +575,7 @@ onBeforeUnmount(() => {
     <div v-if="showHistory" class="overflow-x-auto mt-6">
         <table class="min-w-full bg-white">
             <thead>
-                <tr class="bg-gray-100">
+                <tr class="bg-gray-200">
                     <th
                         class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-800"
                     >
