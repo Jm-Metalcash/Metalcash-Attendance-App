@@ -258,7 +258,7 @@ onBeforeUnmount(() => {
                                         v-if="successMessages.notes[index]"
                                         class="text-green-500 text-xs relative mt-1 success-message"
                                     >
-                                        Modification avec succès
+                                        Enregistré avec succès
                                     </p>
                                 </td>
                             </tr>
@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <div v-else>
-                <p class="text-sm text-gray-400">
+                <p class="text-sm text-gray-400 px-2 pt-4">
                     Aucune note actuellement pour ce fournisseur.
                 </p>
             </div>
@@ -353,7 +353,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.prenom"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -377,7 +377,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.nom"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -407,7 +407,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.email"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -433,7 +433,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.telephone"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -470,7 +470,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.adresse.rue"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -496,7 +496,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.adresse.codePostal"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -528,7 +528,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.adresse.localite"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>
@@ -554,7 +554,7 @@ onBeforeUnmount(() => {
                                 v-if="successMessages.adresse.pays"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
-                                Modification avec succès
+                                Enregistré avec succès
                             </p>
                         </dd>
                     </div>

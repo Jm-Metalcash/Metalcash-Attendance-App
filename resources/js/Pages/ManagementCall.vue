@@ -23,6 +23,7 @@ const users = ref([
         notes: [
             { date: "2024-09-01", content: "Actuellement en déplacement en Allemagne" },
             { date: "2024-08-15", content: "Client intéressé par une livraison d'or en septembre" },
+            { date: "2024-08-15", content: "Test" },
         ],
         historique: [
             { date: "2024-01-10", type: "Or", poids: "2.5" },
@@ -171,9 +172,10 @@ const newUser = ref({
     historique: [],
 });
 
-// Fonction pour ajouter un nouvel utilisateur
+// Fonction pour ajouter un nouvel utilisateur et l'affiche
 const addUser = () => {
-    users.value.push({ ...newUser.value });
+    const addedUser = { ...newUser.value };  
+    users.value.push(addedUser);  
     newUser.value = {
         nom: "",
         prenom: "",
@@ -187,8 +189,16 @@ const addUser = () => {
         },
         historique: [],
     };
-    toggleModal();
+    toggleModal(); 
+
+    selectedUser.value = null;
+    
+    setTimeout(() => {
+        selectUser(addedUser);  
+    }, 0);
 };
+
+
 </script>
 
 <template>
