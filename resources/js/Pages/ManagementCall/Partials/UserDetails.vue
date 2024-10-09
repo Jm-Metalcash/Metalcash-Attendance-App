@@ -138,9 +138,12 @@ const addNote = () => {
 
 const saveNewNote = () => {
     if (newNote.value.content) {
+        const now = new Date();
+        const isoStringWithTime = now.toISOString(); // Format ISO inclut l'heure et les minutes
+
         editableUser.notes.push({
             content: newNote.value.content,
-            date: newNote.value.date,
+            date: isoStringWithTime,
         });
         newNote.value.content = ""; // Réinitialiser la nouvelle note
         showAddNote.value = false; // Cacher la zone d'ajout
@@ -148,6 +151,31 @@ const saveNewNote = () => {
         successMessages.notes.push(false);
     }
 };
+
+
+
+//Affichage des dates en DD-MM-YYYY
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+};
+
+
+//Affichage des dates en DD-MM-YYYY
+const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+};
+
 
 // Gérer l'affichage de l'historique
 const showHistory = ref(false);
@@ -204,7 +232,7 @@ onBeforeUnmount(() => {
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left text-gray-500 w-1/6"
                                 >
-                                    {{ note.date }}
+                                        {{ formatDateTime(note.date) }}
                                 </td>
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left text-gray-500 w-5/6"
@@ -561,7 +589,7 @@ onBeforeUnmount(() => {
                     <td
                         class="py-2 px-4 border-b text-sm text-left text-gray-500"
                     >
-                        {{ record.date }}
+                        {{ formatDate(record.date) }}
                     </td>
                     <td
                         class="py-2 px-4 border-b text-sm text-center text-gray-500"
