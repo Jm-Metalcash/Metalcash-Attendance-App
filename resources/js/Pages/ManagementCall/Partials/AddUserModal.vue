@@ -125,7 +125,7 @@
                         >Pays</label
                     >
                     <input
-                        v-model="newUser.country"
+                        v-model="newUser.adresse.pays"
                         id="pays"
                         class="mt-1 block w-full p-2 border-gray-300 rounded-md"
                     />
