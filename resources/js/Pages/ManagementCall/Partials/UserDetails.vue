@@ -126,6 +126,7 @@ const closeAllNotes = () => {
 };
 
 // Ajout de nouvelles notes
+const showAddNoteSuccess = ref(false);
 const showAddNote = ref(false);
 const newNote = ref({
     content: "",
@@ -139,7 +140,7 @@ const addNote = () => {
 const saveNewNote = () => {
     if (newNote.value.content) {
         const now = new Date();
-        const isoStringWithTime = now.toISOString(); // Format ISO inclut l'heure et les minutes
+        const isoStringWithTime = now.toISOString(); // Inclut l'heure actuelle
 
         editableUser.notes.push({
             content: newNote.value.content,
@@ -147,35 +148,38 @@ const saveNewNote = () => {
         });
         newNote.value.content = ""; // Réinitialiser la nouvelle note
         showAddNote.value = false; // Cacher la zone d'ajout
+
+        // Afficher le message de succès
+        showAddNoteSuccess.value = true;
+        setTimeout(() => {
+            showAddNoteSuccess.value = false; // Masquer le message de succès après 3 secondes
+        }, 3000);
+
         isEditing.notes.push(false);
         successMessages.notes.push(false);
     }
 };
 
-
-
 //Affichage des dates en DD-MM-YYYY
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Les mois commencent à 0
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
 };
 
-
 //Affichage des dates en DD-MM-YYYY
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
 
     return `${day}-${month}-${year} | ${hours}:${minutes}`;
 };
-
 
 // Gérer l'affichage de l'historique
 const showHistory = ref(false);
@@ -232,7 +236,7 @@ onBeforeUnmount(() => {
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left text-gray-500 w-1/6"
                                 >
-                                        {{ formatDateTime(note.date) }}
+                                    {{ formatDateTime(note.date) }}
                                 </td>
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left text-gray-500 w-5/6"
@@ -275,6 +279,14 @@ onBeforeUnmount(() => {
                     Aucune note actuellement pour ce fournisseur.
                 </p>
             </div>
+
+            <!-- Message de succès lors de l'ajout d'une note -->
+            <p
+                v-if="showAddNoteSuccess"
+                class="text-green-500 text-sm md:ml-52 mx-auto success-message"
+            >
+                La note a été ajoutée avec succès !
+            </p>
 
             <!-- Bouton d'ajout de note stylisé -->
             <div class="flex items-center justify-start mt-4 ml-2">
