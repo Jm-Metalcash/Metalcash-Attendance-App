@@ -339,8 +339,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.prenom"
                                 @click="editField('prenom')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.prenom }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.prenom ? editableUser.prenom : "Ajouter un prénom" }}</span
                             >
                             <input
                                 v-else
@@ -363,8 +363,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.nom"
                                 @click="editField('nom')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.nom }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.nom ? editableUser.nom : "Ajouter un pays" }}</span
                             >
                             <input
                                 v-else
@@ -393,8 +393,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.email"
                                 @click="editField('email')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.email }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.email ? editableUser.email : "Ajouter une adresse e-mail" }}</span
                             >
                             <input
                                 v-else
@@ -419,8 +419,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.telephone"
                                 @click="editField('telephone')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.telephone }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.telephone ? editableUser.telephone : "Ajouter un numéro de téléphone" }}</span
                             >
                             <input
                                 v-else
@@ -456,8 +456,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.adresse.rue"
                                 @click="editField('adresse.rue')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.adresse.rue }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.adresse.rue ? editableUser.adresse.rue : "Ajouter une rue" }}</span
                             >
                             <input
                                 v-else
@@ -482,8 +482,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.adresse.codePostal"
                                 @click="editField('adresse.codePostal')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.adresse.codePostal }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.adresse.codePostal ? editableUser.adresse.codePostal : "Ajouter un code postal" }}</span
                             >
                             <input
                                 v-else
@@ -514,8 +514,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.adresse.localite"
                                 @click="editField('adresse.localite')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.adresse.localite }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.adresse.localite ? editableUser.adresse.localite : "Ajouter une localité" }}</span
                             >
                             <input
                                 v-else
@@ -540,8 +540,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-if="!isEditing.adresse.pays"
                                 @click="editField('adresse.pays')"
-                                class="editable-text cursor-pointer"
-                                >{{ editableUser.adresse.pays }}</span
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                                >{{ editableUser.adresse.pays ? editableUser.adresse.pays : "Ajouter un pays" }}</span
                             >
                             <input
                                 v-else
