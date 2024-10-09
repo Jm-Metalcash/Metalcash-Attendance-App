@@ -20,7 +20,10 @@ const users = ref([
             localite: "Paris",
             pays: "France",
         },
-        note: "Actuellent en déplacement en Allemagne",
+        notes: [
+            { date: "2024-09-01", content: "Actuellement en déplacement en Allemagne" },
+            { date: "2024-08-15", content: "Client intéressé par une livraison d'or en septembre" },
+        ],
         historique: [
             { date: "2024-01-10", type: "Or", poids: "2.5" },
             { date: "2024-02-15", type: "Argent", poids: "1.2" },
@@ -39,7 +42,10 @@ const users = ref([
             localite: "Bruxelles",
             pays: "Belgique",
         },
-        note: "Le fournisseur veut livrer 3,5kg fin de semaine (vendredi)",
+        notes: [
+            { date: "2024-10-05", content: "Le fournisseur veut livrer 3,5kg fin de semaine (vendredi)" },
+            { date: "2024-07-20", content: "A demandé une modification de l'adresse de livraison" },
+        ],
         historique: [
             { date: "2024-02-20", type: "Or", poids: "3.1" },
             { date: "2024-04-12", type: "Argent", poids: "2.0" },
@@ -57,10 +63,11 @@ const users = ref([
             localite: "Berlin",
             pays: "Allemagne",
         },
-        note: "Livraison prévue ce jeudi 10/10/2024 (10kg de plomb)",
-        historique: [
-            
+        notes: [
+            { date: "2024-10-08", content: "Livraison prévue ce jeudi 10/10/2024 (10kg de plomb)" },
+            { date: "2024-09-12", content: "Discussion en cours pour un contrat de 20kg de cuivre" },
         ],
+        historique: [],
     },
     {
         nom: "Jansen",
@@ -74,7 +81,10 @@ const users = ref([
             localite: "Amsterdam",
             pays: "Pays-Bas",
         },
-        note: "Le fournisseur veut un devis (prix) pour sa demande de livraison (10kg de radios)",
+        notes: [
+            { date: "2024-09-10", content: "Le fournisseur veut un devis (prix) pour sa demande de livraison (10kg de radios)" },
+            { date: "2024-08-30", content: "S'intéresse à une nouvelle gamme de métaux rares" },
+        ],
         historique: [
             { date: "2024-02-10", type: "Platine", poids: "0.7" },
             { date: "2024-04-17", type: "Or", poids: "2.2" },
@@ -92,13 +102,17 @@ const users = ref([
             localite: "Londres",
             pays: "Angleterre",
         },
-        note: "Le fournisseur veut absolument passer par Nico pour sa demande.",
+        notes: [
+            { date: "2024-10-01", content: "Le fournisseur veut absolument passer par Nico pour sa demande." },
+            { date: "2024-09-15", content: "Demande spéciale pour 15kg de métaux divers" },
+        ],
         historique: [
             { date: "2024-03-12", type: "Or", poids: "4.0" },
             { date: "2024-05-14", type: "Argent", poids: "1.7" },
         ],
     },
 ]);
+
 
 // Terme de recherche
 const searchTerm = ref("");

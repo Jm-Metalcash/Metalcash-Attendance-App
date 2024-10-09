@@ -34,7 +34,7 @@ const isEditing = reactive({
         localite: false,
         pays: false,
     },
-    note: false,
+    notes: [],
 });
 
 // Réactif pour afficher les messages de succès
@@ -49,8 +49,21 @@ const successMessages = reactive({
         localite: false,
         pays: false,
     },
-    note: false,
+    notes: [],
 });
+
+// Fonction pour activer l'édition d'une note
+const editNote = (index) => {
+    isEditing.notes[index] = true;
+};
+
+const saveNote = (index) => {
+    isEditing.notes[index] = false;
+    successMessages.notes[index] = true;
+    setTimeout(() => {
+        successMessages.notes[index] = false;
+    }, 3000);
+};
 
 // Fonction pour activer l'édition d'un champ
 const editField = (field) => {
@@ -106,6 +119,14 @@ const toggleHistory = () => {
 };
 
 onMounted(() => {
+    if (editableUser.notes && editableUser.notes.length > 0) {
+        // Initialiser chaque note avec false pour isEditing et successMessages
+        editableUser.notes.forEach(() => {
+            isEditing.notes.push(false);  // Ajouter `false` pour chaque note
+            successMessages.notes.push(false);  // Ajouter `false` pour chaque note
+        });
+    }
+
     document.addEventListener("click", handleClickOutside);
 });
 
@@ -119,6 +140,57 @@ onBeforeUnmount(() => {
         v-if="editableUser"
         class="bg-white overflow-hidden shadow rounded-lg border mt-8"
     >
+        <!-- Section Notes -->
+        <div class="pb-12 px-0 md:px-0">
+            <div v-if="editableUser.notes && editableUser.notes.length > 0">
+                <!-- Tableau des notes -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-800">
+                                    Date
+                                </th>
+                                <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-800">
+                                    Note
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(note, index) in editableUser.notes" :key="index">
+                                <td class="py-2 px-4 border-b text-sm text-left text-gray-500">
+                                    {{ note.date }}
+                                </td>
+                                <td class="py-2 px-4 border-b text-sm text-left text-gray-500">
+                                    <!-- Modification ici : on vérifie que isEditing.notes[index] existe avant de l'utiliser -->
+                                    <span v-if="!isEditing.notes[index]" @click="editNote(index)" class="editable-text cursor-pointer">
+                                        {{ note.content }}
+                                    </span>
+                                    <textarea
+                                        v-else
+                                        v-model="note.content"
+                                        @blur="saveNote(index)"
+                                        class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                                    ></textarea>
+                                    <p v-if="successMessages.notes[index]" class="text-green-500 text-xs mt-1 success-message">
+                                        Modification avec succès
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr v-if="editableUser.notes.length === 0">
+                                <td colspan="2" class="py-5 px-4 border-b text-sm text-center text-gray-500">
+                                    Aucune note pour ce fournisseur.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div v-else>
+                <p class="text-sm text-gray-400">Aucune note actuellement pour ce fournisseur.</p>
+            </div>
+        </div>
+
         <div class="px-4 py-5 sm:px-6 bg-gray-100">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
                 Informations générales sur le fournisseur
@@ -354,41 +426,6 @@ onBeforeUnmount(() => {
                                 Modification avec succès
                             </p>
                         </dd>
-                    </div>
-                </div>
-
-                <!-- Section Note -->
-                <div>
-                    <div class="px-4 py-5 sm:px-6 bg-gray-100">
-                        <p
-                            class="mt-1 max-w-2xl text-sm text-gray-500 font-bold"
-                        >
-                            Note
-                        </p>
-                    </div>
-                    <div class="py-3 sm:py-5 px-4 md:px-6">
-                        <span
-                            v-if="!isEditing.note"
-                            @click="editField('note')"
-                            class="editable-text text-sm text-gray-400 cursor-pointer"
-                            >{{
-                                editableUser.note ||
-                                "Aucune note actuellement pour ce fournisseur."
-                            }}</span
-                        >
-                        <textarea
-                            v-else
-                            ref="noteInput"
-                            v-model="editableUser.note"
-                            @blur="saveField('note')"
-                            class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                        ></textarea>
-                        <p
-                            v-if="successMessages.note"
-                            class="text-green-500 text-xs mt-1 success-message"
-                        >
-                            Modification avec succès
-                        </p>
                     </div>
                 </div>
             </dl>
