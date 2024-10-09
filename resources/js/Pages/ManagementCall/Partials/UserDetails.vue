@@ -9,22 +9,10 @@ const props = defineProps({
     },
 });
 
-// Fonction pour gérer le clic en dehors de l'input
-const handleClickOutside = (event) => {
-    // Vérifie si le clic est en dehors des champs éditables
-    if (
-        !event.target.closest(".editable-input") &&
-        !event.target.closest(".editable-text")
-    ) {
-        closeAllFields();
-        closeAllNotes();
-    }
-};
-
-// Réactif pour éditer l'utilisateur
+// État réactif pour l'utilisateur modifiable
 const editableUser = reactive({ ...props.user });
 
-// État pour savoir quel champ est en cours d'édition
+// État réactif pour savoir quel champ est en cours d'édition
 const isEditing = reactive({
     prenom: false,
     nom: false,
@@ -54,20 +42,18 @@ const successMessages = reactive({
     notes: [],
 });
 
-// Fonction pour activer l'édition d'une note
-const editNote = (index) => {
-    isEditing.notes[index] = true;
+// Fonction pour gérer le clic en dehors de l'input
+const handleClickOutside = (event) => {
+    if (
+        !event.target.closest(".editable-input") &&
+        !event.target.closest(".editable-text")
+    ) {
+        closeAllFields();
+        closeAllNotes();
+    }
 };
 
-const saveNote = (index) => {
-    isEditing.notes[index] = false;
-    successMessages.notes[index] = true;
-    setTimeout(() => {
-        successMessages.notes[index] = false;
-    }, 3000);
-};
-
-// Fonction pour activer l'édition d'un champ
+// Fonctions pour gérer les champs d'édition (prénom, nom, email, etc.)
 const editField = (field) => {
     if (field.includes("adresse")) {
         const [obj, prop] = field.split(".");
@@ -77,16 +63,17 @@ const editField = (field) => {
     }
 };
 
-// Fonction pour fermer toutes les notes et sauvegarder
-const closeAllNotes = () => {
-    editableUser.notes.forEach((note, index) => {
-        if (isEditing.notes[index]) {
-            saveNote(index);  
-        }
-    });
+const saveField = (field) => {
+    if (field.includes("adresse")) {
+        const [obj, prop] = field.split(".");
+        isEditing[obj][prop] = false;
+        displaySuccessMessage(obj, prop);
+    } else {
+        isEditing[field] = false;
+        displaySuccessMessage(field);
+    }
 };
 
-// Fonction pour fermer tous les champs d'édition
 const closeAllFields = () => {
     Object.keys(isEditing).forEach((field) => {
         if (typeof isEditing[field] === "object") {
@@ -101,25 +88,64 @@ const closeAllFields = () => {
     });
 };
 
-// Fonction pour sauvegarder le champ et désactiver l'édition
-const saveField = (field) => {
-    if (field.includes("adresse")) {
-        const [obj, prop] = field.split(".");
-        isEditing[obj][prop] = false;
-        if (editableUser[obj][prop]) {
-            successMessages[obj][prop] = true;
-            setTimeout(() => {
-                successMessages[obj][prop] = false;
-            }, 3000);
-        }
+const displaySuccessMessage = (field, prop = null) => {
+    if (Array.isArray(successMessages[field])) {
+        successMessages[field][prop] = true;
+        setTimeout(() => {
+            successMessages[field][prop] = false;
+        }, 3000);
+    } else if (prop) {
+        successMessages[field][prop] = true;
+        setTimeout(() => {
+            successMessages[field][prop] = false;
+        }, 3000);
     } else {
-        isEditing[field] = false;
-        if (editableUser[field]) {
-            successMessages[field] = true;
-            setTimeout(() => {
-                successMessages[field] = false;
-            }, 3000);
+        successMessages[field] = true;
+        setTimeout(() => {
+            successMessages[field] = false;
+        }, 3000);
+    }
+};
+
+// Fonctions pour gérer les notes
+const editNote = (index) => {
+    isEditing.notes[index] = true;
+};
+
+const saveNote = (index) => {
+    isEditing.notes[index] = false;
+    displaySuccessMessage("notes", index);
+};
+
+const closeAllNotes = () => {
+    editableUser.notes.forEach((note, index) => {
+        if (isEditing.notes[index]) {
+            saveNote(index);
         }
+    });
+};
+
+// Ajout de nouvelles notes
+const showAddNote = ref(false);
+const newNote = ref({
+    content: "",
+    date: new Date().toISOString().slice(0, 10),
+});
+
+const addNote = () => {
+    showAddNote.value = true;
+};
+
+const saveNewNote = () => {
+    if (newNote.value.content) {
+        editableUser.notes.push({
+            content: newNote.value.content,
+            date: newNote.value.date,
+        });
+        newNote.value.content = ""; // Réinitialiser la nouvelle note
+        showAddNote.value = false; // Cacher la zone d'ajout
+        isEditing.notes.push(false);
+        successMessages.notes.push(false);
     }
 };
 
@@ -129,15 +155,14 @@ const toggleHistory = () => {
     showHistory.value = !showHistory.value;
 };
 
+// Montage et démontage
 onMounted(() => {
-    if (editableUser.notes && editableUser.notes.length > 0) {
-        // Initialiser chaque note avec false pour isEditing et successMessages
+    if (editableUser.notes.length > 0) {
         editableUser.notes.forEach(() => {
-            isEditing.notes.push(false);  // Ajouter `false` pour chaque note
-            successMessages.notes.push(false);  // Ajouter `false` pour chaque note
+            isEditing.notes.push(false);
+            successMessages.notes.push(false);
         });
     }
-
     document.addEventListener("click", handleClickOutside);
 });
 
@@ -153,54 +178,110 @@ onBeforeUnmount(() => {
     >
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
-    <div v-if="editableUser.notes && editableUser.notes.length > 0">
-        <!-- Tableau des notes -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-800 w-1/5">
-                            Date
-                        </th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-800 w-4/5"> 
-                            Note
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(note, index) in editableUser.notes" :key="index">
-                        <td class="py-2 px-4 border-b text-sm text-left text-gray-500 w-1/6">
-                            {{ note.date }}
-                        </td>
-                        <td class="py-2 px-4 border-b text-sm text-left text-gray-500 w-5/6">
-                            <span v-if="!isEditing.notes[index]" @click="editNote(index)" class="editable-text cursor-pointer">
-                                {{ note.content }}
-                            </span>
-                            <textarea
-                                v-else
-                                v-model="note.content"
-                                @blur="saveNote(index)"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            ></textarea>
-                            <p v-if="successMessages.notes[index]" class="text-green-500 text-xs relative mt-1 success-message">
-                                Modification avec succès
-                            </p>
-                        </td>
-                    </tr>
-                    <tr v-if="editableUser.notes.length === 0">
-                        <td colspan="2" class="py-5 px-4 border-b text-sm text-center text-gray-500">
-                            Aucune note pour ce fournisseur.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div v-else>
-        <p class="text-sm text-gray-400">Aucune note actuellement pour ce fournisseur.</p>
-    </div>
-</div>
+            <div v-if="editableUser.notes.length > 0">
+                <!-- Tableau des notes -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th
+                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/5"
+                                >
+                                    Date
+                                </th>
+                                <th
+                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-4/5"
+                                >
+                                    Note
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(note, index) in editableUser.notes"
+                                :key="index"
+                            >
+                                <td
+                                    class="py-2 px-4 border-b text-sm text-left text-gray-500 w-1/6"
+                                >
+                                    {{ note.date }}
+                                </td>
+                                <td
+                                    class="py-2 px-4 border-b text-sm text-left text-gray-500 w-5/6"
+                                >
+                                    <span
+                                        v-if="!isEditing.notes[index]"
+                                        @click="editNote(index)"
+                                        class="editable-text cursor-pointer"
+                                    >
+                                        {{ note.content }}
+                                    </span>
+                                    <textarea
+                                        v-else
+                                        v-model="note.content"
+                                        @blur="saveNote(index)"
+                                        class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                                    ></textarea>
+                                    <p
+                                        v-if="successMessages.notes[index]"
+                                        class="text-green-500 text-xs relative mt-1 success-message"
+                                    >
+                                        Modification avec succès
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr v-if="editableUser.notes.length === 0">
+                                <td
+                                    colspan="2"
+                                    class="py-5 px-4 border-b text-sm text-center text-gray-500"
+                                >
+                                    Aucune note pour ce fournisseur.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div v-else>
+                <p class="text-sm text-gray-400">
+                    Aucune note actuellement pour ce fournisseur.
+                </p>
+            </div>
 
+            <!-- Bouton d'ajout de note stylisé -->
+            <div class="flex items-center justify-start mt-4 ml-2">
+                <button
+                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                    @click="addNote"
+                >
+                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
+                    Ajouter une note
+                </button>
+            </div>
+
+            <!-- Zone d'ajout de nouvelle note -->
+            <div v-if="showAddNote" class="mt-4">
+                <div class="bg-gray-50 p-4 rounded-md shadow-md">
+                    <h4 class="text-gray-700 text-sm font-semibold mb-2">
+                        Nouvelle note
+                    </h4>
+                    <input
+                        type="text"
+                        v-model="newNote.content"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Saisir la note..."
+                    />
+                    <button
+                        @click="saveNewNote"
+                        class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
+                    >
+                        Enregistrer la note
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Informations Générales -->
         <div class="px-4 py-5 sm:px-6 bg-gray-100">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
                 Informations générales sur le fournisseur
