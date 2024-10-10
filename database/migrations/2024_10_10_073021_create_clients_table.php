@@ -22,8 +22,8 @@ class CreateClientsTable extends Migration
             $table->string('locality', 128)->nullable(); // Colonne locality varchar(128), peut être null
             $table->string('postalCode', 64)->nullable(); // Colonne postalCode varchar(64), peut être null
             $table->string('country', 128)->nullable(); // Colonne country varchar(128), peut être null
-            $table->string('email', 128)->nullable(); // Colonne email varchar(128), peut être null
-            $table->string('phone', 64); // Colonne phone varchar(64), not null
+            $table->string('email', 128); // Colonne email varchar(128), not null
+            $table->string('phone', 64)->unique(); // Colonne phone varchar(64), not null et unique
             $table->string('company', 64)->nullable(); // Colonne company varchar(64), peut être null
             $table->string('companyvat', 64)->nullable(); // Colonne companyvat varchar(64), peut être null
             $table->date('regdate')->nullable(); // Colonne regdate date, peut être null
@@ -41,4 +41,5 @@ class CreateClientsTable extends Migration
         Schema::dropIfExists('clients');
     }
 }
+
 

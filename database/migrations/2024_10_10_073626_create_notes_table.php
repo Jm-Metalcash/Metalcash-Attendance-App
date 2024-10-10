@@ -18,7 +18,8 @@ class CreateNotesTable extends Migration
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade'); // Relation avec la table clients
             $table->text('content'); // Colonne content pour le texte de la note
             $table->timestamp('note_date')->useCurrent(); // Colonne date (DD-MM-YYYY Heure:minute), par défaut la date actuelle
-            $table->timestamps(); // Colonnes created_at et updated_at
+            $table->text('status')->nullable();
+            $table->timestamps();
         });
     }
 
