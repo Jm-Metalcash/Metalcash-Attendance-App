@@ -9,15 +9,14 @@ class Note extends Model
 {
     use HasFactory;
 
-    // Colonnes qui peuvent être assignées en masse
-    protected $fillable = [
-        'client_id', 'content', 'note_date'
-    ];
+    protected $fillable = ['content', 'note_date', 'client_id'];
+
+    protected $dates = ['note_date'];
 
     // Relation inverse avec la table clients
     public function client()
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        return $this->belongsTo(Client::class);
     }
 }
 

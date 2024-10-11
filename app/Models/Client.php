@@ -23,7 +23,7 @@ class Client extends Model
     // Relation avec la table notes
     public function notes()
     {
-        return $this->hasMany(Note::class, 'client_id');
+        return $this->hasMany(Note::class);
     }
 }
 

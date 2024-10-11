@@ -21,7 +21,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(note, index) in editableUser.notes" :key="index">
+              <tr v-for="(note, index) in editableUser.notes" :key="note.id">
                 <td
                   class="py-2 px-4 border-b text-sm text-left text-gray-500 w-1/6"
                 >
@@ -384,6 +384,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
+import axios from 'axios';
 
 // Props
 const props = defineProps({
@@ -401,7 +402,7 @@ const editableUser = reactive({
 });
 
 // Initialiser isEditingNotes comme un tableau réactif
-const isEditingNotes = reactive(editableUser.notes.map(() => false));
+const isEditingNotes = reactive([]);
 
 // Réactif pour afficher les messages de succès
 const successMessages = reactive({
@@ -413,7 +414,22 @@ const successMessages = reactive({
   postalCode: false,
   locality: false,
   country: false,
-  notes: reactive(editableUser.notes.map(() => false)),
+  notes: [],
+});
+
+// Initialiser isEditingNotes et successMessages.notes
+const initializeNotesState = () => {
+  isEditingNotes.splice(0, isEditingNotes.length, ...editableUser.notes.map(() => false));
+  successMessages.notes.splice(0, successMessages.notes.length, ...editableUser.notes.map(() => false));
+};
+
+onMounted(() => {
+  initializeNotesState();
+  document.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 
 // État réactif pour savoir quel champ est en cours d'édition
@@ -444,9 +460,19 @@ const editField = (field) => {
   isEditing[field] = true;
 };
 
+// Enregistre les données avec Axios vers la DB
 const saveField = (field) => {
   isEditing[field] = false;
-  displaySuccessMessage(field);
+
+  axios.put(`/clients/${editableUser.id}`, {
+    [field]: editableUser[field],
+  })
+  .then(() => {
+    displaySuccessMessage(field);
+  })
+  .catch((error) => {
+    console.error('Failed to update the client:', error);
+  });
 };
 
 const closeAllFields = () => {
@@ -469,9 +495,20 @@ const editNote = (index) => {
   isEditingNotes[index] = true;
 };
 
+// Enregistre une note avec Axios vers la DB
 const saveNote = (index) => {
   isEditingNotes[index] = false;
-  displayNoteSuccessMessage(index);
+
+  // Envoyer une requête PUT à l'API pour mettre à jour la note
+  axios.put(`/clients/${editableUser.id}/notes/${editableUser.notes[index].id}`, {
+    content: editableUser.notes[index].content,
+  })
+  .then(() => {
+    displayNoteSuccessMessage(index);
+  })
+  .catch((error) => {
+    console.error('Failed to update the note:', error);
+  });
 };
 
 const closeAllNotes = () => {
@@ -505,25 +542,37 @@ const saveNewNote = () => {
   if (newNote.value.content) {
     const now = new Date().toISOString();
 
-    editableUser.notes.push({
+    axios.post(`/clients/${editableUser.id}/notes`, {
       content: newNote.value.content,
       note_date: now,
+    })
+    .then((response) => {
+      // Ajouter la nouvelle note avec l'ID retourné par le serveur
+      editableUser.notes.push({
+        id: response.data.id, // Assurez-vous que le serveur renvoie l'ID
+        content: newNote.value.content,
+        note_date: now,
+      });
+
+      // Mettre à jour isEditingNotes et successMessages.notes
+      isEditingNotes.push(false);
+      successMessages.notes.push(false);
+
+      newNote.value.content = "";
+      showAddNote.value = false;
+
+      // Afficher le message de succès
+      showAddNoteSuccess.value = true;
+      setTimeout(() => {
+        showAddNoteSuccess.value = false;
+      }, 3000);
+    })
+    .catch((error) => {
+      console.error('Failed to add the note:', error);
     });
-
-    newNote.value.content = "";
-    showAddNote.value = false;
-
-    // Mettre à jour isEditingNotes et successMessages.notes
-    isEditingNotes.push(false);
-    successMessages.notes.push(false);
-
-    // Afficher le message de succès
-    showAddNoteSuccess.value = true;
-    setTimeout(() => {
-      showAddNoteSuccess.value = false;
-    }, 3000);
   }
 };
+
 
 // Affichage des dates en format DD-MM-YYYY | HH:mm
 const formatDateTime = (dateString) => {
@@ -542,14 +591,6 @@ const showHistory = ref(false);
 const toggleHistory = () => {
   showHistory.value = !showHistory.value;
 };
-
-onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleClickOutside);
-});
 </script>
 
 <style scoped>

@@ -6,6 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -51,8 +52,12 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     // Route pour afficher les pointages d'un employé spécifique
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 
-    //Management appel téléphonique
+    //Management appel téléphonique et clients
     Route::get('/gestion-appels-telephoniques', [ClientController::class, 'index'])->name('managementCall');
+    Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
+    //gestion des notes des clients
+    Route::put('/clients/{client}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
+    Route::post('/clients/{client}/notes', [NoteController::class, 'store'])->name('notes.store');
 });
 
 
