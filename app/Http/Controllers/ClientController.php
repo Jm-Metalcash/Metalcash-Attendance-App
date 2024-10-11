@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
+    //Affiche la liste des clients avec leurs transactions et notes
     public function index()
     {
         // Récupère les clients avec leurs transactions et notes
@@ -21,6 +22,7 @@ class ClientController extends Controller
 
 
 
+    //Modifie les données d'un client
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -33,12 +35,13 @@ class ClientController extends Controller
             'postalCode' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:255',
         ]);
-    
+
         $client = Client::findOrFail($id);
         $client->update($validatedData);
-    
-        return response()->json(['message' => 'Client updated successfully']);
-    }
-    
-}
 
+        // Recharger les données du client depuis la base de données
+        $client->refresh();
+
+        return response()->json($client);
+    }
+}
