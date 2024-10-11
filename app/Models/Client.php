@@ -14,6 +14,15 @@ class Client extends Model
         'fullName', 'familyName', 'firstName', 'address', 'locality', 'postalCode', 'country', 'email', 'phone', 'company', 'companyvat', 'regdate'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($client) {
+            $client->fullName = trim($client->firstName . ' ' . $client->familyName);
+        });
+    }
+
     // Relation avec la table historical_transactions (transactions)
     public function transactions()
     {
