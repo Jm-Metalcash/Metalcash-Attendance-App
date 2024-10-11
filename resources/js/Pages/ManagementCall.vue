@@ -4,116 +4,13 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
 import UserList from "./ManagementCall/Partials/UserList.vue";
-import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue"; 
+import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
 
-// Générer des données fictives avec noms, prénoms, pays, et adresses adaptés
-const users = ref([
-    {
-        nom: "Dupont",
-        prenom: "Jean",
-        country: "France",
-        telephone: "+33 6 12 34 56 78",
-        email: "jean.dupont@example.com",
-        adresse: {
-            rue: "123 Rue de Paris",
-            codePostal: "75001",
-            localite: "Paris",
-            pays: "France",
-        },
-        notes: [
-            { date: "2024-09-01", content: "Actuellement en déplacement en Allemagne" },
-            { date: "2024-08-15", content: "Client intéressé par une livraison d'or en septembre" },
-            { date: "2024-08-15", content: "Test" },
-        ],
-        historique: [
-            { date: "2024-01-10", type: "Or", poids: "2.5" },
-            { date: "2024-02-15", type: "Argent", poids: "1.2" },
-            { date: "2024-03-05", type: "Platine", poids: "0.8" },
-        ],
-    },
-    {
-        nom: "Martin",
-        prenom: "Marie",
-        country: "Belgique",
-        telephone: "+32 495 12 34 56",
-        email: "marie.martin@example.com",
-        adresse: {
-            rue: "12 Rue Royale",
-            codePostal: "1000",
-            localite: "Bruxelles",
-            pays: "Belgique",
-        },
-        notes: [
-            { date: "2024-10-05", content: "Le fournisseur veut livrer 3,5kg fin de semaine (vendredi)" },
-            { date: "2024-07-20", content: "A demandé une modification de l'adresse de livraison" },
-        ],
-        historique: [
-            { date: "2024-02-20", type: "Or", poids: "3.1" },
-            { date: "2024-04-12", type: "Argent", poids: "2.0" },
-        ],
-    },
-    {
-        nom: "Schneider",
-        prenom: "Franz",
-        country: "Allemagne",
-        telephone: "+49 151 23456789",
-        email: "franz.schneider@example.com",
-        adresse: {
-            rue: "10 Hauptstraße",
-            codePostal: "10115",
-            localite: "Berlin",
-            pays: "Allemagne",
-        },
-        notes: [
-            { date: "2024-10-08", content: "Livraison prévue ce jeudi 10/10/2024 (10kg de plomb)" },
-            { date: "2024-09-12", content: "Discussion en cours pour un contrat de 20kg de cuivre" },
-        ],
-        historique: [],
-    },
-    {
-        nom: "Jansen",
-        prenom: "Emma",
-        country: "Pays-Bas",
-        telephone: "+31 6 12345678",
-        email: "emma.jansen@example.com",
-        adresse: {
-            rue: "34 Nieuwezijds Voorburgwal",
-            codePostal: "1012",
-            localite: "Amsterdam",
-            pays: "Pays-Bas",
-        },
-        notes: [
-            { date: "2024-09-10", content: "Le fournisseur veut un devis (prix) pour sa demande de livraison (10kg de radios)" },
-            { date: "2024-08-30", content: "S'intéresse à une nouvelle gamme de métaux rares" },
-        ],
-        historique: [
-            { date: "2024-02-10", type: "Platine", poids: "0.7" },
-            { date: "2024-04-17", type: "Or", poids: "2.2" },
-        ],
-    },
-    {
-        nom: "Smith",
-        prenom: "John",
-        country: "Angleterre",
-        telephone: "+44 7700 900123",
-        email: "john.smith@example.com",
-        adresse: {
-            rue: "45 Oxford Street",
-            codePostal: "W1D 1BS",
-            localite: "Londres",
-            pays: "Angleterre",
-        },
-        notes: [
-            { date: "2024-10-01", content: "Le fournisseur veut absolument passer par Nico pour sa demande." },
-            { date: "2024-09-15", content: "Demande spéciale pour 15kg de métaux divers" },
-        ],
-        historique: [
-            { date: "2024-03-12", type: "Or", poids: "4.0" },
-            { date: "2024-05-14", type: "Argent", poids: "1.7" },
-        ],
-    },
-]);
+// Les clients sont passés via Inertia
+const props = defineProps(['clients']);
 
+// Les données des clients à partir des props
+const users = ref(props.clients);
 
 // Terme de recherche
 const searchTerm = ref("");
@@ -121,23 +18,25 @@ const searchTerm = ref("");
 // Utilisateur sélectionné
 const selectedUser = ref(null);
 
-// Propriété calculée pour filtrer les utilisateurs
+// Propriété calculée pour filtrer les utilisateurs en fonction du terme de recherche
 const filteredUsers = computed(() => {
     return users.value.filter((user) => {
         const searchLower = searchTerm.value.toLowerCase();
         return (
-            user.nom.toLowerCase().includes(searchLower) ||
-            user.prenom.toLowerCase().includes(searchLower) ||
-            user.country.toLowerCase().includes(searchLower) ||
-            user.telephone.toLowerCase().includes(searchLower) ||
-            user.email.toLowerCase().includes(searchLower) ||
-            user.adresse.rue.toLowerCase().includes(searchLower) ||
-            user.adresse.codePostal.toLowerCase().includes(searchLower) ||
-            user.adresse.localite.toLowerCase().includes(searchLower) ||
-            user.adresse.pays.toLowerCase().includes(searchLower)
+            (user.fullName ? user.fullName.toLowerCase().includes(searchLower) : false) ||        // fullName
+            (user.familyName ? user.familyName.toLowerCase().includes(searchLower) : false) ||    // familyName
+            (user.firstName ? user.firstName.toLowerCase().includes(searchLower) : false) ||      // firstName
+            (user.address ? user.address.toLowerCase().includes(searchLower) : false) ||          // address
+            (user.locality ? user.locality.toLowerCase().includes(searchLower) : false) ||        // locality
+            (user.postalCode ? user.postalCode.toLowerCase().includes(searchLower) : false) ||    // postalCode
+            (user.country ? user.country.toLowerCase().includes(searchLower) : false) ||          // country
+            (user.email ? user.email.toLowerCase().includes(searchLower) : false) ||              // email
+            (user.phone ? user.phone.toLowerCase().includes(searchLower) : false) ||              // phone
+            (user.company ? user.company.toLowerCase().includes(searchLower) : false)             // company
         );
     });
 });
+
 
 // Fonction pour sélectionner un utilisateur
 const selectUser = (user) => {
@@ -149,7 +48,7 @@ watch(searchTerm, () => {
     selectedUser.value = null;
 });
 
-// État du modal
+// État du modal pour ajouter un utilisateur
 const showModal = ref(false);
 
 // Fonction pour ouvrir et fermer le modal
@@ -159,46 +58,50 @@ const toggleModal = () => {
 
 // Nouvel utilisateur à ajouter
 const newUser = ref({
-    nom: "",
-    prenom: "",
-    telephone: "",
+    fullName: "",
+    familyName: "",
+    firstName: "",
+    address: "",
+    locality: "",
+    postalCode: "",
+    country: "",
     email: "",
-    adresse: {
-        rue: "",
-        codePostal: "",
-        localite: "",
-        pays: "",
-    },
-    historique: [],
+    phone: "",
+    company: "",
+    companyvat: "",
+    regdate: "",
+    notes: [],
+    transactions: []
 });
 
-// Fonction pour ajouter un nouvel utilisateur et l'affiche
+// Fonction pour ajouter un nouvel utilisateur
 const addUser = () => {
     const addedUser = { ...newUser.value };  
     users.value.push(addedUser);  
     newUser.value = {
-        nom: "",
-        prenom: "",
-        telephone: "",
+        fullName: "",
+        familyName: "",
+        firstName: "",
+        address: "",
+        locality: "",
+        postalCode: "",
+        country: "",
         email: "",
-        adresse: {
-            rue: "",
-            codePostal: "",
-            localite: "",
-            pays: "",
-        },
-        historique: [],
+        phone: "",
+        company: "",
+        companyvat: "",
+        regdate: "",
+        notes: [],
+        transactions: []
     };
     toggleModal(); 
-
     selectedUser.value = null;
-    
+
+    // Sélectionner le nouvel utilisateur
     setTimeout(() => {
         selectUser(addedUser);  
     }, 0);
 };
-
-
 </script>
 
 <template>
@@ -271,6 +174,3 @@ const addUser = () => {
     }
 }
 </style>
-
-
-<style scoped></style>

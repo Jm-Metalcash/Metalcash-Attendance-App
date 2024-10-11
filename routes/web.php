@@ -5,6 +5,7 @@ use App\Http\Controllers\DayController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -51,9 +52,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 
     //Management appel téléphonique
-    Route::get('/gestion-appels-telephoniques', function () {
-        return Inertia::render('ManagementCall');
-    })->name('managementCall');
+    Route::get('/gestion-appels-telephoniques', [ClientController::class, 'index'])->name('managementCall');
 });
 
 
