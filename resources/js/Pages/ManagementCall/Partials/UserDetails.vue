@@ -47,6 +47,9 @@
                                         v-else
                                         v-model="note.content"
                                         @blur="saveNote(index)"
+                                        @keydown.enter="saveNote(index)"
+                                        @mousedown="mouseDown = true"
+                                        @mouseup="handleMouseUp(index)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
 
@@ -139,6 +142,7 @@
                                 v-else
                                 v-model="editableUser.firstName"
                                 @blur="saveField('firstName')"
+                                @keydown.enter="saveField('firstName')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -165,6 +169,7 @@
                                 v-else
                                 v-model="editableUser.familyName"
                                 @blur="saveField('familyName')"
+                                @keydown.enter="saveField('familyName')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -198,6 +203,7 @@
                                 v-else
                                 v-model="editableUser.email"
                                 @blur="saveField('email')"
+                                @keydown.enter="saveField('email')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -227,6 +233,7 @@
                                 v-else
                                 v-model="editableUser.phone"
                                 @blur="saveField('phone')"
+                                @keydown.enter="saveField('phone')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -267,6 +274,7 @@
                                 v-else
                                 v-model="editableUser.address"
                                 @blur="saveField('address')"
+                                @keydown.enter="saveField('address')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -296,6 +304,7 @@
                                 v-else
                                 v-model="editableUser.postalCode"
                                 @blur="saveField('postalCode')"
+                                @keydown.enter="saveField('postalCode')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -331,6 +340,7 @@
                                 v-else
                                 v-model="editableUser.locality"
                                 @blur="saveField('locality')"
+                                @keydown.enter="saveField('locality')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -357,6 +367,7 @@
                                 v-else
                                 v-model="editableUser.country"
                                 @blur="saveField('country')"
+                                @keydown.enter="saveField('country')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                             />
                             <p
@@ -490,7 +501,7 @@ const initializeNotesState = () => {
 
 onMounted(() => {
     initializeNotesState();
-    document.addEventListener("click", handleClickOutside);
+    
 });
 
 onBeforeUnmount(() => {
@@ -509,6 +520,9 @@ const isEditing = reactive({
     country: false,
 });
 
+// État pour gérer si la souris est cliquée
+const mouseDown = ref(false);
+
 // Fonction pour gérer le clic en dehors de l'input
 const handleClickOutside = (event) => {
     if (
@@ -518,6 +532,18 @@ const handleClickOutside = (event) => {
         closeAllFields();
         closeAllNotes();
     }
+};
+
+// Gestionnaire du blur : sauvegarde uniquement si la souris n'a pas été utilisée
+const handleBlur = (index) => {
+  if (!mouseDown.value) {
+    saveNote(index);
+  }
+};
+
+// Gérer le relâchement du clic de la souris pour éviter l'exécution de la sauvegarde
+const handleMouseUp = (index) => {
+  mouseDown.value = false;
 };
 
 // Fonctions pour gérer les champs d'édition
