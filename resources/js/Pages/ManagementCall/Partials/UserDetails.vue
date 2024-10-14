@@ -441,7 +441,7 @@
                             <td
                                 class="py-2 px-4 border-b text-sm text-left text-gray-500"
                             >
-                                {{ formatDateTime(transaction.date) }}
+                                {{ formatDateOnly(transaction.date) }}
                             </td>
                             <td
                                 class="py-2 px-4 border-b text-sm text-center text-gray-500"
@@ -692,13 +692,7 @@ const saveNote = (index) => {
         });
 };
 
-const closeAllNotes = () => {
-    editableUser.notes.forEach((note, index) => {
-        if (isEditingNotes[index]) {
-            saveNote(index);
-        }
-    });
-};
+
 
 const displayNoteSuccessMessage = (index) => {
     successMessages.notes[index] = true;
@@ -715,9 +709,6 @@ const newNote = ref({
     note_date: new Date().toISOString(),
 });
 
-const addNote = () => {
-    showAddNote.value = true;
-};
 
 const saveNewNote = () => {
     if (newNote.value.content) {
@@ -755,17 +746,53 @@ const saveNewNote = () => {
     }
 };
 
-// Affichage des dates en format DD-MM-YYYY | HH:mm
+
+// Fonction de formatage de la date
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
 
-    return `${day}-${month}-${year} | ${hours}:${minutes}`;
+    // Si la date n'est pas valide, retourner une chaîne vide
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+    // Formatage en fonction du fuseau horaire local
+    const options = {
+        timeZone: 'Europe/Paris', // Remplace par le fuseau souhaité
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    };
+
+    return new Intl.DateTimeFormat('fr-FR', options).format(date);
 };
+
+
+// Fonction de formatage de la date sans l'heure (pour les transactions)
+const formatDateOnly = (dateString) => {
+    const date = new Date(dateString);
+
+    // Si la date n'est pas valide, retourner une chaîne vide
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+    // Formatage pour n'afficher que la date
+    const options = {
+        timeZone: 'Europe/Paris', // Remplace par le fuseau souhaité
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    };
+
+    return new Intl.DateTimeFormat('fr-FR', options).format(date);
+};
+
+
+
+
 
 // Gérer l'affichage de l'historique
 const showHistory = ref(false);
@@ -792,6 +819,7 @@ const editTransaction = (index) => {
 // Méthode pour sauvegarder une transaction modifiée
 const saveTransaction = (index) => {
     isEditingTransactions[index] = false;
+
 
     // Envoyer la requête PUT pour mettre à jour la transaction
     axios
@@ -834,15 +862,22 @@ const showAddTransaction = ref(false);
 
 // Méthode pour sauvegarder une nouvelle transaction
 const saveNewTransaction = () => {
+    const now = new Date().toISOString();  // Stockage en UTC
+
     axios
-        .post(`/clients/${editableUser.id}/transactions`, newTransaction.value)
+        .post(`/clients/${editableUser.id}/transactions`, {
+            typeofmetal: newTransaction.value.typeofmetal,
+            weight: newTransaction.value.weight,
+            date: now,  // Enregistrer la date au format UTC
+            details: newTransaction.value.details,
+        })
         .then((response) => {
-            // Ajouter la nouvelle transaction
+            // Ajouter la nouvelle transaction avec l'ID retourné par le serveur
             editableUser.transactions.push({
                 id: response.data.id,
                 typeofmetal: newTransaction.value.typeofmetal,
                 weight: newTransaction.value.weight,
-                date: newTransaction.value.date,
+                date: now,  // Utiliser la même date pour le stockage
                 details: newTransaction.value.details,
             });
 
@@ -865,6 +900,7 @@ const saveNewTransaction = () => {
             console.error("Erreur lors de l'ajout de la transaction :", error);
         });
 };
+
 </script>
 
 <style scoped>

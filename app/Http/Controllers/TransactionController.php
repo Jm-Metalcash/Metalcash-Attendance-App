@@ -12,12 +12,10 @@ class TransactionController extends Controller
     // Mise à jour d'une transaction
     public function update(Request $request, Client $client, HistoricalTransaction $transaction)
     {
-        // Vérifier que la transaction appartient bien au client
         if ($transaction->client_id !== $client->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Validation des données
         $validatedData = $request->validate([
             'type' => 'nullable|string|max:255',
             'typeofmetal' => 'required|string|max:255',
@@ -35,22 +33,25 @@ class TransactionController extends Controller
     // Ajout d'une nouvelle transaction
     public function store(Request $request, Client $client)
     {
-        // Validation des données
         $validatedData = $request->validate([
             'type' => 'nullable|string|max:255',
             'typeofmetal' => 'required|string|max:255',
             'weight' => 'required|numeric',
             'details' => 'nullable|string|max:1000',
+            'date' => 'nullable|date',
         ]);
-    
-        // Utiliser la date et l'heure actuelles pour l'encodement
-        $validatedData['date'] = Carbon::now();
-    
-        // Créer la transaction et l'associer au client
+
+        // Stocker la date en UTC
+        $validatedData['date'] = isset($validatedData['date']) 
+            ? Carbon::parse($validatedData['date'])->setTimezone('UTC') 
+            : Carbon::now('UTC');
+
         $transaction = $client->transactions()->create($validatedData);
-    
-        return response()->json(['id' => $transaction->id]);
+
+        // Retourner la date en UTC dans la réponse
+        return response()->json([
+            'id' => $transaction->id,
+            'date' => $transaction->date->toISOString(), // ISO format pour la cohérence
+        ]);
     }
-    
-    
 }

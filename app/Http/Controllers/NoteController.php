@@ -28,23 +28,30 @@ class NoteController extends Controller
 
     // Ajout d'une nouvelle note
     public function store(Request $request, Client $client)
-{
-    $validatedData = $request->validate([
-        'content' => 'nullable|string|max:1000',
-        'note_date' => 'nullable|date', 
-    ]);
-
-    // Convertir la date si nécessaire
-    $validatedData['note_date'] = Carbon::parse($validatedData['note_date']);
-
-    // Créer une note uniquement si `content` est renseigné
-    if (!empty($validatedData['content'])) {
-        $note = $client->notes()->create($validatedData);
-        return response()->json(['id' => $note->id]);
+    {
+        $validatedData = $request->validate([
+            'content' => 'nullable|string|max:1000',
+            'note_date' => 'nullable|date',
+        ]);
+    
+        // Convertir la date si nécessaire
+        $validatedData['note_date'] = Carbon::parse($validatedData['note_date'])->setTimezone('Europe/Paris');
+    
+        // Créer une note uniquement si `content` est renseigné
+        if (!empty($validatedData['content'])) {
+            $note = $client->notes()->create($validatedData);
+    
+            // Retourner la note avec la date formatée
+            return response()->json([
+                'id' => $note->id,
+                'content' => $note->content,
+                'note_date' => $note->note_date->format('Y-m-d\TH:i:s') // Format ISO 8601
+            ]);
+        }
+    
+        return response()->json(['message' => 'Note not created as content is empty'], 200);
     }
-
-    return response()->json(['message' => 'Note not created as content is empty'], 200);
-}
+    
 
     
 }

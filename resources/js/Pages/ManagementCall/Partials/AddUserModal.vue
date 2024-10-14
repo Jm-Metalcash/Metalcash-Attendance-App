@@ -78,9 +78,12 @@
     </div>
 </template>
 
+
+
 <script setup>
 import { ref, defineEmits } from "vue";
 import axios from "axios";
+
 
 const props = defineProps({
     showModal: {
@@ -94,7 +97,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["toggleModal", "addUser"]);
-
 
 // Réactifs pour le formulaire
 const newUser = ref({
@@ -113,6 +115,7 @@ const newUser = ref({
 // Réactif pour la note
 const newNote = ref({
     content: "",
+    note_date: new Date().toISOString(), // Initialisation de la date ici
 });
 
 const errors = ref({});
@@ -124,12 +127,17 @@ const addUserWithNote = async () => {
         const response = await axios.post("/clients", newUser.value);
         const clientId = response.data.id;
 
+        let noteData = null;
+
         // Ajouter la note associée au client s'il y a un contenu
         if (newNote.value.content) {
-            await axios.post(`/clients/${clientId}/notes`, {
+            const noteResponse = await axios.post(`/clients/${clientId}/notes`, {
                 content: newNote.value.content,
-                note_date: new Date().toISOString(),
+                note_date: new Date().toISOString(), // Utilisation d'une date ISO
             });
+
+            // Assigner les données de la note, y compris la date formatée
+            noteData = noteResponse.data;
         }
 
         // Réinitialiser les champs
@@ -147,12 +155,11 @@ const addUserWithNote = async () => {
         };
         newNote.value.content = "";
 
-        // Émettre l'événement 'addUser' avec le client ajouté
-        emit("addUser", response.data);
+        // Émettre l'événement 'addUser' avec le client ajouté et les notes
+        emit("addUser", { ...response.data, notes: noteData ? [noteData] : [] });
 
     } catch (error) {
         if (error.response && error.response.status === 422) {
-            // Laravel renvoie les erreurs dans error.response.data.errors
             errors.value = error.response.data.errors;
         } else {
             console.error("Error while adding user with note:", error);
@@ -160,8 +167,4 @@ const addUserWithNote = async () => {
     }
 };
 
-
-
 </script>
-
-
