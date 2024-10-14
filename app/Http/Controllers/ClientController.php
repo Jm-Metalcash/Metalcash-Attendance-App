@@ -67,11 +67,20 @@ class ClientController extends Controller
             'phone.unique' => 'Le numéro indiqué est déjà existant.',
             'email.email' => 'Le format ne correspond pas à une adresse e-mail valide.',
         ]);
-
-        // Si la validation est réussie, on crée le client
-        $client = Client::create($validatedData);
-
-        // Renvoyer une réponse JSON avec le client créé
-        return response()->json($client, 201);
+    
+        // Supprimer les champs avec des valeurs nulles
+        $validatedData = array_filter($validatedData, fn($value) => !is_null($value));
+    
+        try {
+            // Si la validation est réussie, on crée le client
+            $client = Client::create($validatedData);
+    
+            // Renvoyer une réponse JSON avec le client créé
+            return response()->json($client, 201);
+        } catch (\Exception $e) {
+            // Capturer les erreurs et renvoyer une réponse appropriée
+            return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
+        }
     }
+    
 }
