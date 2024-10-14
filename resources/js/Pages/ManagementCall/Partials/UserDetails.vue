@@ -49,7 +49,6 @@
                                         @blur="saveNote(index)"
                                         @keydown.enter="saveNote(index)"
                                         @mousedown="mouseDown = true"
-                                        @mouseup="handleMouseUp(index)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
 
@@ -83,11 +82,22 @@
             <!-- Bouton d'ajout de note stylisé -->
             <div class="flex items-center justify-start mt-4 ml-2">
                 <button
+                    v-if="!showAddNote"
                     class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="addNote"
+                    @click="showAddNote = true"
                 >
                     <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
                     Ajouter une note
+                </button>
+
+                <!-- Bouton pour réduire le formulaire si showAddNote est true -->
+                <button
+                    v-if="showAddNote"
+                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                    @click="showAddNote = false"
+                >
+                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
+                    Réduire le formulaire
                 </button>
             </div>
 
@@ -100,6 +110,7 @@
                     <input
                         type="text"
                         v-model="newNote.content"
+                        @keydown.enter="saveNewNote"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Saisir la note..."
                     />
@@ -797,9 +808,9 @@ const saveTransaction = (index) => {
             console.log("Transaction mise à jour avec succès");
 
             // Afficher le message de succès
-            successMessages.transactions[index] = true;
+            successMessages.transactions = true;
             setTimeout(() => {
-                successMessages.transactions[index] = false;
+                successMessages.transactions = false;
             }, 3000);
         })
         .catch((error) => {
@@ -838,7 +849,7 @@ const saveNewTransaction = () => {
             // Réinitialiser le formulaire
             newTransaction.value.typeofmetal = "";
             newTransaction.value.weight = "";
-            newTransaction.value.date = new Date().toISOString().substr(0, 10);
+            newTransaction.value.date = new Date().toISOString();
             newTransaction.value.details = "";
 
             // Cacher le formulaire
@@ -855,7 +866,6 @@ const saveNewTransaction = () => {
         });
 };
 </script>
-
 
 <style scoped>
 .success-message {
