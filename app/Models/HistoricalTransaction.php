@@ -14,6 +14,8 @@ class HistoricalTransaction extends Model
         'client_id', 'date', 'type', 'typeofmetal', 'weight', 'details'
     ];
 
+    protected $dates = ['date'];
+
     // Relation inverse avec la table clients
     public function client()
     {
