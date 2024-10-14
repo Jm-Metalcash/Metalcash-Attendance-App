@@ -422,7 +422,9 @@
                     </thead>
                     <tbody>
                         <tr
-                            v-for="transaction in editableUser.transactions"
+                            v-for="(
+                                transaction, index
+                            ) in editableUser.transactions"
                             :key="transaction.id"
                         >
                             <td
@@ -433,15 +435,41 @@
                             <td
                                 class="py-2 px-4 border-b text-sm text-center text-gray-500"
                             >
-                                {{ transaction.typeofmetal }}
+                                <span
+                                    v-if="!isEditingTransactions[index]"
+                                    @click="editTransaction(index)"
+                                    class="editable-text cursor-pointer"
+                                >
+                                    {{ transaction.typeofmetal }}
+                                </span>
+                                <input
+                                    v-else
+                                    v-model="transaction.typeofmetal"
+                                    @blur="saveTransaction(index)"
+                                    @keydown.enter="saveTransaction(index)"
+                                    class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                                />
                             </td>
                             <td
                                 class="py-2 px-4 border-b text-sm text-center text-gray-500 lg:pr-28"
                             >
-                                {{ transaction.weight }}
+                                <span
+                                    v-if="!isEditingTransactions[index]"
+                                    @click="editTransaction(index)"
+                                    class="editable-text cursor-pointer"
+                                >
+                                    {{ transaction.weight }}
+                                </span>
+                                <input
+                                    v-else
+                                    v-model="transaction.weight"
+                                    @blur="saveTransaction(index)"
+                                    @keydown.enter="saveTransaction(index)"
+                                    class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                                />
                             </td>
                         </tr>
-                        <tr v-if="!editableUser.transactions.length">
+                        <tr v-if="editableUser.transactions.length < 0">
                             <td
                                 colspan="3"
                                 class="py-5 px-4 border-b text-sm text-center text-gray-500"
@@ -517,7 +545,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 
 // Props
@@ -537,9 +565,6 @@ const editableUser = reactive({
     notes: props.user.notes || [],
     transactions: props.user.transactions || [],
 });
-
-// Variable pour gérer si le formulaire est minimisé
-const formMinimized = ref(false);
 
 // Initialiser isEditingNotes comme un tableau réactif
 const isEditingNotes = reactive([]);
@@ -577,10 +602,6 @@ onMounted(() => {
     initializeTransactionsState();
 });
 
-onBeforeUnmount(() => {
-    document.removeEventListener("click", handleClickOutside);
-});
-
 // État réactif pour savoir quel champ est en cours d'édition
 const isEditing = reactive({
     firstName: false,
@@ -592,25 +613,6 @@ const isEditing = reactive({
     locality: false,
     country: false,
 });
-
-// État pour gérer si la souris est cliquée
-const mouseDown = ref(false);
-
-// Fonction pour gérer le clic en dehors de l'input
-const handleClickOutside = (event) => {
-    if (
-        !event.target.closest(".editable-input") &&
-        !event.target.closest(".editable-text")
-    ) {
-        closeAllFields();
-        closeAllNotes();
-    }
-};
-
-// Gérer le relâchement du clic de la souris pour éviter l'exécution de la sauvegarde
-const handleMouseUp = (index) => {
-    mouseDown.value = false;
-};
 
 // Fonctions pour gérer les champs d'édition
 const editField = (field) => {
@@ -740,48 +742,6 @@ const saveNewNote = () => {
                 console.error("Failed to add the note:", error);
             });
     }
-
-    // Méthode pour sauvegarder un nouvel historique
-    const saveNewHistory = () => {
-        if (
-            newHistory.value.typeofmetal &&
-            newHistory.value.weight &&
-            newHistory.value.date
-        ) {
-            // Envoyer une requête POST à l'API pour ajouter l'historique
-            axios
-                .post(`/clients/${editableUser.id}/transactions`, {
-                    type: newHistory.value.type,
-                    typeofmetal: newHistory.value.typeofmetal,
-                    weight: newHistory.value.weight,
-                    date: newHistory.value.date,
-                    details: newHistory.value.details,
-                })
-                .then((response) => {
-                    // Ajouter la nouvelle transaction à la liste des transactions de l'utilisateur
-                    editableUser.transactions.push(response.data);
-
-                    // Réinitialiser le formulaire
-                    newHistory.value.typeofmetal = "";
-                    newHistory.value.weight = "";
-                    newHistory.value.date = new Date()
-                        .toISOString()
-                        .substr(0, 10);
-                    newHistory.value.details = "";
-
-                    showAddHistory.value = false;
-
-                    // Afficher un message de succès si nécessaire
-                    // ...
-                })
-                .catch((error) => {
-                    console.error(
-                        "Erreur lors de l'ajout de la transaction :",
-                        error
-                    );
-                });
-        }
-    };
 };
 
 // Affichage des dates en format DD-MM-YYYY | HH:mm
@@ -811,6 +771,43 @@ const initializeTransactionsState = () => {
         isEditingTransactions.length,
         ...editableUser.transactions.map(() => false)
     );
+};
+
+// Méthode pour basculer en mode édition d'une transaction
+const editTransaction = (index) => {
+    isEditingTransactions[index] = true;
+};
+
+// Méthode pour sauvegarder une transaction modifiée
+const saveTransaction = (index) => {
+    isEditingTransactions[index] = false;
+
+    // Envoyer la requête PUT pour mettre à jour la transaction
+    axios
+        .put(
+            `/clients/${editableUser.id}/transactions/${editableUser.transactions[index].id}`,
+            {
+                typeofmetal: editableUser.transactions[index].typeofmetal,
+                weight: editableUser.transactions[index].weight,
+                date: editableUser.transactions[index].date,
+                details: editableUser.transactions[index].details,
+            }
+        )
+        .then(() => {
+            console.log("Transaction mise à jour avec succès");
+
+            // Afficher le message de succès
+            successMessages.transactions[index] = true;
+            setTimeout(() => {
+                successMessages.transactions[index] = false;
+            }, 3000);
+        })
+        .catch((error) => {
+            console.error(
+                "Erreur lors de la mise à jour de la transaction :",
+                error
+            );
+        });
 };
 
 // Formulaire de nouvelle transaction
@@ -858,6 +855,7 @@ const saveNewTransaction = () => {
         });
 };
 </script>
+
 
 <style scoped>
 .success-message {
