@@ -643,7 +643,7 @@ const saveField = (field) => {
             Object.assign(editableUser, response.data);
 
             // Émettre l'événement avec les données mises à jour
-            emit("user-updated", editableUser);
+            emit("user-updated", JSON.parse(JSON.stringify(editableUser)));
 
             displaySuccessMessage(field);
         })
@@ -652,13 +652,6 @@ const saveField = (field) => {
         });
 };
 
-const closeAllFields = () => {
-    Object.keys(isEditing).forEach((field) => {
-        if (isEditing[field]) {
-            saveField(field);
-        }
-    });
-};
 
 const displaySuccessMessage = (field) => {
     successMessages[field] = true;
@@ -692,8 +685,6 @@ const saveNote = (index) => {
         });
 };
 
-
-
 const displayNoteSuccessMessage = (index) => {
     successMessages.notes[index] = true;
     setTimeout(() => {
@@ -708,7 +699,6 @@ const newNote = ref({
     content: "",
     note_date: new Date().toISOString(),
 });
-
 
 const saveNewNote = () => {
     if (newNote.value.content) {
@@ -746,7 +736,6 @@ const saveNewNote = () => {
     }
 };
 
-
 // Fonction de formatage de la date
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -758,17 +747,16 @@ const formatDateTime = (dateString) => {
 
     // Formatage en fonction du fuseau horaire local
     const options = {
-        timeZone: 'Europe/Paris', // Remplace par le fuseau souhaité
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        timeZone: "Europe/Paris", // Remplace par le fuseau souhaité
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
     };
 
-    return new Intl.DateTimeFormat('fr-FR', options).format(date);
+    return new Intl.DateTimeFormat("fr-FR", options).format(date);
 };
-
 
 // Fonction de formatage de la date sans l'heure (pour les transactions)
 const formatDateOnly = (dateString) => {
@@ -781,18 +769,14 @@ const formatDateOnly = (dateString) => {
 
     // Formatage pour n'afficher que la date
     const options = {
-        timeZone: 'Europe/Paris', // Remplace par le fuseau souhaité
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
+        timeZone: "Europe/Paris", // Remplace par le fuseau souhaité
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
     };
 
-    return new Intl.DateTimeFormat('fr-FR', options).format(date);
+    return new Intl.DateTimeFormat("fr-FR", options).format(date);
 };
-
-
-
-
 
 // Gérer l'affichage de l'historique
 const showHistory = ref(false);
@@ -819,7 +803,6 @@ const editTransaction = (index) => {
 // Méthode pour sauvegarder une transaction modifiée
 const saveTransaction = (index) => {
     isEditingTransactions[index] = false;
-
 
     // Envoyer la requête PUT pour mettre à jour la transaction
     axios
@@ -862,13 +845,13 @@ const showAddTransaction = ref(false);
 
 // Méthode pour sauvegarder une nouvelle transaction
 const saveNewTransaction = () => {
-    const now = new Date().toISOString();  // Stockage en UTC
+    const now = new Date().toISOString(); // Stockage en UTC
 
     axios
         .post(`/clients/${editableUser.id}/transactions`, {
             typeofmetal: newTransaction.value.typeofmetal,
             weight: newTransaction.value.weight,
-            date: now,  // Enregistrer la date au format UTC
+            date: now, // Enregistrer la date au format UTC
             details: newTransaction.value.details,
         })
         .then((response) => {
@@ -877,7 +860,7 @@ const saveNewTransaction = () => {
                 id: response.data.id,
                 typeofmetal: newTransaction.value.typeofmetal,
                 weight: newTransaction.value.weight,
-                date: now,  // Utiliser la même date pour le stockage
+                date: now, // Utiliser la même date pour le stockage
                 details: newTransaction.value.details,
             });
 
