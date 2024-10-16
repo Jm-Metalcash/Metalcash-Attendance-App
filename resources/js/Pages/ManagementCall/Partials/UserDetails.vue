@@ -32,9 +32,12 @@
                                 </th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <transition-group name="slide" tag="tbody">
                             <tr
-                                v-for="(note, index) in editableUser.notes"
+                                v-for="(note, index) in editableUser.notes
+                                    .slice()
+                                    .reverse()
+                                    .slice(0, visibleNotesCount)"
                                 :key="note.id"
                                 :class="
                                     note.type === 'avertissement'
@@ -43,12 +46,12 @@
                                 "
                             >
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left  w-1/6"
+                                    class="py-2 px-4 border-b text-sm text-left w-1/6"
                                 >
                                     {{ formatDateTime(note.note_date) }}
                                 </td>
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left  w-5/6"
+                                    class="py-2 px-4 border-b text-sm text-left w-5/6"
                                 >
                                     <!-- Affichage du contenu de la note -->
                                     <span
@@ -78,8 +81,30 @@
                                     </p>
                                 </td>
                             </tr>
-                        </tbody>
+                        </transition-group>
                     </table>
+                    <div class="text-center">
+                        <button
+                            v-if="visibleNotesCount < editableUser.notes.length"
+                            @click="showMoreNotes"
+                            class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
+                        >
+                            Voir plus <i class="fa-solid fa-angle-down"></i>
+                        </button>
+
+                        <!-- Bouton Voir moins -->
+                        <button
+                            v-if="
+                                visibleNotesCount >=
+                                    editableUser.notes.length &&
+                                editableUser.notes.length > 5
+                            "
+                            @click="showLessNotes"
+                            class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
+                        >
+                            Voir moins <i class="fa-solid fa-angle-up"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div v-else>
@@ -97,7 +122,9 @@
             </p>
 
             <!-- Bouton d'ajout de note stylisé -->
-            <div class="flex items-center justify-start mt-4 ml-2">
+            <div
+                class="flex items-center justify-start md:justify-start mt-4 ml-2"
+            >
                 <button
                     v-if="!showAddNote"
                     class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
@@ -603,6 +630,19 @@ const editableUser = reactive({
     transactions: props.user.transactions || [],
 });
 
+// nb reactif d'affichage des notes
+const visibleNotesCount = ref(5);
+
+// Fonction pour afficher plus de notes
+const showMoreNotes = () => {
+    visibleNotesCount.value = editableUser.notes.length;
+};
+
+// Fonction pour revenir aux 5 premières notes
+const showLessNotes = () => {
+    visibleNotesCount.value = 5;
+};
+
 // Initialiser isEditingNotes comme un tableau réactif
 const isEditingNotes = reactive([]);
 
@@ -924,6 +964,21 @@ const saveNewTransaction = () => {
 </script>
 
 <style scoped>
+/* Transition pour les notes */
+.slide-enter-active, .slide-leave-active {
+  transition: all 0.5s ease;
+}
+
+.slide-enter-from, .slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-leave-from, .slide-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .success-message {
     animation: fade-in-out 3s forwards;
     position: absolute;
