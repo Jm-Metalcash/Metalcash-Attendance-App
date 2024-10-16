@@ -9,7 +9,7 @@ class Note extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['content', 'note_date', 'client_id'];
+    protected $fillable = ['content', 'note_date', 'client_id', 'type'];
 
     protected $dates = ['note_date'];
 

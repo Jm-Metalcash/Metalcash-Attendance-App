@@ -1,5 +1,17 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
+        <!-- Section blacklist -->
+        <div v-if="user.blacklist === 1" class="warning-blacklist mb-4">
+            <div
+                class="bg-red-100 text-red-700 px-4 py-2 relative"
+                role="alert"
+            >
+                <span class="font-bold text-sm">Note :</span>
+                <span class="block sm:inline text-sm md:ml-1"
+                    >Ce fournisseur possède un avertissement (voir notes)</span
+                >
+            </div>
+        </div>
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
             <div v-if="editableUser.notes && editableUser.notes.length > 0">
@@ -24,14 +36,19 @@
                             <tr
                                 v-for="(note, index) in editableUser.notes"
                                 :key="note.id"
+                                :class="
+                                    note.type === 'avertissement'
+                                        ? 'bg-red-100 text-red-700'
+                                        : 'text-gray-500'
+                                "
                             >
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left text-gray-500 w-1/6"
+                                    class="py-2 px-4 border-b text-sm text-left  w-1/6"
                                 >
                                     {{ formatDateTime(note.note_date) }}
                                 </td>
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left text-gray-500 w-5/6"
+                                    class="py-2 px-4 border-b text-sm text-left  w-5/6"
                                 >
                                     <!-- Affichage du contenu de la note -->
                                     <span
@@ -107,6 +124,15 @@
                     <h4 class="text-gray-700 text-sm font-semibold mb-2">
                         Nouvelle note
                     </h4>
+
+                    <select
+                        id="noteType"
+                        v-model="newNote.type"
+                        class="mt-1 mb-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    >
+                        <option value="information">Information</option>
+                        <option value="avertissement">Avertissement</option>
+                    </select>
                     <input
                         type="text"
                         v-model="newNote.content"
@@ -652,7 +678,6 @@ const saveField = (field) => {
         });
 };
 
-
 const displaySuccessMessage = (field) => {
     successMessages[field] = true;
     setTimeout(() => {
@@ -696,6 +721,7 @@ const displayNoteSuccessMessage = (index) => {
 const showAddNoteSuccess = ref(false);
 const showAddNote = ref(false);
 const newNote = ref({
+    type: "information",
     content: "",
     note_date: new Date().toISOString(),
 });
@@ -704,34 +730,46 @@ const saveNewNote = () => {
     if (newNote.value.content) {
         const now = new Date().toISOString();
 
+        const blacklistValue = newNote.value.type === "avertissement" ? 1 : 0;
+
         axios
             .post(`/clients/${editableUser.id}/notes`, {
                 content: newNote.value.content,
                 note_date: now,
+                type: newNote.value.type, // Envoie le type de la note
             })
             .then((response) => {
-                // Ajouter la nouvelle note avec l'ID retourné par le serveur
                 editableUser.notes.push({
                     id: response.data.id,
                     content: newNote.value.content,
                     note_date: now,
+                    type: newNote.value.type, // Ajoute le type de la note
                 });
 
-                // Mettre à jour isEditingNotes et successMessages.notes
-                isEditingNotes.push(false);
-                successMessages.notes.push(false);
+                return axios.put(`/clients/${editableUser.id}`, {
+                    blacklist: blacklistValue,
+                });
+            })
+            .then(() => {
+                editableUser.blacklist = blacklistValue;
+
+                // Émettre un événement pour informer le parent que le blacklist a été mis à jour
+                emit("user-updated", JSON.parse(JSON.stringify(editableUser)));
 
                 newNote.value.content = "";
+                newNote.value.type = "information"; // Réinitialiser à la valeur par défaut
                 showAddNote.value = false;
 
-                // Afficher le message de succès
                 showAddNoteSuccess.value = true;
                 setTimeout(() => {
                     showAddNoteSuccess.value = false;
                 }, 3000);
             })
             .catch((error) => {
-                console.error("Failed to add the note:", error);
+                console.error(
+                    "Erreur lors de l'ajout de la note ou de la mise à jour du client :",
+                    error
+                );
             });
     }
 };
@@ -883,7 +921,6 @@ const saveNewTransaction = () => {
             console.error("Erreur lors de l'ajout de la transaction :", error);
         });
 };
-
 </script>
 
 <style scoped>

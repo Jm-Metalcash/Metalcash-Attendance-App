@@ -32,6 +32,7 @@ class NoteController extends Controller
         $validatedData = $request->validate([
             'content' => 'nullable|string|max:1000',
             'note_date' => 'nullable|date',
+            'type' => 'required|string|in:information,avertissement'
         ]);
     
         // Convertir la date si nécessaire
@@ -45,7 +46,8 @@ class NoteController extends Controller
             return response()->json([
                 'id' => $note->id,
                 'content' => $note->content,
-                'note_date' => $note->note_date->format('Y-m-d\TH:i:s') // Format ISO 8601
+                'note_date' => $note->note_date->format('Y-m-d\TH:i:s'),
+                'type' => $note->type 
             ]);
         }
     
