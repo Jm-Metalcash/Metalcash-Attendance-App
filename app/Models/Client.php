@@ -11,7 +11,7 @@ class Client extends Model
 
     // Colonnes qui peuvent être assignées en masse
     protected $fillable = [
-        'fullName', 'familyName', 'firstName', 'address', 'locality', 'postalCode', 'country', 'email', 'phone', 'company', 'companyvat', 'regdate'
+        'fullName', 'familyName', 'firstName', 'address', 'locality', 'postalCode', 'country', 'email', 'phone', 'blacklist', 'company', 'companyvat', 'regdate'
     ];
 
     protected static function boot()

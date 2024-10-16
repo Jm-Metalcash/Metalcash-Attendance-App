@@ -33,6 +33,7 @@ class ClientController extends Controller
             'locality' => 'nullable|string|max:255',
             'postalCode' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:255',
+            'blacklist' => 'nullable|boolean',
         ]);
 
         $client = Client::findOrFail($id);
@@ -61,6 +62,7 @@ class ClientController extends Controller
             'postalCode' => 'nullable|string|max:10',
             'locality' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
+            'blacklist' => 'nullable|boolean',
         ], [
             // Messages d'erreur personnalisés
             'phone.required' => 'Le numéro de téléphone est obligatoire.',
