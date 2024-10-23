@@ -23,12 +23,17 @@ class Client extends Model
         });
     }
    
-
     // Relation avec la table notes
     public function notes()
     {
         return $this->hasMany(Note::class);
     }
+
+
+    public function bordereauHistoriques()
+{
+    return $this->hasMany(BordereauHistorique::class);
+}
 }
 
 

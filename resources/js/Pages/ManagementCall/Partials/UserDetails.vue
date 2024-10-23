@@ -183,7 +183,7 @@
             </p>
         </div>
         <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
-            <dl class="sm:divide-y sm:divide-gray-200">
+            <div class="sm:divide-y sm:divide-gray-200">
                 <!-- Première ligne : Prénom & Nom -->
                 <div
                     class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
@@ -442,8 +442,12 @@
                         </dd>
                     </div>
                 </div>
-            </dl>
-        </div>  
+            </div>
+        </div> 
+        
+        <!-- DISPLAY LES HISTORIQUES DES BORDEREAUX -->
+
+
     </div>
 </template>
 
@@ -466,6 +470,7 @@ const emit = defineEmits(["user-updated"]);
 const editableUser = reactive({
     ...props.user,
     notes: props.user.notes || [],
+    bordereauHistoriques: props.user.bordereau_historiques || [],
 });
 
 // nb reactif d'affichage des notes

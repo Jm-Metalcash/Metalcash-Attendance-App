@@ -7,6 +7,8 @@ use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\BordereauHistoriqueController;
+use App\Http\Controllers\BordereauInformationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -28,10 +30,10 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
-    
+
     // Autres routes nécessitant la restriction d'IP après authentification
     Route::get('/historique', [HistoricalController::class, 'index'])->name('historique');
-    
+
     // Envoi des données des jours dans la base de données
     Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
     Route::get('/dashboard/days', [DayController::class, 'index']);
@@ -48,7 +50,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy')->middleware('role:Admin,Informatique');
     Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('update-day')->middleware('role:Admin,Informatique');
     Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('add-day')->middleware('role:Admin,Informatique');
-    
+
     // Route pour afficher les pointages d'un employé spécifique
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 
@@ -56,11 +58,18 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/gestion-appels-telephoniques', [ClientController::class, 'index'])->name('managementCall');
     Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::post('/clients', [ClientController::class, 'store']);
-    
+
     //gestion des notes des clients
     Route::put('/clients/{client}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
     Route::post('/clients/{client}/notes', [NoteController::class, 'store'])->name('notes.store');
+    Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
 
+    // Routes pour les bordereaux historiques
+    Route::get('clients/{client}/bordereau_historique/{bordereauHistorique}', [BordereauHistoriqueController::class, 'show']);
+    Route::post('clients/{client}/bordereau_historique', [BordereauHistoriqueController::class, 'store']);
+    
+    // Routes pour les informations du bordereau
+    Route::resource('bordereau_historique.informations', BordereauInformationController::class);
 });
 
 

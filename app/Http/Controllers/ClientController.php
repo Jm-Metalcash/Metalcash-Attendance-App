@@ -21,6 +21,21 @@ class ClientController extends Controller
         ]);
     }
 
+    // Affiche les détails d'un client spécifique
+    public function show($id)
+    {
+        // Récupérer le client avec ses notes, ses historiques de bordereaux et les informations associées
+        $client = Client::with([
+            'notes',
+            'bordereauHistoriques.informations'
+        ])->findOrFail($id);
+
+        // Envoie les données à la vue Inertia
+        return Inertia::render('Client/UserDetails', [
+            'user' => $client,
+        ]);
+    }
+
     // Modifie les données d'un client
     public function update(Request $request, $id)
     {
@@ -69,14 +84,14 @@ class ClientController extends Controller
             'phone.unique' => 'Le numéro indiqué est déjà existant.',
             'email.email' => 'Le format ne correspond pas à une adresse e-mail valide.',
         ]);
-    
+
         // Supprimer les champs avec des valeurs nulles
         $validatedData = array_filter($validatedData, fn($value) => !is_null($value));
-    
+
         try {
             // Si la validation est réussie, on crée le client
             $client = Client::create($validatedData);
-    
+
             // Renvoyer une réponse JSON avec le client créé
             return response()->json($client, 201);
         } catch (\Exception $e) {
@@ -84,5 +99,4 @@ class ClientController extends Controller
             return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
         }
     }
-    
 }
