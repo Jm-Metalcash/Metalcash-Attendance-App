@@ -29,12 +29,20 @@ class ClientController extends Controller
             'notes',
             'bordereauHistoriques.informations'
         ])->findOrFail($id);
-
+    
+        // Vérifier si la requête est une requête AJAX
+        if (request()->ajax()) {
+            return response()->json(['user' => $client]);
+        }
+    
         // Envoie les données à la vue Inertia
-        return Inertia::render('Client/UserDetails', [
+        return Inertia::render('ManagementCall', [
             'user' => $client,
         ]);
     }
+    
+    
+
 
     // Modifie les données d'un client
     public function update(Request $request, $id)

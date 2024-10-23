@@ -443,11 +443,81 @@
                     </div>
                 </div>
             </div>
-        </div> 
-        
-        <!-- DISPLAY LES HISTORIQUES DES BORDEREAUX -->
+        </div>
 
+        <!-- Section Historiques des Bordereaux -->
+        <div class="max-w-7xl mx-auto">
+            <div class="inline-block min-w-full py-2 align-middle">
+                <div
+                    class="overflow-hidden shadow ring-opacity-5 md:rounded-lg"
+                >
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    scope="col"
+                                    class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-600 sm:pl-6"
+                                >
+                                    #
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-600"
+                                >
+                                    Date
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-3 py-3.5 text-sm font-semibold text-center text-gray-600"
+                                >
+                                    Statut
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            <tr
+                                v-for="(
+                                    historique, index
+                                ) in editableUser.bordereauHistoriques"
+                                :key="historique.id"
+                            >
+                                <!-- Numéro de ligne -->
+                                <td
+                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-center font-normal text-gray-600 sm:pl-6"
+                                >
+                                    {{ index + 1 }}
+                                </td>
 
+                                <!-- Date du bordereau -->
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-center text-gray-600"
+                                >
+                                    {{ formatDateTime(historique.date) }}
+                                </td>
+
+                                <!-- Statut du bordereau -->
+                                <td
+                                    class="whitespace-nowrap px-3 py-4 text-sm text-center"
+                                >
+                                    <span
+                                        :class="{
+                                            'bg-green-100 text-green-800 py-1 px-4 rounded-xl text-center':
+                                                historique.status === 1,
+                                            'bg-yellow-100 text-yellow-800 py-1 px-4 rounded-xl text-center':
+                                                historique.status === 0,
+                                            'bg-red-100 text-red-800 py-1 px-4 rounded-xl text-center':
+                                                historique.status === 2,
+                                        }"
+                                    >
+                                        {{ formatStatus(historique.status) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -504,22 +574,22 @@ const successMessages = reactive({
 
 // Initialiser isEditingNotes et successMessages.notes
 const initializeNotesState = () => {
-  editableUser.notes.forEach((note) => {
-    isEditingNotes[note.id] = false;
-  });
+    editableUser.notes.forEach((note) => {
+        isEditingNotes[note.id] = false;
+    });
 };
 initializeNotesState();
 
 watch(
-  () => editableUser.notes,
-  (newNotes) => {
-    newNotes.forEach((note) => {
-      if (!(note.id in isEditingNotes)) {
-        isEditingNotes[note.id] = false;
-      }
-    });
-  },
-  { immediate: true }
+    () => editableUser.notes,
+    (newNotes) => {
+        newNotes.forEach((note) => {
+            if (!(note.id in isEditingNotes)) {
+                isEditingNotes[note.id] = false;
+            }
+        });
+    },
+    { immediate: true }
 );
 
 onMounted(() => {
@@ -583,31 +653,31 @@ const reversedNotes = computed(() => {
 
 // Enregistre une note avec Axios vers la DB
 const saveNote = (note) => {
-  isEditingNotes[note.id] = false;
+    isEditingNotes[note.id] = false;
 
-  axios
-    .put(`/clients/${editableUser.id}/notes/${note.id}`, {
-      content: note.content,
-    })
-    .then((response) => {
-      // Mettre à jour la note dans editableUser.notes
-      const index = editableUser.notes.findIndex((n) => n.id === note.id);
-      if (index !== -1) {
-        editableUser.notes[index] = response.data;
-      }
+    axios
+        .put(`/clients/${editableUser.id}/notes/${note.id}`, {
+            content: note.content,
+        })
+        .then((response) => {
+            // Mettre à jour la note dans editableUser.notes
+            const index = editableUser.notes.findIndex((n) => n.id === note.id);
+            if (index !== -1) {
+                editableUser.notes[index] = response.data;
+            }
 
-      displayNoteSuccessMessage(note.id);
-    })
-    .catch((error) => {
-      console.error("Erreur lors de la mise à jour de la note :", error);
-    });
+            displayNoteSuccessMessage(note.id);
+        })
+        .catch((error) => {
+            console.error("Erreur lors de la mise à jour de la note :", error);
+        });
 };
 
 const displayNoteSuccessMessage = (noteId) => {
-  successMessages.notes[noteId] = true;
-  setTimeout(() => {
-    successMessages.notes[noteId] = false;
-  }, 3000);
+    successMessages.notes[noteId] = true;
+    setTimeout(() => {
+        successMessages.notes[noteId] = false;
+    }, 3000);
 };
 
 // Ajout de nouvelles notes
@@ -689,6 +759,19 @@ const formatDateTime = (dateString) => {
     return new Intl.DateTimeFormat("fr-FR", options).format(date);
 };
 
+// Fonction pour formater le statut
+const formatStatus = (status) => {
+    switch (status) {
+        case 0:
+            return "En cours";
+        case 1:
+            return "Clôturé";
+        case 2:
+            return "Annulation";
+        default:
+            return "Inconnu";
+    }
+};
 
 watch(
     () => editableUser.notes,

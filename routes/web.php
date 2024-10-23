@@ -65,11 +65,8 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
 
     // Routes pour les bordereaux historiques
-    Route::get('clients/{client}/bordereau_historique/{bordereauHistorique}', [BordereauHistoriqueController::class, 'show']);
+    Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
     Route::post('clients/{client}/bordereau_historique', [BordereauHistoriqueController::class, 'store']);
-    
-    // Routes pour les informations du bordereau
-    Route::resource('bordereau_historique.informations', BordereauInformationController::class);
 });
 
 

@@ -73,8 +73,16 @@ const filteredUsers = computed(() => {
 
 // Fonction pour sélectionner un utilisateur
 const selectUser = (user) => {
-    selectedUser.value = user;
+    axios
+        .get(`/clients/${user.id}`)
+        .then((response) => {
+            selectedUser.value = response.data.user;
+        })
+        .catch((error) => {
+            console.error("Erreur lors de la récupération des données de l'utilisateur :", error);
+        });
 };
+
 
 // Réinitialiser selectedUser si searchTerm change
 watch(searchTerm, () => {
