@@ -22,12 +22,7 @@ class Client extends Model
             $client->fullName = trim($client->firstName . ' ' . $client->familyName);
         });
     }
-
-    // Relation avec la table historical_transactions (transactions)
-    public function transactions()
-    {
-        return $this->hasMany(HistoricalTransaction::class, 'client_id');
-    }
+   
 
     // Relation avec la table notes
     public function notes()

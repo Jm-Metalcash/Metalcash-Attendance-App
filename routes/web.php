@@ -7,7 +7,6 @@ use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NoteController;
-use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -62,9 +61,6 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::put('/clients/{client}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
     Route::post('/clients/{client}/notes', [NoteController::class, 'store'])->name('notes.store');
 
-    // Routes pour gérer les transactions
-    Route::post('/clients/{client}/transactions', [TransactionController::class, 'store']); // Ajout d'une transaction
-    Route::put('/clients/{client}/transactions/{transaction}', [TransactionController::class, 'update']); // Mise à jour d'une transaction
 });
 
 

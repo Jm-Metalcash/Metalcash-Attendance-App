@@ -443,167 +443,7 @@
                     </div>
                 </div>
             </dl>
-        </div>
-
-        <!-- Bouton pour voir l'historique des transactions -->
-        <button
-            class="mt-12 text-sm bg-[rgb(0,85,150)] hover:bg-[rgb(5,121,198)] text-white font-bold py-2 px-4 rounded mx-4 mb-6"
-            @click="toggleHistory"
-        >
-            {{ showHistory ? "Cacher" : "Voir" }} l'historique des transactions
-        </button>
-
-        <!-- Section Historique -->
-        <div
-            v-if="
-                showHistory &&
-                editableUser.transactions &&
-                editableUser.transactions.length > 0
-            "
-        >
-            <!-- Tableau des transactions -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr class="bg-gray-200">
-                            <th
-                                class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/3"
-                            >
-                                Date
-                            </th>
-                            <th
-                                class="py-2 px-4 border-b text-center text-sm font-semibold text-gray-600 w-1/3"
-                            >
-                                Type de métal
-                            </th>
-                            <th
-                                class="py-2 px-4 border-b text-center text-sm font-semibold text-gray-600 w-1/3 lg:pr-24"
-                            >
-                                Poids (kg)
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="(
-                                transaction, index
-                            ) in editableUser.transactions"
-                            :key="transaction.id"
-                        >
-                            <td
-                                class="py-2 px-4 border-b text-sm text-left text-gray-500"
-                            >
-                                {{ formatDateOnly(transaction.date) }}
-                            </td>
-                            <td
-                                class="py-2 px-4 border-b text-sm text-center text-gray-500"
-                            >
-                                <span
-                                    v-if="!isEditingTransactions[index]"
-                                    @click="editTransaction(index)"
-                                    class="editable-text cursor-pointer"
-                                >
-                                    {{ transaction.typeofmetal }}
-                                </span>
-                                <input
-                                    v-else
-                                    v-model="transaction.typeofmetal"
-                                    @blur="saveTransaction(index)"
-                                    @keydown.enter="saveTransaction(index)"
-                                    class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                                />
-                            </td>
-                            <td
-                                class="py-2 px-4 border-b text-sm text-center text-gray-500 lg:pr-28"
-                            >
-                                <span
-                                    v-if="!isEditingTransactions[index]"
-                                    @click="editTransaction(index)"
-                                    class="editable-text cursor-pointer"
-                                >
-                                    {{ transaction.weight }}
-                                </span>
-                                <input
-                                    v-else
-                                    v-model="transaction.weight"
-                                    @blur="saveTransaction(index)"
-                                    @keydown.enter="saveTransaction(index)"
-                                    class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                                />
-                            </td>
-                        </tr>
-                        <tr v-if="editableUser.transactions.length < 0">
-                            <td
-                                colspan="3"
-                                class="py-5 px-4 border-b text-sm text-center text-gray-500"
-                            >
-                                Aucun historique pour ce fournisseur.
-                            </td>
-                        </tr>
-                        <!-- Message de succès après ajout d'une transaction -->
-                        <p
-                            v-if="successMessages.transactions"
-                            class="text-green-500 text-sm mx-auto success-message relative md:right-[30%] lg:right-[40%] xl:right-[45%] hidden md:block"
-                        >
-                            La transaction a été ajoutée avec succès !
-                        </p>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Formulaire pour ajouter une nouvelle transaction -->
-        <div v-if="showHistory" class="mt-4">
-            <div class="flex items-center justify-start mt-4 ml-2 mb-6">
-                <!-- Bouton pour afficher le formulaire d'ajout si showAddTransaction est false -->
-                <button
-                    v-if="!showAddTransaction"
-                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="showAddTransaction = true"
-                >
-                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
-                    Ajouter une transaction
-                </button>
-
-                <!-- Bouton pour réduire le formulaire si showAddTransaction est true -->
-                <button
-                    v-if="showAddTransaction"
-                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="showAddTransaction = false"
-                >
-                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
-                    Réduire le formulaire
-                </button>
-            </div>
-
-            <!-- Formulaire d'ajout de transaction -->
-            <div
-                v-if="showAddTransaction"
-                class="bg-gray-50 p-4 rounded-md shadow-md"
-            >
-                <h4 class="text-gray-700 text-sm font-semibold mb-2">
-                    Nouvelle transaction
-                </h4>
-                <input
-                    type="text"
-                    v-model="newTransaction.typeofmetal"
-                    class="block w-full px-3 py-2 mb-2 border border-gray-300 rounded-md text-sm"
-                    placeholder="Type de métal"
-                />
-                <input
-                    type="number"
-                    v-model="newTransaction.weight"
-                    class="block w-full px-3 py-2 mb-2 border border-gray-300 rounded-md text-sm"
-                    placeholder="Poids en kg"
-                />
-                <button
-                    @click="saveNewTransaction"
-                    class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
-                >
-                    Enregistrer la transaction
-                </button>
-            </div>
-        </div>
+        </div>  
     </div>
 </template>
 
@@ -626,7 +466,6 @@ const emit = defineEmits(["user-updated"]);
 const editableUser = reactive({
     ...props.user,
     notes: props.user.notes || [],
-    transactions: props.user.transactions || [],
 });
 
 // nb reactif d'affichage des notes
@@ -656,7 +495,6 @@ const successMessages = reactive({
     locality: false,
     country: false,
     notes: [],
-    transactions: false,
 });
 
 // Initialiser isEditingNotes et successMessages.notes
@@ -681,7 +519,6 @@ watch(
 
 onMounted(() => {
     initializeNotesState();
-    initializeTransactionsState();
 });
 
 // État réactif pour savoir quel champ est en cours d'édition
@@ -847,131 +684,6 @@ const formatDateTime = (dateString) => {
     return new Intl.DateTimeFormat("fr-FR", options).format(date);
 };
 
-// Fonction de formatage de la date sans l'heure (pour les transactions)
-const formatDateOnly = (dateString) => {
-    const date = new Date(dateString);
-
-    // Si la date n'est pas valide, retourner une chaîne vide
-    if (isNaN(date.getTime())) {
-        return "";
-    }
-
-    // Formatage pour n'afficher que la date
-    const options = {
-        timeZone: "Europe/Paris", // Remplace par le fuseau souhaité
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    };
-
-    return new Intl.DateTimeFormat("fr-FR", options).format(date);
-};
-
-// Gérer l'affichage de l'historique
-const showHistory = ref(false);
-const toggleHistory = () => {
-    showHistory.value = !showHistory.value;
-};
-
-const isEditingTransactions = reactive([]);
-
-// Initialiser isEditingTransactions
-const initializeTransactionsState = () => {
-    isEditingTransactions.splice(
-        0,
-        isEditingTransactions.length,
-        ...editableUser.transactions.map(() => false)
-    );
-};
-
-// Méthode pour basculer en mode édition d'une transaction
-const editTransaction = (index) => {
-    isEditingTransactions[index] = true;
-};
-
-// Méthode pour sauvegarder une transaction modifiée
-const saveTransaction = (index) => {
-    isEditingTransactions[index] = false;
-
-    // Envoyer la requête PUT pour mettre à jour la transaction
-    axios
-        .put(
-            `/clients/${editableUser.id}/transactions/${editableUser.transactions[index].id}`,
-            {
-                typeofmetal: editableUser.transactions[index].typeofmetal,
-                weight: editableUser.transactions[index].weight,
-                date: editableUser.transactions[index].date,
-                details: editableUser.transactions[index].details,
-            }
-        )
-        .then(() => {
-            console.log("Transaction mise à jour avec succès");
-
-            // Afficher le message de succès
-            successMessages.transactions = true;
-            setTimeout(() => {
-                successMessages.transactions = false;
-            }, 3000);
-        })
-        .catch((error) => {
-            console.error(
-                "Erreur lors de la mise à jour de la transaction :",
-                error
-            );
-        });
-};
-
-// Formulaire de nouvelle transaction
-const newTransaction = ref({
-    typeofmetal: "",
-    weight: "",
-    date: new Date().toISOString(),
-    details: "",
-});
-
-//affiche le form pour ajouter une nouvelle transaction
-const showAddTransaction = ref(false);
-
-// Méthode pour sauvegarder une nouvelle transaction
-const saveNewTransaction = () => {
-    const now = new Date().toISOString(); // Stockage en UTC
-
-    axios
-        .post(`/clients/${editableUser.id}/transactions`, {
-            typeofmetal: newTransaction.value.typeofmetal,
-            weight: newTransaction.value.weight,
-            date: now, // Enregistrer la date au format UTC
-            details: newTransaction.value.details,
-        })
-        .then((response) => {
-            // Ajouter la nouvelle transaction avec l'ID retourné par le serveur
-            editableUser.transactions.push({
-                id: response.data.id,
-                typeofmetal: newTransaction.value.typeofmetal,
-                weight: newTransaction.value.weight,
-                date: now, // Utiliser la même date pour le stockage
-                details: newTransaction.value.details,
-            });
-
-            // Réinitialiser le formulaire
-            newTransaction.value.typeofmetal = "";
-            newTransaction.value.weight = "";
-            newTransaction.value.date = new Date().toISOString();
-            newTransaction.value.details = "";
-
-            // Cacher le formulaire
-            showAddTransaction.value = false;
-
-            // Afficher le message de succès
-            successMessages.transactions = true;
-            setTimeout(() => {
-                successMessages.transactions = false;
-            }, 3000);
-        })
-        .catch((error) => {
-            console.error("Erreur lors de l'ajout de la transaction :", error);
-        });
-};
 
 watch(
     () => editableUser.notes,
