@@ -133,7 +133,8 @@ const addUserWithNote = async () => {
         if (newNote.value.content) {
             const noteResponse = await axios.post(`/clients/${clientId}/notes`, {
                 content: newNote.value.content,
-                note_date: new Date().toISOString(), // Utilisation d'une date ISO
+                note_date: new Date().toISOString(),
+                type: 'information',
             });
 
             // Assigner les données de la note, y compris la date formatée

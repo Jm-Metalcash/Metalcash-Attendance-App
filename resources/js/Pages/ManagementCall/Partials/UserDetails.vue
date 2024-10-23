@@ -34,10 +34,10 @@
                         </thead>
                         <transition-group name="slide" tag="tbody">
                             <tr
-                                v-for="(note, index) in editableUser.notes
-                                    .slice()
-                                    .reverse()
-                                    .slice(0, visibleNotesCount)"
+                                v-for="note in reversedNotes.slice(
+                                    0,
+                                    visibleNotesCount
+                                )"
                                 :key="note.id"
                                 :class="
                                     note.type === 'avertissement'
@@ -53,28 +53,27 @@
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-5/6"
                                 >
-                                    <!-- Affichage du contenu de la note -->
+                                    <!-- Affichage de la note -->
                                     <span
-                                        v-if="!isEditingNotes[index]"
-                                        @click="editNote(index)"
+                                        v-if="!isEditingNotes[note.id]"
+                                        @click="editNote(note.id)"
                                         class="editable-text cursor-pointer"
                                     >
                                         {{ note.content }}
                                     </span>
 
-                                    <!-- Champ textarea lorsque la note est en mode édition -->
+                                    <!-- Champ d'édition -->
                                     <textarea
                                         v-else
                                         v-model="note.content"
-                                        @blur="saveNote(index)"
-                                        @keydown.enter="saveNote(index)"
-                                        @mousedown="mouseDown = true"
+                                        @blur="saveNote(note)"
+                                        @keydown.enter.prevent="saveNote(note)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
 
-                                    <!-- Message de succès après modification -->
+                                    <!-- Message de succès -->
                                     <p
-                                        v-if="successMessages.notes[index]"
+                                        v-if="successMessages.notes[note.id]"
                                         class="text-green-500 text-xs relative mt-1 success-message"
                                     >
                                         Enregistré avec succès
@@ -609,7 +608,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed, watch } from "vue";
 import axios from "axios";
 
 // Props
@@ -644,7 +643,7 @@ const showLessNotes = () => {
 };
 
 // Initialiser isEditingNotes comme un tableau réactif
-const isEditingNotes = reactive([]);
+const isEditingNotes = reactive({});
 
 // Réactif pour afficher les messages de succès
 const successMessages = reactive({
@@ -662,17 +661,23 @@ const successMessages = reactive({
 
 // Initialiser isEditingNotes et successMessages.notes
 const initializeNotesState = () => {
-    isEditingNotes.splice(
-        0,
-        isEditingNotes.length,
-        ...editableUser.notes.map(() => false)
-    );
-    successMessages.notes.splice(
-        0,
-        successMessages.notes.length,
-        ...editableUser.notes.map(() => false)
-    );
+  editableUser.notes.forEach((note) => {
+    isEditingNotes[note.id] = false;
+  });
 };
+initializeNotesState();
+
+watch(
+  () => editableUser.notes,
+  (newNotes) => {
+    newNotes.forEach((note) => {
+      if (!(note.id in isEditingNotes)) {
+        isEditingNotes[note.id] = false;
+      }
+    });
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
     initializeNotesState();
@@ -726,35 +731,41 @@ const displaySuccessMessage = (field) => {
 };
 
 // Fonctions pour gérer les notes
-const editNote = (index) => {
-    isEditingNotes[index] = true;
+const editNote = (noteId) => {
+    isEditingNotes[noteId] = true;
 };
+
+const reversedNotes = computed(() => {
+    return [...editableUser.notes].reverse();
+});
 
 // Enregistre une note avec Axios vers la DB
-const saveNote = (index) => {
-    isEditingNotes[index] = false;
+const saveNote = (note) => {
+  isEditingNotes[note.id] = false;
 
-    // Envoyer une requête PUT à l'API pour mettre à jour la note
-    axios
-        .put(
-            `/clients/${editableUser.id}/notes/${editableUser.notes[index].id}`,
-            {
-                content: editableUser.notes[index].content,
-            }
-        )
-        .then(() => {
-            displayNoteSuccessMessage(index);
-        })
-        .catch((error) => {
-            console.error("Failed to update the note:", error);
-        });
+  axios
+    .put(`/clients/${editableUser.id}/notes/${note.id}`, {
+      content: note.content,
+    })
+    .then((response) => {
+      // Mettre à jour la note dans editableUser.notes
+      const index = editableUser.notes.findIndex((n) => n.id === note.id);
+      if (index !== -1) {
+        editableUser.notes[index] = response.data;
+      }
+
+      displayNoteSuccessMessage(note.id);
+    })
+    .catch((error) => {
+      console.error("Erreur lors de la mise à jour de la note :", error);
+    });
 };
 
-const displayNoteSuccessMessage = (index) => {
-    successMessages.notes[index] = true;
-    setTimeout(() => {
-        successMessages.notes[index] = false;
-    }, 3000);
+const displayNoteSuccessMessage = (noteId) => {
+  successMessages.notes[noteId] = true;
+  setTimeout(() => {
+    successMessages.notes[noteId] = false;
+  }, 3000);
 };
 
 // Ajout de nouvelles notes
@@ -961,22 +972,37 @@ const saveNewTransaction = () => {
             console.error("Erreur lors de l'ajout de la transaction :", error);
         });
 };
+
+watch(
+    () => editableUser.notes,
+    (newNotes) => {
+        newNotes.forEach((note) => {
+            if (!(note.id in isEditingNotes)) {
+                isEditingNotes[note.id] = false;
+            }
+        });
+    },
+    { immediate: true }
+);
 </script>
 
 <style scoped>
 /* Transition pour les notes */
-.slide-enter-active, .slide-leave-active {
-  transition: all 0.5s ease;
+.slide-enter-active,
+.slide-leave-active {
+    transition: all 0.5s ease;
 }
 
-.slide-enter-from, .slide-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+.slide-enter-from,
+.slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
-.slide-leave-from, .slide-enter-to {
-  opacity: 1;
-  transform: translateY(0);
+.slide-leave-from,
+.slide-enter-to {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .success-message {
