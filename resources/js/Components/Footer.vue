@@ -58,6 +58,25 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             Gestion des employés
                         </Link>
                     </li>
+                    <li>
+                        <Link
+                            v-if="
+                                page.props.auth.roles &&
+                                (page.props.auth.roles.includes('Admin') ||
+                                    page.props.auth.roles.includes(
+                                        'Informatique'
+                                    ) ||
+                                    page.props.auth.roles.includes(
+                                        'Comptabilité'
+                                    ))
+                            "
+                            :href="route('managementCall')"
+                            :active="route().current('managementCall')"
+                            class="hover:underline me-4 md:me-6"
+                        >
+                            Gestion des appels
+                        </Link>
+                    </li>
                 </ul>
             </div>
             <hr class="my-6 border-gray-200 sm:mx-auto lg:my-8" />
