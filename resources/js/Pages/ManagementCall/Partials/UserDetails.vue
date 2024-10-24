@@ -347,7 +347,7 @@
 
     <!-- Localité -->
     <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
-        <dt class="text-sm font-bold text-gray-500">Localité</dt>
+        <dt class="text-sm font-bold text-gray-500">Localitéq</dt>
         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
             <span
                 v-if="!isEditing.locality"
