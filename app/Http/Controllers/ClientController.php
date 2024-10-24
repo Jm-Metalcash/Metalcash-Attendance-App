@@ -29,19 +29,19 @@ class ClientController extends Controller
             'notes',
             'bordereauHistoriques.informations'
         ])->findOrFail($id);
-    
+
         // Vérifier si la requête est une requête AJAX
         if (request()->ajax()) {
             return response()->json(['user' => $client]);
         }
-    
+
         // Envoie les données à la vue Inertia
         return Inertia::render('ManagementCall', [
             'user' => $client,
         ]);
     }
-    
-    
+
+
 
 
     // Modifie les données d'un client
@@ -57,27 +57,31 @@ class ClientController extends Controller
             'postalCode' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:255',
             'blacklist' => 'nullable|boolean',
+            'entity' => 'nullable|string|max:255',
+            'docType' => 'nullable|string|max:255',
+            'docNumber' => 'nullable|string|max:255',
+            'docExp' => 'nullable|date',
+            'interest' => 'nullable|string|max:255',
+            'referer' => 'nullable|string|max:255',
+            'birthDate' => 'nullable|date',
         ]);
 
         $client = Client::findOrFail($id);
         $client->update($validatedData);
-
-        // Recharger les données du client depuis la base de données
-        $client->refresh();
 
         return response()->json($client);
     }
 
 
 
+
     // Fonction pour créer un nouveau client
     public function store(Request $request)
     {
-        // Validation des données avec des messages d'erreur personnalisés
         $validatedData = $request->validate([
             'firstName' => 'nullable|string|max:255',
             'familyName' => 'nullable|string|max:255',
-            'phone' => 'required|string|max:255|unique:clients,phone', // Le numéro de téléphone est requis et doit être unique
+            'phone' => 'required|string|max:255|unique:clients,phone',
             'email' => 'nullable|email|max:255',
             'company' => 'nullable|string|max:255',
             'companyvat' => 'nullable|string|max:255',
@@ -86,24 +90,23 @@ class ClientController extends Controller
             'locality' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'blacklist' => 'nullable|boolean',
-        ], [
-            // Messages d'erreur personnalisés
-            'phone.required' => 'Le numéro de téléphone est obligatoire.',
-            'phone.unique' => 'Le numéro indiqué est déjà existant.',
-            'email.email' => 'Le format ne correspond pas à une adresse e-mail valide.',
+            'entity' => 'nullable|string|max:255',
+            'docType' => 'nullable|string|max:255',
+            'docNumber' => 'nullable|string|max:255',
+            'docExp' => 'nullable|date',
+            'interest' => 'nullable|string|max:255',
+            'referer' => 'nullable|string|max:255',
+            'birthDate' => 'nullable|date',
         ]);
 
         // Supprimer les champs avec des valeurs nulles
         $validatedData = array_filter($validatedData, fn($value) => !is_null($value));
 
         try {
-            // Si la validation est réussie, on crée le client
             $client = Client::create($validatedData);
 
-            // Renvoyer une réponse JSON avec le client créé
             return response()->json($client, 201);
         } catch (\Exception $e) {
-            // Capturer les erreurs et renvoyer une réponse appropriée
             return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
         }
     }

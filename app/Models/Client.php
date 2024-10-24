@@ -11,7 +11,9 @@ class Client extends Model
 
     // Colonnes qui peuvent être assignées en masse
     protected $fillable = [
-        'fullName', 'familyName', 'firstName', 'address', 'locality', 'postalCode', 'country', 'email', 'phone', 'blacklist', 'company', 'companyvat', 'regdate'
+        'fullName', 'familyName', 'firstName', 'address', 'locality', 'postalCode', 'country', 'email', 'phone', 
+        'blacklist', 'company', 'companyvat', 'regdate', 'entity', 'docType', 'docNumber', 'docExp', 'interest', 
+        'referer', 'birthDate'
     ];
 
     protected static function boot()
@@ -29,11 +31,8 @@ class Client extends Model
         return $this->hasMany(Note::class);
     }
 
-
     public function bordereauHistoriques()
-{
-    return $this->hasMany(BordereauHistorique::class);
+    {
+        return $this->hasMany(BordereauHistorique::class);
+    }
 }
-}
-
-
