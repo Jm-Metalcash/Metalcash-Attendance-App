@@ -310,138 +310,99 @@
                 </div>
 
                 <!-- Troisième ligne : Rue et numéro & Code postal -->
-                <div class="px-4 py-5 sm:px-6 bg-gray-200">
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                        Adresse
-                    </p>
-                </div>
-                <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                >
-                    <div class="sm:col-span-1 px-4 md:px-0">
-                        <dt class="text-sm font-bold text-gray-500">
-                            Rue et numéro
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.address"
-                                @click="editField('address')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableUser.address ||
-                                    "Ajouter une adresse"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableUser.address"
-                                @blur="saveField('address')"
-                                @keydown.enter="saveField('address')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.address"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
-                        <dt class="text-sm font-bold text-gray-500">
-                            Code postal
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.postalCode"
-                                @click="editField('postalCode')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableUser.postalCode ||
-                                    "Ajouter un code postal"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableUser.postalCode"
-                                @blur="saveField('postalCode')"
-                                @keydown.enter="saveField('postalCode')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.postalCode"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                </div>
+                <!-- Troisième ligne : Rue et numéro, Localité, et Pays -->
+<div class="px-4 py-5 sm:px-6 bg-gray-200">
+    <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
+        Adresse
+    </p>
+</div>
 
-                <!-- Quatrième ligne : Localité & Pays -->
-                <div
-                    class="py-0 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                >
-                    <div class="sm:col-span-1 px-4 md:px-0">
-                        <dt class="text-sm font-bold text-gray-500">
-                            Localité
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.locality"
-                                @click="editField('locality')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableUser.locality ||
-                                    "Ajouter une localité"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableUser.locality"
-                                @blur="saveField('locality')"
-                                @keydown.enter="saveField('locality')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.locality"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                    <div
-                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
-                    >
-                        <dt class="text-sm font-bold text-gray-500">Pays</dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.country"
-                                @click="editField('country')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{ editableUser.country || "Ajouter un pays" }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableUser.country"
-                                @blur="saveField('country')"
-                                @keydown.enter="saveField('country')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.country"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                </div>
+<div class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <!-- Rue et numéro -->
+    <div class="sm:col-span-1 px-4 md:px-0">
+        <dt class="text-sm font-bold text-gray-500">Rue et numéro</dt>
+        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+            <span
+                v-if="!isEditing.address"
+                @click="editField('address')"
+                class="editable-text cursor-pointer hover:text-gray-500"
+            >
+                {{ editableUser.address || "Ajouter une adresse" }}
+            </span>
+            <input
+                v-else
+                v-model="editableUser.address"
+                @blur="saveField('address')"
+                @keydown.enter="saveField('address')"
+                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+            />
+            <p
+                v-if="successMessages.address"
+                class="text-green-500 text-xs mt-1 success-message"
+            >
+                Enregistré avec succès
+            </p>
+        </dd>
+    </div>
+
+    <!-- Localité -->
+    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
+        <dt class="text-sm font-bold text-gray-500">Localité</dt>
+        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+            <span
+                v-if="!isEditing.locality"
+                @click="editField('locality')"
+                class="editable-text cursor-pointer hover:text-gray-500"
+            >
+                {{ editableUser.locality || "Ajouter une localité" }}
+            </span>
+            <input
+                v-else
+                v-model="editableUser.locality"
+                @blur="saveField('locality')"
+                @keydown.enter="saveField('locality')"
+                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+            />
+            <p
+                v-if="successMessages.locality"
+                class="text-green-500 text-xs mt-1 success-message"
+            >
+                Enregistré avec succès
+            </p>
+        </dd>
+    </div>
+
+    <!-- Pays -->
+    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0">
+        <dt class="text-sm font-bold text-gray-500">Pays</dt>
+        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+            <span
+                v-if="!isEditing.country"
+                @click="editField('country')"
+                class="editable-text cursor-pointer hover:text-gray-500"
+            >
+                {{ editableUser.country || "Ajouter un pays" }}
+            </span>
+            <input
+                v-else
+                v-model="editableUser.country"
+                @blur="saveField('country')"
+                @keydown.enter="saveField('country')"
+                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+            />
+            <p
+                v-if="successMessages.country"
+                class="text-green-500 text-xs mt-1 success-message"
+            >
+                Enregistré avec succès
+            </p>
+        </dd>
+    </div>
+</div>
+
+                
+
+                
             </div>
         </div>
 
