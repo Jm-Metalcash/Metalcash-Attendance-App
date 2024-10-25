@@ -37,38 +37,42 @@ const maxDisplayCount = 20;
 
 // Propriété calculée pour filtrer les utilisateurs en fonction du terme de recherche
 const filteredUsers = computed(() => {
-    const searchLower = searchTerm.value.toLowerCase();
+    // permet de rechercher en majuscules ou minuscules
+    const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
+
     const results = users.value.filter((user) => {
+        //supprime les espaces dans la recherche
+        const normalize = (str) => (str ? str.toLowerCase().replace(/\s+/g, "") : "");
+
+        // combine firstname et lastname
+        const combinedName1 = normalize(user.firstName + user.familyName);
+        const combinedName2 = normalize(user.familyName + user.firstName);
+
+        // Vérifie si le terme de recherche est présent dans l'un des deux formats combinés
+        const nameMatches = combinedName1.includes(searchLower) || combinedName2.includes(searchLower);
+
         return (
-            (user.fullName
-                ? user.fullName.toLowerCase().includes(searchLower)
-                : false) ||
-            (user.familyName
-                ? user.familyName.toLowerCase().includes(searchLower)
-                : false) ||
-            (user.firstName
-                ? user.firstName.toLowerCase().includes(searchLower)
-                : false) ||
+            nameMatches ||
             (user.address
-                ? user.address.toLowerCase().includes(searchLower)
+                ? normalize(user.address).includes(searchLower)
                 : false) ||
             (user.locality
-                ? user.locality.toLowerCase().includes(searchLower)
+                ? normalize(user.locality).includes(searchLower)
                 : false) ||
             (user.postalCode
-                ? user.postalCode.toLowerCase().includes(searchLower)
+                ? normalize(user.postalCode).includes(searchLower)
                 : false) ||
             (user.country
-                ? user.country.toLowerCase().includes(searchLower)
+                ? normalize(user.country).includes(searchLower)
                 : false) ||
             (user.email
-                ? user.email.toLowerCase().includes(searchLower)
+                ? normalize(user.email).includes(searchLower)
                 : false) ||
             (user.phone
-                ? user.phone.toLowerCase().includes(searchLower)
+                ? normalize(user.phone).includes(searchLower)
                 : false) ||
             (user.company
-                ? user.company.toLowerCase().includes(searchLower)
+                ? normalize(user.company).includes(searchLower)
                 : false)
         );
     });
@@ -77,12 +81,8 @@ const filteredUsers = computed(() => {
     return results.slice(0, maxDisplayCount);
 });
 
-// Affiche max 20 users
-const limitedUsers = computed(() => {
-    return searchTerm.value
-        ? filteredUsers.value // Affiche tous les résultats filtrés en cas de recherche
-        : users.value.slice(0, maxDisplayCount); // Limite l'affichage à 20 par défaut
-});
+
+
 
 // Fonction pour sélectionner un utilisateur
 const selectUser = (user) => {
