@@ -32,10 +32,13 @@ const newUser = ref({
     country: "",
 });
 
+// Nombre maximum d'utilisateurs affichés par défaut
+const maxDisplayCount = 20;
+
 // Propriété calculée pour filtrer les utilisateurs en fonction du terme de recherche
 const filteredUsers = computed(() => {
-    return users.value.filter((user) => {
-        const searchLower = searchTerm.value.toLowerCase();
+    const searchLower = searchTerm.value.toLowerCase();
+    const results = users.value.filter((user) => {
         return (
             (user.fullName
                 ? user.fullName.toLowerCase().includes(searchLower)
@@ -69,6 +72,16 @@ const filteredUsers = computed(() => {
                 : false)
         );
     });
+
+    // Limiter le nombre de résultats affichés à 20
+    return results.slice(0, maxDisplayCount);
+});
+
+// Affiche max 20 users
+const limitedUsers = computed(() => {
+    return searchTerm.value
+        ? filteredUsers.value // Affiche tous les résultats filtrés en cas de recherche
+        : users.value.slice(0, maxDisplayCount); // Limite l'affichage à 20 par défaut
 });
 
 // Fonction pour sélectionner un utilisateur
@@ -79,10 +92,12 @@ const selectUser = (user) => {
             selectedUser.value = response.data.user;
         })
         .catch((error) => {
-            console.error("Erreur lors de la récupération des données de l'utilisateur :", error);
+            console.error(
+                "Erreur lors de la récupération des données de l'utilisateur :",
+                error
+            );
         });
 };
-
 
 // Réinitialiser selectedUser si searchTerm change
 watch(searchTerm, () => {
@@ -188,7 +203,7 @@ const updateUserInList = (updatedUser) => {
 
                             <!-- Affichage de la liste d'utilisateurs -->
                             <UserList
-                                v-if="!selectedUser && searchTerm.length > 0"
+                                v-if="!selectedUser && filteredUsers.length > 0"
                                 :filteredUsers="filteredUsers"
                                 :selectUser="selectUser"
                             />
