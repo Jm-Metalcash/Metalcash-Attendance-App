@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
@@ -32,64 +32,83 @@ const newUser = ref({
     country: "",
 });
 
-// Nombre maximum d'utilisateurs affichés par défaut
-const maxDisplayCount = 20;
-
-// Propriété calculée pour filtrer les utilisateurs en fonction du terme de recherche
+// Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
 const filteredUsers = computed(() => {
-    // permet de rechercher en majuscules ou minuscules
     const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
 
-    const results = users.value.filter((user) => {
-        //supprime les espaces dans la recherche
-        const normalize = (str) => (str ? str.toLowerCase().replace(/\s+/g, "") : "");
+    return users.value
+        .filter((user) => {
+            const normalize = (str) =>
+                str ? str.toLowerCase().replace(/\s+/g, "") : "";
 
-        // combine firstname et lastname
-        const combinedName1 = normalize(user.firstName + user.familyName);
-        const combinedName2 = normalize(user.familyName + user.firstName);
+            const combinedName1 = normalize(user.firstName + user.familyName);
+            const combinedName2 = normalize(user.familyName + user.firstName);
 
-        // Vérifie si le terme de recherche est présent dans l'un des deux formats combinés
-        const nameMatches = combinedName1.includes(searchLower) || combinedName2.includes(searchLower);
+            const nameMatches =
+                combinedName1.includes(searchLower) ||
+                combinedName2.includes(searchLower);
 
-        return (
-            nameMatches ||
-            (user.address
-                ? normalize(user.address).includes(searchLower)
-                : false) ||
-            (user.locality
-                ? normalize(user.locality).includes(searchLower)
-                : false) ||
-            (user.postalCode
-                ? normalize(user.postalCode).includes(searchLower)
-                : false) ||
-            (user.country
-                ? normalize(user.country).includes(searchLower)
-                : false) ||
-            (user.email
-                ? normalize(user.email).includes(searchLower)
-                : false) ||
-            (user.phone
-                ? normalize(user.phone).includes(searchLower)
-                : false) ||
-            (user.company
-                ? normalize(user.company).includes(searchLower)
-                : false)
-        );
-    });
-
-    // Limiter le nombre de résultats affichés à 20
-    return results.slice(0, maxDisplayCount);
+            return (
+                nameMatches ||
+                (user.address
+                    ? normalize(user.address).includes(searchLower)
+                    : false) ||
+                (user.locality
+                    ? normalize(user.locality).includes(searchLower)
+                    : false) ||
+                (user.postalCode
+                    ? normalize(user.postalCode).includes(searchLower)
+                    : false) ||
+                (user.country
+                    ? normalize(user.country).includes(searchLower)
+                    : false) ||
+                (user.email
+                    ? normalize(user.email).includes(searchLower)
+                    : false) ||
+                (user.phone
+                    ? normalize(user.phone).includes(searchLower)
+                    : false) ||
+                (user.company
+                    ? normalize(user.company).includes(searchLower)
+                    : false)
+            );
+        })
+        .slice(0, 5); // Limiter à 5 résultats maximum
 });
 
+// Liste pour stocker les 5 derniers utilisateurs consultés (à sauvegarder dans localStorage)
+const recentUsers = ref([]);
 
+// Charger les derniers utilisateurs consultés depuis localStorage lors du montage
+onMounted(() => {
+    const storedRecentUsers = localStorage.getItem("recentUsers");
+    if (storedRecentUsers) {
+        recentUsers.value = JSON.parse(storedRecentUsers);
+    }
+});
 
+// Fonction pour sauvegarder recentUsers dans localStorage
+const saveRecentUsersToLocalStorage = () => {
+    localStorage.setItem("recentUsers", JSON.stringify(recentUsers.value));
+};
 
-// Fonction pour sélectionner un utilisateur
+// Fonction pour sélectionner un utilisateur et mettre à jour la liste des 5 derniers utilisateurs consultés
 const selectUser = (user) => {
     axios
         .get(`/clients/${user.id}`)
         .then((response) => {
             selectedUser.value = response.data.user;
+
+            // Ajouter l'utilisateur dans recentUsers si non présent
+            if (!recentUsers.value.find((u) => u.id === user.id)) {
+                recentUsers.value.unshift(user);
+            }
+            // Limiter recentUsers à 5 éléments
+            if (recentUsers.value.length > 5) {
+                recentUsers.value.pop();
+            }
+            // Sauvegarder recentUsers dans localStorage
+            saveRecentUsersToLocalStorage();
         })
         .catch((error) => {
             console.error(
@@ -112,7 +131,7 @@ const toggleModal = () => {
     showModal.value = !showModal.value;
 };
 
-// Fonction pour gérer l'ajout d'un nouvel utilisateur (handleAddUser)
+// Fonction pour gérer l'ajout d'un nouvel utilisateur
 const handleAddUser = (newUser) => {
     users.value.push(newUser); // Ajoute le nouvel utilisateur à la liste
     selectedUser.value = newUser; // Sélectionne l'utilisateur ajouté
@@ -121,15 +140,12 @@ const handleAddUser = (newUser) => {
 
 // Fonction pour mettre à jour l'utilisateur dans la liste
 const updateUserInList = (updatedUser) => {
-    // Trouver l'index de l'utilisateur dans la liste
     const index = users.value.findIndex((user) => user.id === updatedUser.id);
 
     if (index !== -1) {
-        // Mettre à jour l'utilisateur dans la liste
         users.value[index] = { ...updatedUser };
     }
 
-    // Mettre à jour selectedUser si nécessaire
     if (selectedUser.value && selectedUser.value.id === updatedUser.id) {
         selectedUser.value = users.value[index];
     }
@@ -201,12 +217,30 @@ const updateUserInList = (updatedUser) => {
                                 />
                             </div>
 
-                            <!-- Affichage de la liste d'utilisateurs -->
+                            <!-- Affichage de la liste des utilisateurs filtrés (max 5) -->
                             <UserList
-                                v-if="!selectedUser && filteredUsers.length > 0"
+                                v-if="
+                                    !selectedUser &&
+                                    searchTerm &&
+                                    filteredUsers.length > 0
+                                "
                                 :filteredUsers="filteredUsers"
                                 :selectUser="selectUser"
                             />
+
+                            <!-- Affichage des 5 derniers utilisateurs consultés -->
+                            <div
+                                v-if="!selectedUser && recentUsers.length > 0"
+                                class="mt-8"
+                            >
+                                <h3 class="text-lg font-semibold text-gray-700">
+                                    Derniers fournisseurs consultés
+                                </h3>
+                                <UserList
+                                    :filteredUsers="recentUsers"
+                                    :selectUser="selectUser"
+                                />
+                            </div>
 
                             <!-- Détails de l'utilisateur sélectionné -->
                             <UserDetails

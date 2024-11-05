@@ -309,7 +309,6 @@
                     </div>
                 </div>
 
-                <!-- Troisième ligne : Rue et numéro & Code postal -->
                 <!-- Troisième ligne : Rue et numéro, Localité, et Pays -->
                 <div class="px-4 py-5 sm:px-6 bg-gray-200">
                     <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
