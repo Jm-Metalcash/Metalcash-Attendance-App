@@ -175,6 +175,22 @@ const updateUserInList = (updatedUser) => {
         selectedUser.value = users.value[index];
     }
 };
+
+// Fonction qui permet de supprimer un client
+const handleUserDeleted = (deletedUserId) => {
+    // Filtrer la liste pour retirer l'utilisateur supprimé
+    users.value = users.value.filter((user) => user.id !== deletedUserId);
+
+    // Désélectionner l'utilisateur s'il était actif
+    if (selectedUser.value && selectedUser.value.id === deletedUserId) {
+        selectedUser.value = null;
+    }
+
+    // Mettre à jour recentUsers
+    recentUsers.value = recentUsers.value.filter((user) => user.id !== deletedUserId);
+    saveRecentUsersToLocalStorage();
+};
+
 </script>
 
 <template>
@@ -274,6 +290,7 @@ const updateUserInList = (updatedUser) => {
                                 v-if="selectedUser"
                                 :user="selectedUser"
                                 @user-updated="updateUserInList"
+                                @user-deleted="handleUserDeleted"
                             />
 
                             <!-- Modal d'ajout de client -->

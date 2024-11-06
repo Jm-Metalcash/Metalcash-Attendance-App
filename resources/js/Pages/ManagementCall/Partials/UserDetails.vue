@@ -488,12 +488,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- BUTTON DELETE FOURNISSEUR -->
+        <div class="flex justify-between items-center px-4 pt-4 my-8">
+            <button
+                @click="confirmingUserDeletion = true"
+                class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+            >
+                Supprimer le fournisseur
+            </button>
+        </div>
+
+        <!-- MODAL POUR DELETE UN CLIENT -->
+        <DeleteUserModal
+            :show="confirmingUserDeletion"
+            :userId="editableUser.id"
+            @close="confirmingUserDeletion = false"
+            @user-deleted="handleUserDeleted"
+        />
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from "vue";
+import { ref, reactive, onMounted, computed, watch, defineEmits } from "vue";
 import axios from "axios";
+import DeleteUserModal from "./DeleteUserModal.vue";
 
 // Props
 const props = defineProps({
@@ -504,7 +523,14 @@ const props = defineProps({
 });
 
 // Émission d'événements
-const emit = defineEmits(["user-updated"]);
+const emit = defineEmits(["user-updated", "user-deleted"]);
+
+const confirmingUserDeletion = ref(false);
+
+const handleUserDeleted = (userId) => {
+    emit("user-deleted", userId);
+    confirmingUserDeletion.value = false;
+};
 
 // État réactif pour l'utilisateur modifiable
 const editableUser = reactive({
