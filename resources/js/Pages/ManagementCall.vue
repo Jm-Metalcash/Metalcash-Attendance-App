@@ -7,7 +7,7 @@ import UserList from "./ManagementCall/Partials/UserList.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
 
 // Les clients sont passés via Inertia
-const props = defineProps(["clients"]);
+const props = defineProps(["clients", "currentUser"]);
 
 // Les données des clients à partir des props
 const users = ref(props.clients);
@@ -31,6 +31,9 @@ const newUser = ref({
     locality: "",
     country: "",
 });
+
+// Variable pour indiquer si un nouvel utilisateur a été ajouté
+const isNewUserAdded = ref(false); // Nouveau
 
 // Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
 const filteredUsers = computed(() => {
@@ -131,12 +134,16 @@ const toggleModal = () => {
     showModal.value = !showModal.value;
 };
 
-// Fonction pour gérer l'ajout d'un nouvel utilisateur
+// Variable pour stocker l'ID du fournisseur récemment ajouté
+const newUserId = ref(null);
+
 const handleAddUser = (newUser) => {
-    users.value.push(newUser); // Ajoute le nouvel utilisateur à la liste
-    selectedUser.value = newUser; // Sélectionne l'utilisateur ajouté
-    toggleModal(); // Ferme le modal après l'ajout
+    users.value.push(newUser);
+    selectedUser.value = newUser;
+    newUserId.value = newUser.id;
+    toggleModal();
 };
+
 
 // Fonction pour mettre à jour l'utilisateur dans la liste
 const updateUserInList = (updatedUser) => {
@@ -226,6 +233,7 @@ const updateUserInList = (updatedUser) => {
                                 "
                                 :filteredUsers="filteredUsers"
                                 :selectUser="selectUser"
+                                :newUserId="newUserId"
                             />
 
                             <!-- Affichage des 5 derniers utilisateurs consultés -->
@@ -239,6 +247,7 @@ const updateUserInList = (updatedUser) => {
                                 <UserList
                                     :filteredUsers="recentUsers"
                                     :selectUser="selectUser"
+                                    :isNewUserAdded="isNewUserAdded"
                                 />
                             </div>
 
@@ -263,11 +272,3 @@ const updateUserInList = (updatedUser) => {
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-@media (max-width: 640px) {
-    .flex-row {
-        flex-direction: row;
-    }
-}
-</style>
