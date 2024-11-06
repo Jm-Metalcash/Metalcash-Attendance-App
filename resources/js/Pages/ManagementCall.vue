@@ -33,11 +33,17 @@ const newUser = ref({
 });
 
 // Variable pour indiquer si un nouvel utilisateur a été ajouté
-const isNewUserAdded = ref(false); // Nouveau
+const isNewUserAdded = ref(false);
+
 
 // Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
 const filteredUsers = computed(() => {
+
     const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
+
+    if (!searchLower) {
+        return [];
+    }
 
     return users.value
         .filter((user) => {
@@ -79,6 +85,8 @@ const filteredUsers = computed(() => {
         .slice(0, 5); // Limiter à 5 résultats maximum
 });
 
+
+
 // Liste pour stocker les 5 derniers utilisateurs consultés (à sauvegarder dans localStorage)
 const recentUsers = ref([]);
 
@@ -86,9 +94,19 @@ const recentUsers = ref([]);
 onMounted(() => {
     const storedRecentUsers = localStorage.getItem("recentUsers");
     if (storedRecentUsers) {
-        recentUsers.value = JSON.parse(storedRecentUsers);
+        const parsedUsers = JSON.parse(storedRecentUsers);
+        
+        // Filtrer `recentUsers` pour conserver uniquement les utilisateurs existants
+        recentUsers.value = parsedUsers.filter((user) =>
+            users.value.some((dbUser) => dbUser.id === user.id)
+        );
+        
+        // Mettre à jour le localStorage pour garder la liste synchronisée
+        saveRecentUsersToLocalStorage();
     }
 });
+
+
 
 // Fonction pour sauvegarder recentUsers dans localStorage
 const saveRecentUsersToLocalStorage = () => {
