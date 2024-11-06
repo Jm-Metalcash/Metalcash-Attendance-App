@@ -5,6 +5,7 @@ import { Head } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
 import UserList from "./ManagementCall/Partials/UserList.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
+import FlashMessage from "@/Components/FlashMessage.vue";
 
 // Les clients sont passés via Inertia
 const props = defineProps(["clients", "currentUser"]);
@@ -35,10 +36,8 @@ const newUser = ref({
 // Variable pour indiquer si un nouvel utilisateur a été ajouté
 const isNewUserAdded = ref(false);
 
-
 // Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
 const filteredUsers = computed(() => {
-
     const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
 
     if (!searchLower) {
@@ -85,8 +84,6 @@ const filteredUsers = computed(() => {
         .slice(0, 5); // Limiter à 5 résultats maximum
 });
 
-
-
 // Liste pour stocker les 5 derniers utilisateurs consultés (à sauvegarder dans localStorage)
 const recentUsers = ref([]);
 
@@ -95,18 +92,16 @@ onMounted(() => {
     const storedRecentUsers = localStorage.getItem("recentUsers");
     if (storedRecentUsers) {
         const parsedUsers = JSON.parse(storedRecentUsers);
-        
+
         // Filtrer `recentUsers` pour conserver uniquement les utilisateurs existants
         recentUsers.value = parsedUsers.filter((user) =>
             users.value.some((dbUser) => dbUser.id === user.id)
         );
-        
+
         // Mettre à jour le localStorage pour garder la liste synchronisée
         saveRecentUsersToLocalStorage();
     }
 });
-
-
 
 // Fonction pour sauvegarder recentUsers dans localStorage
 const saveRecentUsersToLocalStorage = () => {
@@ -155,13 +150,19 @@ const toggleModal = () => {
 // Variable pour stocker l'ID du fournisseur récemment ajouté
 const newUserId = ref(null);
 
+// État pour afficher le message de confirmation de l'ajout d'un utilisateur
+const showAddConfirmation = ref(false);
+
 const handleAddUser = (newUser) => {
     users.value.push(newUser);
     selectedUser.value = newUser;
     newUserId.value = newUser.id;
+    showAddConfirmation.value = true; 
+    setTimeout(() => {
+        showAddConfirmation.value = false; // Cache le message après 4 secondes
+    }, 4000);
     toggleModal();
 };
-
 
 // Fonction pour mettre à jour l'utilisateur dans la liste
 const updateUserInList = (updatedUser) => {
@@ -176,21 +177,24 @@ const updateUserInList = (updatedUser) => {
     }
 };
 
+const showDeleteConfirmation = ref(false);
+
 // Fonction qui permet de supprimer un client
 const handleUserDeleted = (deletedUserId) => {
-    // Filtrer la liste pour retirer l'utilisateur supprimé
     users.value = users.value.filter((user) => user.id !== deletedUserId);
 
-    // Désélectionner l'utilisateur s'il était actif
     if (selectedUser.value && selectedUser.value.id === deletedUserId) {
         selectedUser.value = null;
     }
 
-    // Mettre à jour recentUsers
-    recentUsers.value = recentUsers.value.filter((user) => user.id !== deletedUserId);
+    recentUsers.value = recentUsers.value.filter(
+        (user) => user.id !== deletedUserId
+    );
     saveRecentUsersToLocalStorage();
-};
 
+    // Afficher le flash message
+    showDeleteConfirmation.value = true;
+};
 </script>
 
 <template>
@@ -204,6 +208,18 @@ const handleUserDeleted = (deletedUserId) => {
                 Gestion des appels téléphoniques
             </h2>
         </template>
+
+        <FlashMessage
+            v-if="showDeleteConfirmation"
+            message="Le fournisseur a bien été supprimé."
+            @close="showDeleteConfirmation = false"
+        />
+
+        <FlashMessage
+            v-if="showAddConfirmation"
+            message="Le fournisseur a bien été ajouté."
+            @close="showAddConfirmation = false"
+        />
 
         <div
             class="container mx-auto flex flex-col items-center justify-center px-0 md:px-4 sm:px-8 max-w-7xl mt-2 md:mt-8"
