@@ -6,7 +6,7 @@
             @click="selectUser(user)"
             :class="[
                 'flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full',
-                user.recently_added
+                user.blacklist === 1
                     ? 'bg-red-50 text-red-500'
                     : 'bg-teal-50 text-gray-700 hover:text-blue-400 hover:bg-blue-100',
             ]"
@@ -14,10 +14,10 @@
             <!-- Colonne Nom complet (avec indicateur de statut à gauche) -->
             <div class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0">
                 <span
-                    :class="
-                        user.blacklist === 0 ? 'bg-green-400' : 'bg-red-400'
-                    "
-                    class="h-2 w-2 mr-4 rounded-full"
+                    :class="[
+                        user.recently_added ? 'bg-fuchsia-500' : 'bg-green-400',
+                        'h-2 w-2 mr-4 rounded-full',
+                    ]"
                 ></span>
                 <div class="font-medium text-left">
                     {{ user.firstName }} {{ user.familyName }}
