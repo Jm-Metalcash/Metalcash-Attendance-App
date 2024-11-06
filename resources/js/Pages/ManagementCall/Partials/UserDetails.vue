@@ -30,6 +30,11 @@
                                 >
                                     Note
                                 </th>
+                                <th
+                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-4/5"
+                                >
+                                    
+                                </th>
                             </tr>
                         </thead>
                         <transition-group name="slide" tag="tbody">
@@ -78,6 +83,10 @@
                                     >
                                         Enregistré avec succès
                                     </p>
+                                </td>
+                                <td class="py-2 px-4 border-b text-sm text-left w-1/5">
+                                    <button @click="deleteNote(note.id)"
+                                        class="text-red-600 hover:text-red-800 font-semibold">Supprimer</button>
                                 </td>
                             </tr>
                         </transition-group>
@@ -646,6 +655,18 @@ const editNote = (noteId) => {
 const reversedNotes = computed(() => {
     return [...editableUser.notes].reverse();
 });
+
+
+// Fonction pour supprimer une note
+const deleteNote = async (noteId) => {
+    try {
+        await axios.delete(`/clients/${editableUser.id}/notes/${noteId}`);
+        // Filtrer les notes pour retirer celle qui est supprimée
+        editableUser.notes = editableUser.notes.filter((note) => note.id !== noteId);
+    } catch (error) {
+        console.error("Erreur lors de la suppression de la note :", error);
+    }
+};
 
 // Enregistre une note avec Axios vers la DB
 const saveNote = (note) => {

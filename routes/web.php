@@ -65,6 +65,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::put('/clients/{client}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
     Route::post('/clients/{client}/notes', [NoteController::class, 'store'])->name('notes.store');
     Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
+    Route::delete('/clients/{client}/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
 
     // Routes pour les bordereaux historiques
     Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');

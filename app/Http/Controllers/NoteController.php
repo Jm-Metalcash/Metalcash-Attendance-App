@@ -42,7 +42,11 @@ class NoteController extends Controller
         if (!empty($validatedData['content'])) {
             $note = $client->notes()->create($validatedData);
 
-            // Retourner la note avec la date formatée
+            // Si la note est un avertissement, mettre à jour le blacklist
+            if ($validatedData['type'] === 'avertissement') {
+                $client->update(['blacklist' => 1]);
+            }
+
             return response()->json([
                 'id' => $note->id,
                 'content' => $note->content,
@@ -52,5 +56,36 @@ class NoteController extends Controller
         }
 
         return response()->json(['message' => 'Note not created as content is empty'], 200);
+    }
+
+
+
+
+
+    //Suppression d'une note
+    public function destroy(Client $client, Note $note)
+    {
+        // Vérifier que la note appartient bien au client
+        if ($note->client_id !== $client->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Vérifie si la note est un avertissement
+        $isWarning = $note->type === 'avertissement';
+
+        // Supprime la note
+        $note->delete();
+
+        // Si c'était un avertissement, vérifie s'il reste d'autres avertissements pour ce client
+        if ($isWarning) {
+            $hasOtherWarnings = $client->notes()->where('type', 'avertissement')->exists();
+
+            // Si aucun autre avertissement n'existe, retirer le client de la blacklist
+            if (!$hasOtherWarnings) {
+                $client->update(['blacklist' => 0]);
+            }
+        }
+
+        return response()->json(['message' => 'Note deleted successfully']);
     }
 }
