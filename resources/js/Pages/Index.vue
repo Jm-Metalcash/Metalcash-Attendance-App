@@ -1,6 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, usePage } from "@inertiajs/vue3";
+
+const page = usePage();
 </script>
 
 <template>
@@ -27,40 +29,50 @@ import { Head, Link } from "@inertiajs/vue3";
                 </p>
             </div>
 
-            <div
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8"
-            >
-                <Link
-                    :href="route('dashboard')"
-                    class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse action-button"
-                >
-                    <i class="fas fa-check-circle text-2xl mb-2"></i>
-                    <span>Pointer aujourd'hui</span>
-                </Link>
+            <div class="flex justify-center mt-4">
+                <div class="flex flex-wrap justify-center gap-6 mt-8">
+                    <Link :href="route('dashboard')" class="action-button">
+                        <i class="fas fa-check-circle text-2xl mb-2"></i>
+                        <span>Pointer aujourd'hui</span>
+                    </Link>
 
-                <Link
-                    :href="route('historique')"
-                    class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse action-button"
-                >
-                    <i class="fas fa-history text-2xl mb-2"></i>
-                    <span>Consulter l'historique</span>
-                </Link>
+                    <Link :href="route('historique')" class="action-button">
+                        <i class="fas fa-history text-2xl mb-2"></i>
+                        <span>Consulter l'historique</span>
+                    </Link>
 
-                <Link
-                    :href="route('employes')"
-                    class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse action-button"
-                >
-                    <i class="fas fa-users text-2xl mb-2"></i>
-                    <span>Gestion des employés</span>
-                </Link>
+                    <Link
+                        v-if="
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes(
+                                    'Informatique'
+                                ) ||
+                                page.props.auth.roles.includes('Comptabilité'))
+                        "
+                        :href="route('employes')"
+                        class="action-button"
+                    >
+                        <i class="fas fa-users text-2xl mb-2"></i>
+                        <span>Gestion des employés</span>
+                    </Link>
 
-                <Link
-                    :href="route('managementCall')"
-                    class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse action-button"
-                >
-                    <i class="fas fa-phone text-2xl mb-2"></i>
-                    <span>Gestion des appels</span>
-                </Link>
+                    <Link
+                        v-if="
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes(
+                                    'Informatique'
+                                ) ||
+                                page.props.auth.roles.includes('Comptabilité'))
+                        "
+                        :href="route('managementCall')"
+                        class="action-button"
+                    >
+                        <i class="fas fa-phone text-2xl mb-2"></i>
+                        <span>Gestion des appels</span>
+                    </Link>
+                </div>
             </div>
 
             <!-- OTHER BUTTONS -->
@@ -69,7 +81,7 @@ import { Head, Link } from "@inertiajs/vue3";
             >
                 <Link
                     :href="route('profile.edit')"
-                    class="flex items-center space-x-2 text-sm md:text-lg hover:text-blue-600 transition-colors duration-200 ease-in-out"
+                    class="flex items-center space-x-2 text-sm md:text-base hover:text-blue-600 transition-colors duration-200 ease-in-out"
                 >
                     <i class="fas fa-user-circle"></i>
                     <span>Gestion de compte</span>
@@ -79,13 +91,12 @@ import { Head, Link } from "@inertiajs/vue3";
                     :href="route('logout')"
                     method="post"
                     as="button"
-                    class="flex items-center space-x-2 text-sm md:text-lg hover:text-red-600 transition-colors duration-200 ease-in-out"
+                    class="flex items-center space-x-2 text-sm md:text-base hover:text-red-600 transition-colors duration-200 ease-in-out"
                 >
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Se déconnecter</span>
                 </Link>
             </div>
-
         </div>
     </AuthenticatedLayout>
 </template>
