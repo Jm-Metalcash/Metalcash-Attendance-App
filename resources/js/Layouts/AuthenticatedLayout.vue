@@ -36,6 +36,12 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
+                            <NavLink
+                                    :href="route('index')"
+                                    :active="route().current('index')"
+                                >
+                                    Accueil
+                                </NavLink>
                                 <NavLink
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
