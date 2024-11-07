@@ -62,6 +62,30 @@ import { Head, Link } from "@inertiajs/vue3";
                     <span>Gestion des appels</span>
                 </Link>
             </div>
+
+            <!-- OTHER BUTTONS -->
+            <div
+                class="other-buttons mt-12 md:mt-80 flex justify-center space-x-6 md:space-x-8 text-gray-600"
+            >
+                <Link
+                    :href="route('profile.edit')"
+                    class="flex items-center space-x-2 text-sm md:text-lg hover:text-blue-600 transition-colors duration-200 ease-in-out"
+                >
+                    <i class="fas fa-user-circle"></i>
+                    <span>Gestion de compte</span>
+                </Link>
+
+                <Link
+                    :href="route('logout')"
+                    method="post"
+                    as="button"
+                    class="flex items-center space-x-2 text-sm md:text-lg hover:text-red-600 transition-colors duration-200 ease-in-out"
+                >
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Se déconnecter</span>
+                </Link>
+            </div>
+
         </div>
     </AuthenticatedLayout>
 </template>
