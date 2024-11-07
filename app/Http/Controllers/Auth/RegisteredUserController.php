@@ -59,6 +59,6 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         // Redirection vers le tableau de bord
-        return redirect(route('dashboard'));
+        return redirect(route('index'));
     }
 }

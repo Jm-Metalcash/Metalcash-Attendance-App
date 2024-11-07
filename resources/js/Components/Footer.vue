@@ -8,11 +8,11 @@ const logoUrl = computed(() => "/images/logo-HD.png");
 </script>
 
 <template>
-    <footer class="bg-gray-800 shadow">
+    <footer class="bg-gray-800 shadow z-50">
         <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
             <div class="sm:flex sm:items-center sm:justify-between">
                 <Link
-                    :href="route('dashboard')"
+                    :href="route('index')"
                     class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
                 >
                     <img :src="logoUrl" alt="Logo Metalcash" class="h-8" />
@@ -25,6 +25,13 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                 <ul
                     class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-200 sm:mb-0"
                 >
+                <li>
+                        <Link
+                            :href="route('index')"
+                            class="hover:underline me-4 md:me-6"
+                            >Accueil</Link
+                        >
+                    </li>
                     <li>
                         <Link
                             :href="route('dashboard')"

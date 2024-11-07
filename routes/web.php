@@ -21,11 +21,20 @@ use App\Http\Middleware\RestrictIP;
 // Route de connexion (page de login), accessible à tout le monde
 Route::get('/', function () {
     return Auth::check()
-        ? redirect()->route('dashboard')
+        ? redirect()->route('index')
         : Inertia::render('Auth/Login');
 })->name('home');
 
-// Route de dashboard après connexion, protégée par 'auth' et 'RestrictIP'
+
+// Route Index après connexion
+Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
+    Route::get('/index', function () {
+        return Inertia::render('Index');
+    })->name('index');
+});
+
+
+// Route de dashboard
 Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');

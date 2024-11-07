@@ -82,7 +82,7 @@ const checkUserStatus = (days) => {
             </h2>
         </template>
 
-        <div class="container mx-auto px-4 sm:px-8 max-w-7xl">
+        <div class="container flex-grow mx-auto px-4 sm:px-8 max-w-7xl bg-white rounded-lg shadow-lg py-8">
             <div class="py-8">
                 <!-- Titre de la page -->
                 <div>

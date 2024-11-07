@@ -222,7 +222,7 @@ const handleUserDeleted = (deletedUserId) => {
         />
 
         <div
-            class="container mx-auto flex flex-col items-center justify-center px-0 md:px-4 sm:px-8 max-w-7xl mt-2 md:mt-8"
+            class="container mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 max-w-7xl mt-2 md:mt-8 bg-white min-h-[800px]"
         >
             <div class="w-full max-w-7xl mt-0 mx-auto px-0">
                 <div class="flex justify-center p-4 px-3 py-10">
