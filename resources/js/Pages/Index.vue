@@ -38,7 +38,7 @@ const page = usePage();
 
                     <Link :href="route('historique')" class="action-button">
                         <i class="fas fa-history text-2xl mb-2"></i>
-                        <span>Consulter l'historique</span>
+                        <span>Consulter mon historique</span>
                     </Link>
 
                     <Link
