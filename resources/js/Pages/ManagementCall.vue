@@ -177,24 +177,6 @@ const updateUserInList = (updatedUser) => {
     }
 };
 
-const showDeleteConfirmation = ref(false);
-
-// Fonction qui permet de supprimer un client
-const handleUserDeleted = (deletedUserId) => {
-    users.value = users.value.filter((user) => user.id !== deletedUserId);
-
-    if (selectedUser.value && selectedUser.value.id === deletedUserId) {
-        selectedUser.value = null;
-    }
-
-    recentUsers.value = recentUsers.value.filter(
-        (user) => user.id !== deletedUserId
-    );
-    saveRecentUsersToLocalStorage();
-
-    // Afficher le flash message
-    showDeleteConfirmation.value = true;
-};
 </script>
 
 <template>
@@ -208,12 +190,6 @@ const handleUserDeleted = (deletedUserId) => {
                 Gestion des appels téléphoniques
             </h2>
         </template>
-
-        <FlashMessage
-            v-if="showDeleteConfirmation"
-            message="Le fournisseur a bien été supprimé."
-            @close="showDeleteConfirmation = false"
-        />
 
         <FlashMessage
             v-if="showAddConfirmation"

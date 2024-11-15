@@ -76,6 +76,7 @@ class ClientController extends Controller
 
 
 
+    //Ajoute un nouveau fournisseur
     public function store(Request $request)
     {
         // Validation des données d'entrée
@@ -103,12 +104,13 @@ class ClientController extends Controller
         // Supprimer les champs avec des valeurs nulles
         $validatedData = array_filter($validatedData, fn($value) => !is_null($value));
 
-        // Condition pour définir recently_added à 1 uniquement pour l'utilisateur "fa@metalcash.be"
-        if (Auth::user() && Auth::user()->email === 'fa@metalcash.be') {
+        // Condition pour définir recently_added (changement de couleur pipelette) pour le rôle 'Comptabilité'
+        if (Auth::user() && collect(Auth::user()->roles)->contains(fn($role) => $role->name === 'Comptabilité')) {
             $validatedData['recently_added'] = true;
         } else {
             $validatedData['recently_added'] = false;
         }
+        
 
         try {
             // Création du client avec les données validées
@@ -120,19 +122,4 @@ class ClientController extends Controller
         }
     }
 
-
-    
-
-    //Supprime un client
-    public function destroy($id)
-    {
-        try {
-            $client = Client::findOrFail($id);
-            $client->delete();
-
-            return response()->json(['message' => 'Client deleted successfully'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error deleting client: ' . $e->getMessage()], 500);
-        }
-    }
 }

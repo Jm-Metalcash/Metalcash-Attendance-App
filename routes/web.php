@@ -67,7 +67,6 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/gestion-appels-telephoniques', [ClientController::class, 'index'])->name('managementCall');
     Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::post('/clients', [ClientController::class, 'store']);
-    Route::delete('/clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
 
 
     //gestion des notes des clients
