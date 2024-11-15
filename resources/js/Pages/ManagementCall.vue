@@ -157,7 +157,7 @@ const handleAddUser = (newUser) => {
     users.value.push(newUser);
     selectedUser.value = newUser;
     newUserId.value = newUser.id;
-    showAddConfirmation.value = true; 
+    showAddConfirmation.value = true;
     setTimeout(() => {
         showAddConfirmation.value = false; // Cache le message après 4 secondes
     }, 4000);
@@ -177,6 +177,39 @@ const updateUserInList = (updatedUser) => {
     }
 };
 
+// Les 10 derniers clients ajoutés
+const recentAddedUsers = computed(() => {
+    return users.value
+        .filter((user) => user.created_at) // Exclure si `created_at` est null
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Trier par `created_at` décroissant
+        .slice(0, 20); // Limiter à 20 résultats
+});
+
+// Les 10 derniers clients modifiés
+const recentModifiedUsers = computed(() => {
+    return users.value
+        .filter(
+            (user) =>
+                user.updated_at && // Exclure si `updated_at` est null
+                user.created_at && // Exclure si `created_at` est null
+                new Date(user.updated_at) > new Date(user.created_at) // Seulement si modifié
+        )
+        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)) // Trier par `updated_at` décroissant
+        .slice(0, 20); // Limiter à 20 résultats
+});
+
+// Fonction pour formater les dates avec les fonctionnalités natives de JavaScript
+const formatDate = (date) => {
+    if (!date) return "Non disponible";
+    const d = new Date(date);
+    return d.toLocaleString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};
 </script>
 
 <template>
@@ -251,30 +284,163 @@ const updateUserInList = (updatedUser) => {
                             </div>
 
                             <!-- Affichage de la liste des utilisateurs filtrés (max 5) -->
-                            <UserList
+                            <div
                                 v-if="
                                     !selectedUser &&
                                     searchTerm &&
                                     filteredUsers.length > 0
                                 "
-                                :filteredUsers="filteredUsers"
-                                :selectUser="selectUser"
-                                :newUserId="newUserId"
-                            />
-
-                            <!-- Affichage des 5 derniers utilisateurs consultés -->
-                            <div
-                                v-if="!selectedUser && recentUsers.length > 0"
-                                class="mt-8"
                             >
                                 <h3 class="text-lg font-semibold text-gray-700">
-                                    Derniers fournisseurs consultés
+                                    Résultat de la recherche :
                                 </h3>
                                 <UserList
-                                    :filteredUsers="recentUsers"
+                                    :filteredUsers="filteredUsers"
                                     :selectUser="selectUser"
-                                    :isNewUserAdded="isNewUserAdded"
+                                    :newUserId="newUserId"
                                 />
+                            </div>
+
+
+
+                            <!-- Historique des modifications des fournisseurs -->
+                            <div
+                                v-if="
+                                    !searchTerm
+                                "
+                                class="client-manage-panel"
+                            >
+                                <!-- Affichage des 5 derniers utilisateurs consultés -->
+                                <div
+                                    v-if="
+                                        !selectedUser && recentUsers.length > 0
+                                    "
+                                    class="mt-8 border p-4 bg-zinc-0"
+                                >
+                                    <h3
+                                        class="text-lg font-semibold text-gray-700"
+                                    >
+                                        Derniers fournisseurs consultés
+                                    </h3>
+                                    <UserList
+                                        :filteredUsers="recentUsers"
+                                        :selectUser="selectUser"
+                                        :isNewUserAdded="isNewUserAdded"
+                                    />
+                                </div>
+
+
+
+                                <!-- Affiche les 20 derniers fournisseurs ajoutés -->
+                                <div
+                                    v-if="
+                                        !selectedUser &&
+                                        recentAddedUsers.length > 0
+                                    "
+                                    class="mt-8 border p-4 bg-zinc-0"
+                                >
+                                    <h3
+                                        class="text-lg font-semibold text-gray-700"
+                                    >
+                                        Nouveaux fournisseurs ajoutés
+                                    </h3>
+                                    <div class="py-3 text-sm">
+                                        <div
+                                            v-for="(
+                                                user, index
+                                            ) in recentAddedUsers"
+                                            :key="user.id || index"
+                                            @click="selectUser(user)"
+                                            class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
+                                        >
+                                            <!-- Nom complet avec indicateur de statut -->
+                                            <div
+                                                class="flex w-full sm:w-1/6 items-center"
+                                            >
+                                                <span
+                                                    :class="[
+                                                        user.recently_added
+                                                            ? 'bg-fuchsia-500'
+                                                            : 'bg-green-400',
+                                                        'h-2 w-2 mr-4 rounded-full',
+                                                    ]"
+                                                ></span>
+                                                <div
+                                                    class="font-medium text-left"
+                                                >
+                                                    {{ user.firstName }}
+                                                    {{ user.familyName }}
+                                                </div>
+                                            </div>
+                                            <!-- Date d'ajout -->
+                                            <div
+                                                class="text-sm font-normal w-full sm:w-1/6"
+                                            >
+                                                Ajouté le :
+                                                {{
+                                                    formatDate(user.created_at)
+                                                }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                
+                                <!-- Affiche les 20 derniers fournisseurs modifiés -->
+                                <div
+                                    v-if="
+                                        !selectedUser &&
+                                        recentModifiedUsers.length > 0
+                                    "
+                                    class="mt-8 border p-4 bg-zinc-0"
+                                >
+                                    <h3
+                                        class="text-lg font-semibold text-gray-700"
+                                    >
+                                        Derniers fournisseurs modifiés
+                                    </h3>
+                                    <div class="py-3 text-sm">
+                                        <div
+                                            v-for="(
+                                                user, index
+                                            ) in recentModifiedUsers"
+                                            :key="user.id || index"
+                                            @click="selectUser(user)"
+                                            class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-green-50 text-gray-700 hover:bg-green-100 hover:text-green-800"
+                                        >
+                                            <!-- Nom complet avec indicateur de statut -->
+                                            <div
+                                                class="flex w-full sm:w-1/6 items-center"
+                                            >
+                                                <span
+                                                    :class="[
+                                                        user.recently_added
+                                                            ? 'bg-fuchsia-500'
+                                                            : 'bg-green-400',
+                                                        'h-2 w-2 mr-4 rounded-full',
+                                                    ]"
+                                                ></span>
+                                                <div
+                                                    class="font-medium text-left"
+                                                >
+                                                    {{ user.firstName }}
+                                                    {{ user.familyName }}
+                                                </div>
+                                            </div>
+                                            <!-- Date de modification -->
+                                            <div
+                                                class="text-sm font-normal w-full sm:w-1/6"
+                                            >
+                                                Modifié le :
+                                                {{
+                                                    formatDate(user.updated_at)
+                                                }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Détails de l'utilisateur sélectionné -->

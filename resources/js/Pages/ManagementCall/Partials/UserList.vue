@@ -4,17 +4,17 @@
             v-for="(user, index) in filteredUsers"
             :key="user.id || index"
             @click="selectUser(user)"
-            :class="[ 
+            :class="[
                 'flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full',
                 user.blacklist === 1
                     ? 'bg-red-50 text-red-500'
-                    : 'bg-teal-50 text-gray-700 hover:text-blue-400 hover:bg-blue-100',
+                    : 'bg-sky-50 text-gray-700 hover:text-blue-400 hover:bg-blue-100',
             ]"
         >
             <!-- Colonne Nom complet (avec indicateur de statut à gauche) -->
             <div class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0">
                 <span
-                    :class="[ 
+                    :class="[
                         user.recently_added ? 'bg-fuchsia-500' : 'bg-green-400',
                         'h-2 w-2 mr-4 rounded-full',
                     ]"
@@ -33,7 +33,9 @@
 
             <!-- Colonne Pays -->
             <div class="flex w-full sm:w-1/6">
-                <div class="text-sm font-normal text-left text-gray-500 ml-6 md:ml-0">
+                <div
+                    class="text-sm font-normal text-left ml-6 md:ml-0"
+                >
                     {{ user.country }}
                 </div>
             </div>

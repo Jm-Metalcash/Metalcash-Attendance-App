@@ -503,7 +503,6 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch, defineEmits } from "vue";
 import axios from "axios";
-import DeleteUserModal from "./DeleteUserModal.vue";
 
 // Props
 const props = defineProps({
