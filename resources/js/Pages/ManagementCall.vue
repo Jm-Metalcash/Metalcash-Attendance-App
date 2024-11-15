@@ -1,11 +1,13 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import { Head, usePage } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
 import UserList from "./ManagementCall/Partials/UserList.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
 import FlashMessage from "@/Components/FlashMessage.vue";
+
+const page = usePage();
 
 // Les clients sont passés via Inertia
 const props = defineProps(["clients", "currentUser"]);
@@ -294,6 +296,7 @@ const formatDate = (date) => {
                                 <h3 class="text-lg font-semibold text-gray-700">
                                     Résultat de la recherche :
                                 </h3>
+
                                 <UserList
                                     :filteredUsers="filteredUsers"
                                     :selectUser="selectUser"
@@ -322,117 +325,144 @@ const formatDate = (date) => {
                                     />
                                 </div>
 
-                                <!-- Affiche les 20 derniers fournisseurs ajoutés -->
+                                <!-- PANEL ADMIN -->
                                 <div
                                     v-if="
-                                        !selectedUser &&
-                                        recentAddedUsers.length > 0
+                                        recentAddedUsers.length > 0 &&
+                                        page.props.auth.roles &&
+                                        (page.props.auth.roles.includes(
+                                            'Admin'
+                                        ) ||
+                                            page.props.auth.roles.includes(
+                                                'Informatique'
+                                            ))
                                     "
-                                    class="mt-8 border p-4 bg-zinc-0"
+                                    class="admin-panel-clients"
                                 >
-                                    <h3
-                                        class="text-lg font-semibold text-gray-700"
+                                    <h2
+                                        class="mt-20 text-xl p-2 font-bold w-full bg-[rgb(0,86,146)] text-white"
                                     >
-                                        Nouveaux fournisseurs ajoutés
-                                    </h3>
-                                    <div class="py-3 text-sm">
-                                        <div
-                                            v-for="(
-                                                user, index
-                                            ) in recentAddedUsers"
-                                            :key="user.id || index"
-                                            @click="selectUser(user)"
-                                            class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
+                                        <i
+                                            class="fa-solid fa-lock pl-2 pr-1"
+                                        ></i>
+                                        Administration
+                                    </h2>
+
+                                    <!-- Affiche les 20 derniers fournisseurs ajoutés -->
+                                    <div
+                                        v-if="!selectedUser"
+                                        class="mt-0 border p-4 bg-zinc-50"
+                                    >
+                                        <h3
+                                            class="text-lg font-semibold text-gray-700"
                                         >
-                                            <!-- Nom complet avec indicateur de statut -->
+                                            Nouveaux fournisseurs ajoutés
+                                        </h3>
+                                        <div class="py-3 text-sm">
                                             <div
-                                                class="flex w-full sm:w-1/6 items-center"
+                                                v-for="(
+                                                    user, index
+                                                ) in recentAddedUsers"
+                                                :key="user.id || index"
+                                                @click="selectUser(user)"
+                                                class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
                                             >
-                                                <span
-                                                    :class="[
-                                                        user.recently_added
-                                                            ? 'bg-fuchsia-500'
-                                                            : 'bg-green-400',
-                                                        'h-2 w-2 mr-4 rounded-full',
-                                                    ]"
-                                                ></span>
+                                                <!-- Nom complet avec indicateur de statut -->
                                                 <div
-                                                    class="font-medium text-left"
+                                                    class="flex w-full sm:w-1/6 items-center"
                                                 >
-                                                    {{ user.firstName }}
-                                                    {{ user.familyName }}
+                                                    <span
+                                                        :class="[
+                                                            user.recently_added
+                                                                ? 'bg-fuchsia-500'
+                                                                : 'bg-green-400',
+                                                            'h-2 w-2 mr-4 rounded-full',
+                                                        ]"
+                                                    ></span>
+                                                    <div
+                                                        class="font-medium text-left"
+                                                    >
+                                                        {{ user.firstName }}
+                                                        {{ user.familyName }}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <!-- Date d'ajout -->
-                                            <div
-                                                class="text-sm font-normal w-full sm:w-1/6"
-                                            >
-                                                Ajouté le :
-                                                <span class="font-bold">
-                                                    {{
-                                                        formatDate(
-                                                            user.created_at
-                                                        )
-                                                    }}
-                                                </span>
+                                                <!-- Date d'ajout -->
+                                                <div
+                                                    class="text-sm font-normal w-full sm:w-1/6"
+                                                >
+                                                    Ajouté le :
+                                                    <span class="font-bold">
+                                                        {{
+                                                            formatDate(
+                                                                user.created_at
+                                                            )
+                                                        }}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Affiche les 20 derniers fournisseurs modifiés -->
-                                <div
-                                    v-if="
-                                        !selectedUser &&
-                                        recentModifiedUsers.length > 0
-                                    "
-                                    class="mt-8 border p-4 bg-zinc-0"
-                                >
-                                    <h3
-                                        class="text-lg font-semibold text-gray-700"
-                                    >
-                                        Derniers fournisseurs modifiés
-                                    </h3>
-                                    <div class="py-3 text-sm">
-                                        <div
-                                            v-for="(
-                                                user, index
-                                            ) in recentModifiedUsers"
-                                            :key="user.id || index"
-                                            @click="selectUser(user)"
-                                            class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-green-50 text-gray-700 hover:bg-green-100 hover:text-green-800"
+                                        <button
+                                            @click="toggleModal"
+                                            class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
                                         >
-                                            <!-- Nom complet avec indicateur de statut -->
+                                            <i
+                                                class="fa-solid fa-plus text-gray-500 mr-2"
+                                            ></i>
+                                            Ajouter un fournisseur
+                                        </button>
+                                    </div>
+
+                                    <!-- Affiche les 20 derniers fournisseurs modifiés -->
+                                    <div
+                                        v-if="!selectedUser"
+                                        class="mt-8 border p-4 bg-zinc-50"
+                                    >
+                                        <h3
+                                            class="text-lg font-semibold text-gray-700"
+                                        >
+                                            Derniers fournisseurs modifiés
+                                        </h3>
+                                        <div class="py-3 text-sm">
                                             <div
-                                                class="flex w-full sm:w-1/6 items-center"
+                                                v-for="(
+                                                    user, index
+                                                ) in recentModifiedUsers"
+                                                :key="user.id || index"
+                                                @click="selectUser(user)"
+                                                class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-green-50 text-gray-700 hover:bg-green-100 hover:text-green-800"
                                             >
-                                                <span
-                                                    :class="[
-                                                        user.recently_added
-                                                            ? 'bg-fuchsia-500'
-                                                            : 'bg-green-400',
-                                                        'h-2 w-2 mr-4 rounded-full',
-                                                    ]"
-                                                ></span>
+                                                <!-- Nom complet avec indicateur de statut -->
                                                 <div
-                                                    class="font-medium text-left"
+                                                    class="flex w-full sm:w-1/6 items-center"
                                                 >
-                                                    {{ user.firstName }}
-                                                    {{ user.familyName }}
+                                                    <span
+                                                        :class="[
+                                                            user.recently_added
+                                                                ? 'bg-fuchsia-500'
+                                                                : 'bg-green-400',
+                                                            'h-2 w-2 mr-4 rounded-full',
+                                                        ]"
+                                                    ></span>
+                                                    <div
+                                                        class="font-medium text-left"
+                                                    >
+                                                        {{ user.firstName }}
+                                                        {{ user.familyName }}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <!-- Date de modification -->
-                                            <div
-                                                class="text-sm font-normal w-full sm:w-1/6"
-                                            >
-                                                Modifié le :
-                                                <span class="font-bold">
-                                                    {{
-                                                        formatDate(
-                                                            user.updated_at
-                                                        )
-                                                    }}
-                                                </span>
+                                                <!-- Date de modification -->
+                                                <div
+                                                    class="text-sm font-normal w-full sm:w-1/6"
+                                                >
+                                                    Modifié le :
+                                                    <span class="font-bold">
+                                                        {{
+                                                            formatDate(
+                                                                user.updated_at
+                                                            )
+                                                        }}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
