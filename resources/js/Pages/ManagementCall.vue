@@ -301,15 +301,8 @@ const formatDate = (date) => {
                                 />
                             </div>
 
-
-
                             <!-- Historique des modifications des fournisseurs -->
-                            <div
-                                v-if="
-                                    !searchTerm
-                                "
-                                class="client-manage-panel"
-                            >
+                            <div v-if="!searchTerm" class="client-manage-panel">
                                 <!-- Affichage des 5 derniers utilisateurs consultés -->
                                 <div
                                     v-if="
@@ -328,8 +321,6 @@ const formatDate = (date) => {
                                         :isNewUserAdded="isNewUserAdded"
                                     />
                                 </div>
-
-
 
                                 <!-- Affiche les 20 derniers fournisseurs ajoutés -->
                                 <div
@@ -377,17 +368,18 @@ const formatDate = (date) => {
                                                 class="text-sm font-normal w-full sm:w-1/6"
                                             >
                                                 Ajouté le :
-                                                {{
-                                                    formatDate(user.created_at)
-                                                }}
+                                                <span class="font-bold">
+                                                    {{
+                                                        formatDate(
+                                                            user.created_at
+                                                        )
+                                                    }}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-
-
-                                
                                 <!-- Affiche les 20 derniers fournisseurs modifiés -->
                                 <div
                                     v-if="
@@ -434,9 +426,13 @@ const formatDate = (date) => {
                                                 class="text-sm font-normal w-full sm:w-1/6"
                                             >
                                                 Modifié le :
-                                                {{
-                                                    formatDate(user.updated_at)
-                                                }}
+                                                <span class="font-bold">
+                                                    {{
+                                                        formatDate(
+                                                            user.updated_at
+                                                        )
+                                                    }}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
