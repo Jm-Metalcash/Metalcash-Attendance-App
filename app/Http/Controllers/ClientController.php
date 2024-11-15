@@ -49,6 +49,7 @@ class ClientController extends Controller
     // Modifie les données d'un client
     public function update(Request $request, $id)
     {
+        // Validation des données d'entrée
         $validatedData = $request->validate([
             'firstName' => 'nullable|string|max:255',
             'familyName' => 'nullable|string|max:255',
@@ -68,11 +69,20 @@ class ClientController extends Controller
             'birthDate' => 'nullable|date',
         ]);
 
+        // Condition pour définir recently_added (changement de couleur pipelette) pour le rôle 'Comptabilité'
+        if (Auth::user() && collect(Auth::user()->roles)->contains(fn($role) => $role->name === 'Comptabilité')) {
+            $validatedData['recently_added'] = true;
+        } else {
+            $validatedData['recently_added'] = false;
+        }
+
+        // Mise à jour des informations du client
         $client = Client::findOrFail($id);
         $client->update($validatedData);
 
         return response()->json($client);
     }
+
 
 
 
@@ -110,7 +120,7 @@ class ClientController extends Controller
         } else {
             $validatedData['recently_added'] = false;
         }
-        
+
 
         try {
             // Création du client avec les données validées
@@ -121,5 +131,4 @@ class ClientController extends Controller
             return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
         }
     }
-
 }
