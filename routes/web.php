@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DayController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\ClientController;
@@ -47,6 +48,10 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
     Route::get('/dashboard/days', [DayController::class, 'index']);
 });
+
+// Gestion des timers des entrées et sorties
+Route::post('/time-entries/store', [TimeEntryController::class, 'store'])->name('time-entries.store');
+
 
 
 // Routes protégées par l'authentification et les rôles Admin, Informatique, ou Comptabilité

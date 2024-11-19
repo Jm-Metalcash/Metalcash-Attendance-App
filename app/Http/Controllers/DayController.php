@@ -40,12 +40,17 @@ class DayController extends Controller
 
     public function index()
     {
-        // Récupérer les jours de la semaine pour l'utilisateur connecté
-        $days = Day::where('user_id', Auth::id())->get();
+        // Récupérer les jours avec leurs entrées de temps pour l'utilisateur connecté
+        $days = Day::with(['timeEntries' => function ($query) {
+            $query->orderBy('time', 'asc'); // Trier les entrées de temps par heure
+        }])
+            ->where('user_id', Auth::id())
+            ->orderBy('date', 'asc')
+            ->get();
 
-        // Formater la date avant de l'envoyer dans la réponse JSON
-        $days = $days->map(function($day) {
-            $day->date = Carbon::parse($day->date)->format('d/m/Y'); // Format "jour-mois-année"
+        // Formater les dates pour le frontend
+        $days = $days->map(function ($day) {
+            $day->date = Carbon::parse($day->date)->format('d/m/Y'); // Format "jour/mois/année"
             return $day;
         });
 
