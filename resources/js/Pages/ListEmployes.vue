@@ -217,10 +217,9 @@ const checkUserStatus = (days) => {
                                                     )
                                                 )
                                         "
-                                        class="px-4 py-2 text-sm text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
+                                        class="px-3 py-2 text-sm text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
                                     >
-                                        <i class="fa-regular fa-eye"></i> Voir
-                                        profil
+                                    <i class="fa-solid fa-gear"></i> Administration des employés
                                     </button>
                                 </td>
                             </tr>

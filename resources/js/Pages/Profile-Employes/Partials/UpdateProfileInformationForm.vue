@@ -23,28 +23,25 @@ const form = useForm({
 <template>
     <section>
         <header class="relative">
-    <!-- Conteneur flex pour le titre -->
-    <h2 class="text-lg font-medium text-gray-900">
-        Informations du profil de {{ page.props.user.name }}
-    </h2>
+            <!-- Conteneur flex pour le titre -->
+            <h2 class="text-lg font-medium text-gray-900">
+                Informations du profil de {{ page.props.user.name }}
+            </h2>
 
-    <p class="mt-1 text-sm text-gray-600">
-        Mettez à jour les informations de profil et l'adresse e-mail de
-        l'utilisateur.
-    </p>
+            <p class="mt-1 text-sm text-gray-600">
+                Mettez à jour les informations de profil et l'adresse e-mail de
+                l'utilisateur.
+            </p>
 
-    <!-- Bouton positionné en absolute sur desktop et en position normale sur mobile/tablette -->
-    <Link :href="route('users.pointages', page.props.user.id)">
-        <button
-            class="bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] text-gray-100 py-2 px-6 font-semibold
-                   lg:absolute lg:top-0 lg:right-0 sm:relative sm:mt-6 w-full sm:w-auto mt-8 lg:mt-0 text-xs lg:text-sm uppercase"
-        >
-            Afficher l'historique des pointages
-        </button>
-    </Link>
-</header>
-
-
+            <!-- Bouton positionné en absolute sur desktop et en position normale sur mobile/tablette -->
+            <Link :href="route('users.pointages', page.props.user.id)">
+                <button
+                    class="bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] text-gray-100 py-2 px-6 font-semibold lg:absolute lg:top-0 lg:right-0 sm:relative sm:mt-6 w-full sm:w-auto mt-8 lg:mt-0 text-xs lg:text-sm uppercase"
+                >
+                    <i class="fa-solid fa-gear"></i> Gestion des pointages
+                </button>
+            </Link>
+        </header>
 
         <!-- Formulaire de mise à jour -->
         <form
