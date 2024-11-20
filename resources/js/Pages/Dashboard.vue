@@ -418,12 +418,12 @@ watch(() => days.value, updateButtonStates, { deep: true });
 
                 <!-- TABLEAU CETTE SEMAINE -->
                 <h3
-                    class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 px-4 py-2 text-left font-bold mt-12 mb-4"
+                    class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 px-4 py-2 text-left font-bold mt-12 mb-0"
                 >
                     Cette semaine :
                 </h3>
 
-                <div class="w-full max-w-4xl mx-auto overflow-x-auto">
+                <div class="w-full max-w-4xl mx-auto overflow-x-auto border mt-0">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
@@ -462,7 +462,7 @@ watch(() => days.value, updateButtonStates, { deep: true });
                                             day.date
                                         }}</span>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-emerald-700">
                                         {{
                                             formatTimeWithoutSeconds(
                                                 day.arrivals[0]
@@ -484,7 +484,7 @@ watch(() => days.value, updateButtonStates, { deep: true });
                                             ></i>
                                         </button>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-red-700">
                                         {{
                                             formatTimeWithoutSeconds(
                                                 day.departures[0]
@@ -506,7 +506,7 @@ watch(() => days.value, updateButtonStates, { deep: true });
                                             ></i>
                                         </button>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
+                                    <td class="px-6 py-4 text-right font-bold opacity-70">
                                         {{ day.total || "--:--" }}
                                     </td>
                                 </tr>
