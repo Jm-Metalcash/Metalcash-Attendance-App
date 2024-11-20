@@ -73,19 +73,12 @@ const calculateDailyTotal = (arrivals, departures) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    return `${hours.toString().padStart(2, "0")}h${minutes
+    return `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}`;
 };
 
-// Fonction pour formater les minutes en heures
-const formatMinutesToHours = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours.toString().padStart(2, "0")}h${remainingMinutes
-        .toString()
-        .padStart(2, "0")}`;
-};
+
 
 // Fonction pour formater l'heure sans les secondes
 function formatTimeWithoutSeconds(time) {
@@ -354,74 +347,79 @@ const removeDepartureTimeEdit = (index) => {
         </template>
 
         <section
-            class="attendance-section flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20 rounded-lg shadow-lg min-h-[800px]"
+            class="attendance-section flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-14 pb-20 rounded-lg shadow-lg min-h-[800px]"
         >
             <!-- Statistiques et filtres -->
             <div class="w-full max-w-6xl mx-auto mb-3">
                 <div
-                    class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4"
+                    class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                 >
-                    <!-- Filtre Année -->
-                    <div class="flex items-center gap-2">
-                        <label
-                            for="year"
-                            class="text-gray-600 font-medium text-sm"
-                        >
-                            Année
-                        </label>
-                        <select
-                            id="year"
-                            v-model="selectedYear"
-                            class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option
-                                v-for="year in years"
-                                :key="year"
-                                :value="year"
-                            >
-                                {{ year }}
-                            </option>
-                        </select>
+                    <!-- Bouton pour ajouter un jour -->
+                    <div
+                        v-if="
+                            isShow &&
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes('Informatique'))
+                        "
+                        class="flex items-center"
+                    >
+                        <PrimaryButton @click="openAddDayModal">
+                            <i class="fas fa-plus mr-2"></i> Ajouter un jour
+                        </PrimaryButton>
                     </div>
 
-                    <!-- Filtre Mois -->
-                    <div class="flex items-center gap-2">
-                        <label
-                            for="month"
-                            class="text-gray-600 font-medium text-sm"
-                        >
-                            Mois
-                        </label>
-                        <select
-                            id="month"
-                            v-model="selectedMonth"
-                            class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option
-                                v-for="month in months"
-                                :key="month.value"
-                                :value="month.value"
+                    <!-- Filtres -->
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center gap-4"
+                    >
+                        <!-- Filtre Année -->
+                        <div class="flex items-center gap-2">
+                            <label
+                                for="year"
+                                class="text-gray-600 font-medium text-sm"
                             >
-                                {{ month.name }}
-                            </option>
-                        </select>
+                                Année
+                            </label>
+                            <select
+                                id="year"
+                                v-model="selectedYear"
+                                class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option
+                                    v-for="year in years"
+                                    :key="year"
+                                    :value="year"
+                                >
+                                    {{ year }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Filtre Mois -->
+                        <div class="flex items-center gap-2">
+                            <label
+                                for="month"
+                                class="text-gray-600 font-medium text-sm"
+                            >
+                                Mois
+                            </label>
+                            <select
+                                id="month"
+                                v-model="selectedMonth"
+                                class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option
+                                    v-for="month in months"
+                                    :key="month.value"
+                                    :value="month.value"
+                                >
+                                    {{ month.name }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Bouton pour ajouter un jour -->
-            <div
-                v-if="
-                    isShow &&
-                    page.props.auth.roles &&
-                    (page.props.auth.roles.includes('Admin') ||
-                        page.props.auth.roles.includes('Informatique'))
-                "
-                class="pt-6 flex justify-end mb-4 mr-8"
-            >
-                <PrimaryButton @click="openAddDayModal">
-                    <i class="fas fa-plus mr-2"></i> Ajouter un jour
-                </PrimaryButton>
             </div>
 
             <!-- Table -->
@@ -445,7 +443,7 @@ const removeDepartureTimeEdit = (index) => {
                                 Départs
                             </th>
                             <th
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
+                                class="px-7 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
                             >
                                 Total
                             </th>
@@ -486,7 +484,7 @@ const removeDepartureTimeEdit = (index) => {
                                         }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-emerald-700">
                                     {{
                                         formatTimeWithoutSeconds(
                                             day.arrivals &&
@@ -514,7 +512,7 @@ const removeDepartureTimeEdit = (index) => {
                                         ></i>
                                     </button>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-red-700">
                                     {{
                                         formatTimeWithoutSeconds(
                                             day.departures &&
@@ -542,7 +540,7 @@ const removeDepartureTimeEdit = (index) => {
                                         ></i>
                                     </button>
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-6 py-4 text-right font-semibold opacity-70">
                                     {{ day.total || "--:--" }}
                                 </td>
                             </tr>
@@ -638,16 +636,16 @@ const removeDepartureTimeEdit = (index) => {
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-calendar-alt text-green-500"></i>
                         <span class="text-sm font-medium">
-                            <strong>Jour enregistrés :</strong>
-                            {{ totalDaysRecorded }}
+                            <span>Jour enregistrés: </span>
+                            <span class="font-bold">{{ totalDaysRecorded }}</span>
                         </span>
                     </div>
                     <!-- Jours enregistrés -->
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-clock text-blue-500"></i>
                         <span class="text-sm font-medium">
-                            <strong>Total des heures :</strong>
-                            {{ formattedTotalHours }}
+                            <span>Total des heures: </span>
+                            <span class="font-bold">{{ formattedTotalHours }}</span>
                         </span>
                     </div>
                 </div>
