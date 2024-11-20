@@ -357,77 +357,54 @@ const removeDepartureTimeEdit = (index) => {
             class="attendance-section flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-24 pb-20 rounded-lg shadow-lg min-h-[800px]"
         >
             <!-- Statistiques et filtres -->
-            <div class="w-full max-w-6xl mx-auto mb-8">
+            <div class="w-full max-w-6xl mx-auto mb-3">
                 <div
-                    class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-6 rounded-lg shadow-md space-y-6 md:space-y-0"
+                    class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4"
                 >
-                    <!-- Informations sur le total des heures et des jours enregistrés -->
-                    <div
-                        class="flex flex-col items-start space-y-2 text-gray-700 w-full lg:w-auto"
-                    >
-                        <div class="flex items-center text-sm">
-                            <i class="fas fa-clock text-blue-500 mr-2"></i>
-                            <span
-                                ><strong>Total des heures :</strong>
-                                {{ formattedTotalHours }}</span
+                    <!-- Filtre Année -->
+                    <div class="flex items-center gap-2">
+                        <label
+                            for="year"
+                            class="text-gray-600 font-medium text-sm"
+                        >
+                            Année
+                        </label>
+                        <select
+                            id="year"
+                            v-model="selectedYear"
+                            class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option
+                                v-for="year in years"
+                                :key="year"
+                                :value="year"
                             >
-                        </div>
-                        <div class="flex items-center text-sm">
-                            <i
-                                class="fas fa-calendar-alt text-green-500 mr-2"
-                            ></i>
-                            <span
-                                ><strong>Jours enregistrés :</strong>
-                                {{ totalDaysRecorded }}</span
-                            >
-                        </div>
+                                {{ year }}
+                            </option>
+                        </select>
                     </div>
 
-                    <!-- Filtres par année et mois -->
-                    <div
-                        class="flex flex-col sm:flex-row md:flex-row items-start md:items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto lg:ml-auto"
-                    >
-                        <div class="flex items-center w-full sm:w-auto">
-                            <label
-                                for="year"
-                                class="text-gray-600 font-semibold text-sm mr-2"
-                                >Année</label
+                    <!-- Filtre Mois -->
+                    <div class="flex items-center gap-2">
+                        <label
+                            for="month"
+                            class="text-gray-600 font-medium text-sm"
+                        >
+                            Mois
+                        </label>
+                        <select
+                            id="month"
+                            v-model="selectedMonth"
+                            class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option
+                                v-for="month in months"
+                                :key="month.value"
+                                :value="month.value"
                             >
-                            <select
-                                id="year"
-                                v-model="selectedYear"
-                                class="w-full sm:w-48 md:w-40 border-gray-300 text-sm rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                            >
-                                <option
-                                    v-for="year in years"
-                                    :key="year"
-                                    :value="year"
-                                >
-                                    {{ year }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="flex items-center w-full sm:w-auto">
-                            <label
-                                for="month"
-                                class="text-gray-600 font-semibold text-sm mr-4 md:mr-2"
-                                >Mois</label
-                            >
-                            <select
-                                id="month"
-                                v-model="selectedMonth"
-                                class="w-full sm:w-48 md:w-40 border-gray-300 text-sm rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                            >
-                                <option
-                                    v-for="month in months"
-                                    :key="month.value"
-                                    :value="month.value"
-                                >
-                                    {{ month.name }}
-                                </option>
-                            </select>
-                        </div>
+                                {{ month.name }}
+                            </option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -653,6 +630,27 @@ const removeDepartureTimeEdit = (index) => {
                         </template>
                     </tbody>
                 </table>
+
+                <div
+                    class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300 rounded-b-lg text-gray-800"
+                >
+                    <!-- Total des heures -->
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-calendar-alt text-green-500"></i>
+                        <span class="text-sm font-medium">
+                            <strong>Jour enregistrés :</strong>
+                            {{ totalDaysRecorded }}
+                        </span>
+                    </div>
+                    <!-- Jours enregistrés -->
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-clock text-blue-500"></i>
+                        <span class="text-sm font-medium">
+                            <strong>Total des heures :</strong>
+                            {{ formattedTotalHours }}
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <!-- Retour au Dashboard ou à la gestion des employés -->
