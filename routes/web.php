@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
 
 // Gestion des timers des entrées et sorties
 Route::post('/time-entries/store', [TimeEntryController::class, 'store'])->name('time-entries.store');
+Route::post('/days/update-total', [DayController::class, 'updateTotal']);
 
 
 

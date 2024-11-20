@@ -165,7 +165,7 @@ function recordTime(actionType) {
     // Calculer le total pour aujourd'hui
     dayInfo.total = calculateDailyTotal(dayInfo.arrivals, dayInfo.departures);
 
-    // Envoyer les données au backend
+    // Envoyer les données au backend pour l'heure enregistrée
     axios
         .post("/time-entries/store", {
             user_id: props.auth.user.id,
@@ -178,11 +178,25 @@ function recordTime(actionType) {
             if (!dayInfo.id) {
                 dayInfo.id = response.data.day_id; // Mise à jour de l'ID
             }
+
+            // Synchroniser le total avec la table `days`
+            axios
+                .post("/days/update-total", {
+                    day_id: dayInfo.id,
+                    total: dayInfo.total,
+                })
+                .then((syncResponse) => {
+                    console.log("Total synchronisé :", syncResponse.data);
+                })
+                .catch((error) => {
+                    console.error("Erreur lors de la synchronisation :", error);
+                });
         })
         .catch((error) => {
             console.error("Erreur lors de l'enregistrement :", error);
         });
 }
+
 
 // Calculer le total des heures travaillées pour un jour
 function calculateDailyTotal(arrivals, departures) {

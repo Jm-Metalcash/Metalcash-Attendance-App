@@ -56,4 +56,28 @@ class DayController extends Controller
 
         return response()->json($days);
     }
+
+
+    public function updateTotal(Request $request)
+{
+    try {
+        // Valider les données entrantes
+        $validated = $request->validate([
+            'day_id' => 'required|exists:days,id',
+            'total' => 'required|regex:/^\d{2}:\d{2}$/', // Format HH:mm
+        ]);
+
+        // Mettre à jour le total
+        $day = Day::findOrFail($validated['day_id']);
+        $day->update(['total' => $validated['total']]);
+
+        return response()->json([
+            'message' => 'Total mis à jour avec succès',
+            'day' => $day,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
 }
