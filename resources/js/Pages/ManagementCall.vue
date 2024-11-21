@@ -11,7 +11,7 @@ import FlashMessage from "@/Components/FlashMessage.vue";
 const page = usePage();
 
 // Les clients sont passés via Inertia
-const props = defineProps(["clients", "currentUser", "selectedUserId"]);
+const props = defineProps(["clients", "currentUser", "selectedUser"]);
 
 // Les données des clients à partir des props
 const users = ref(props.clients);
@@ -35,8 +35,6 @@ const newUser = ref({
     locality: "",
     country: "",
 });
-
-
 
 // Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
 const filteredUsers = computed(() => {
@@ -93,25 +91,24 @@ const recentUsers = ref([]);
 onMounted(() => {
     axios.get("/recent-views").then((response) => {
         recentUsers.value = response.data.map((view) => ({
-            client: view.client, // Inclut toutes les informations du client
-            user: view.user.name,
-            date: new Date(view.created_at).toLocaleString(),
+            client: view.client,
+            viewedBy: view.viewedBy || "Inconnu",
+            viewedAt: view.viewedAt || "Date inconnue",
         }));
     });
 
-    if (props.selectedUserId) {
-        const selected = users.value.find(
-            (user) => user.id === props.selectedUserId
-        );
-        if (selected) {
-            selectedUser.value = selected;
-        } else {
-            closeUserDetails();
-        }
+    if (props.selectedUser) {
+        selectedUser.value = props.selectedUser;
     }
 });
 
-
+// Watch pour mettre à jour selectedUser lorsque props.selectedUser change
+watch(
+    () => props.selectedUser,
+    (newSelectedUser) => {
+        selectedUser.value = newSelectedUser;
+    }
+);
 
 // Fonction pour sélectionner un utilisateur et mettre à jour la liste des 5 derniers utilisateurs consultés
 const selectUser = (user) => {
@@ -122,26 +119,10 @@ const selectUser = (user) => {
 
     console.log("Utilisateur sélectionné :", user);
 
-    axios
-        .post(route("clients.log-view"), { client_id: user.id })
-        .then(() => {
-            console.log("Consultation enregistrée avec succès");
-
-            selectedUser.value = user;
-
-            Inertia.visit(route("management-call", { user: user.id }), {
-                method: "get",
-                preserveState: true,
-                preserveScroll: true,
-                only: ["selectedUserId"],
-            });
-        })
-        .catch((error) => {
-            console.error(
-                "Erreur lors de l'enregistrement de la consultation :",
-                error
-            );
-        });
+    Inertia.visit(route("management-call", { user: user.id }), {
+        method: "get",
+        preserveScroll: true, // Retirer preserveState pour permettre la mise à jour des props
+    });
 };
 
 const closeUserDetails = () => {
@@ -150,9 +131,7 @@ const closeUserDetails = () => {
     // Mettre à jour l'URL pour revenir à /gestion-appels-telephoniques
     Inertia.visit(route("management-call"), {
         method: "get",
-        preserveState: true,
         preserveScroll: true,
-        only: [],
     });
 };
 
@@ -199,12 +178,12 @@ const updateUserInList = (updatedUser) => {
     }
 };
 
-// Les 10 derniers clients ajoutés
+// Les 20 derniers clients ajoutés
 const recentAddedUsers = computed(() => {
     return users.value
-        .filter((user) => user.created_at) // Exclure si `created_at` est null
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Trier par `created_at` décroissant
-        .slice(0, 20); // Limiter à 20 résultats
+        .filter((user) => user.created_at)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 20);
 });
 
 // Les 10 derniers clients modifiés
@@ -212,15 +191,15 @@ const recentModifiedUsers = computed(() => {
     return users.value
         .filter(
             (user) =>
-                user.updated_at && // Exclure si `updated_at` est null
-                user.created_at && // Exclure si `created_at` est null
-                new Date(user.updated_at) > new Date(user.created_at) // Seulement si modifié
+                user.updated_at &&
+                user.created_at &&
+                new Date(user.updated_at) > new Date(user.created_at)
         )
-        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)) // Trier par `updated_at` décroissant
-        .slice(0, 10); // Limiter à 10 résultats
+        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+        .slice(0, 10);
 });
 
-// Fonction pour formater les dates avec les fonctionnalités natives de JavaScript
+// Fonction pour formater les dates
 const formatDate = (date) => {
     if (!date) return "Non disponible";
     const d = new Date(date);
@@ -344,12 +323,11 @@ const formatDate = (date) => {
                                         :filteredUsers="
                                             recentUsers.map((view) => ({
                                                 ...view.client, // Inclure les détails du client
-                                                viewedBy: view.user
-                                                    ? view.user.name
-                                                    : 'Inconnu', // Ajoute le nom de l'utilisateur ayant consulté
+                                                viewedBy:
+                                                    view.viewedBy || 'Inconnu', // Nom de l'utilisateur ayant consulté
                                                 viewedAt:
-                                                    view.date ||
-                                                    'Date inconnue', // Ajoute la date de consultation
+                                                    view.viewedAt ||
+                                                    'Date inconnue', // Date de consultation
                                             }))
                                         "
                                         :selectUser="selectUser"

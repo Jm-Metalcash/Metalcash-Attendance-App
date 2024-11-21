@@ -14,15 +14,39 @@ class ClientController extends Controller
     // Affiche la liste des clients avec leurs transactions et notes
     public function index($user = null)
     {
-        // Récupérer les clients, etc.
+        // Récupérer tous les clients
         $clients = Client::all();
+
+        // Initialiser la variable pour le client sélectionné
+        $selectedClient = null;
+
+        // Si un ID de client est fourni, charger le client avec ses relations
+        if ($user) {
+            $selectedClient = Client::with([
+                'notes',
+                'bordereauHistoriques.informations'
+            ])->find($user);
+
+            // Enregistrer la consultation si le client est trouvé
+            if ($selectedClient) {
+                try {
+                    RecentView::updateOrCreate(
+                        ['user_id' => Auth::id(), 'client_id' => $user],
+                        ['created_at' => now()]
+                    );
+                } catch (\Exception $e) {
+                    return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
+                }
+            }
+        }
 
         return Inertia::render('ManagementCall', [
             'clients' => $clients,
             'currentUser' => Auth::user(),
-            'selectedUserId' => $user, // Passer l'ID de l'utilisateur sélectionné
+            'selectedUser' => $selectedClient,
         ]);
     }
+
 
 
     // Affiche les détails d'un client spécifique// Vérifie que l'ID est correctement récupéré
@@ -172,13 +196,22 @@ class ClientController extends Controller
 
     // méthode renvoie une liste des dernières consultations
     public function getRecentViews()
-{
-    $recentViews = RecentView::with(['user', 'client']) // Inclut le client et l'utilisateur
-        ->orderBy('created_at', 'desc')
-        ->take(10) // Limiter aux 10 dernières consultations
-        ->get();
+    {
+        $recentViews = RecentView::with(['user', 'client']) // Charge les relations
+            ->whereHas('user') // Filtre les vues avec un utilisateur valide
+            ->whereHas('client') // Filtre les vues avec un client valide
+            ->orderBy('created_at', 'desc')
+            ->take(10) // Limiter aux 10 dernières consultations
+            ->get();
 
-    return response()->json($recentViews);
-}
-
+        return response()->json(
+            $recentViews->map(function ($view) {
+                return [
+                    'client' => $view->client,
+                    'viewedBy' => $view->user ? $view->user->name : 'Inconnu',
+                    'viewedAt' => $view->created_at->format('d/m/Y H:i'),
+                ];
+            })
+        );
+    }
 }

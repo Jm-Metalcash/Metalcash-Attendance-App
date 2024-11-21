@@ -14,7 +14,7 @@
             <!-- Colonne Nom complet (avec indicateur de statut à gauche) -->
             <div class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0">
                 <span
-                    :class="[ 
+                    :class="[
                         user.recently_added ? 'bg-fuchsia-500' : 'bg-green-400',
                         'h-2 w-2 mr-4 rounded-full',
                     ]"
@@ -24,19 +24,7 @@
                 </div>
             </div>
 
-            <!-- Colonne Numéro de Téléphone -->
-            <div class="flex w-full sm:w-1/6 mb-2 sm:mb-0">
-                <div class="font-medium text-left w-full ml-6 md:ml-0">
-                    {{ user.phone }}
-                </div>
-            </div>
-
-            <!-- Colonne Pays -->
-            <div class="flex w-full sm:w-1/6">
-                <div class="text-sm font-normal text-left ml-6 md:ml-0">
-                    {{ user.country }}
-                </div>
-            </div>
+            <!-- Autres colonnes -->
 
             <!-- Colonne Consultation (nom de l'utilisateur et date) -->
             <div
@@ -44,7 +32,8 @@
                 class="flex w-full sm:w-1/3 mt-2 sm:mt-0"
             >
                 <div class="text-sm font-light text-left ml-6 md:ml-0">
-                    <strong>Consulté par :</strong> {{ user.viewedBy || "Inconnu" }}<br />
+                    <strong>Consulté par :</strong>
+                    {{ user.viewedBy || "Inconnu" }}<br />
                     <strong>Le :</strong> {{ user.viewedAt || "Date inconnue" }}
                 </div>
             </div>

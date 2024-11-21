@@ -521,7 +521,7 @@ const emit = defineEmits(["user-updated"]);
 const editableUser = reactive({
     ...props.user,
     notes: props.user.notes || [],
-    bordereauHistoriques: props.user.bordereau_historiques || [],
+    bordereauHistoriques: props.user.bordereauHistoriques || [],
 });
 
 // nb reactif d'affichage des notes
