@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
+import { router as Inertia } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
@@ -10,7 +11,7 @@ import FlashMessage from "@/Components/FlashMessage.vue";
 const page = usePage();
 
 // Les clients sont passés via Inertia
-const props = defineProps(["clients", "currentUser"]);
+const props = defineProps(["clients", "currentUser", "selectedUserId"]);
 
 // Les données des clients à partir des props
 const users = ref(props.clients);
@@ -92,18 +93,29 @@ const recentUsers = ref([]);
 // Charger les derniers utilisateurs consultés depuis localStorage lors du montage
 onMounted(() => {
     const storedRecentUsers = localStorage.getItem("recentUsers");
+
+    if (props.selectedUserId) {
+        // Rediriger automatiquement vers /gestion-appels-telephoniques
+        Inertia.visit(route("management-call"), {
+            method: 'get',
+            replace: true,
+            preserveState: true,
+            preserveScroll: true,
+            only: [],
+        });
+    }
+
     if (storedRecentUsers) {
         const parsedUsers = JSON.parse(storedRecentUsers);
 
-        // Filtrer `recentUsers` pour conserver uniquement les utilisateurs existants
         recentUsers.value = parsedUsers.filter((user) =>
             users.value.some((dbUser) => dbUser.id === user.id)
         );
 
-        // Mettre à jour le localStorage pour garder la liste synchronisée
         saveRecentUsersToLocalStorage();
     }
 });
+
 
 // Fonction pour sauvegarder recentUsers dans localStorage
 const saveRecentUsersToLocalStorage = () => {
@@ -121,12 +133,20 @@ const selectUser = (user) => {
             if (!recentUsers.value.find((u) => u.id === user.id)) {
                 recentUsers.value.unshift(user);
             }
-            // Limiter recentUsers à 5 éléments
-            if (recentUsers.value.length > 5) {
+            // Limiter recentUsers à 10 éléments
+            if (recentUsers.value.length > 10) {
                 recentUsers.value.pop();
             }
             // Sauvegarder recentUsers dans localStorage
             saveRecentUsersToLocalStorage();
+
+            // Met à jour l'URL pour inclure l'ID utilisateur sans recharger la page
+            Inertia.visit(route("management-call", { user: user.id }), {
+                method: 'get',
+                preserveState: true,
+                preserveScroll: true,
+                only: ['selectedUserId'], // Ne recharge que selectedUserId
+            });
         })
         .catch((error) => {
             console.error(
@@ -135,6 +155,19 @@ const selectUser = (user) => {
             );
         });
 };
+
+const closeUserDetails = () => {
+    selectedUser.value = null;
+
+    // Mettre à jour l'URL pour revenir à /gestion-appels-telephoniques
+    Inertia.visit(route("management-call"), {
+        method: 'get',
+        preserveState: true,
+        preserveScroll: true,
+        only: [],
+    });
+};
+
 
 // Réinitialiser selectedUser si searchTerm change
 watch(searchTerm, () => {
@@ -474,7 +507,7 @@ const formatDate = (date) => {
                                 v-if="selectedUser"
                                 :user="selectedUser"
                                 @user-updated="updateUserInList"
-                                @user-deleted="handleUserDeleted"
+                                @closeUserDetails="closeUserDetails"
                             />
 
                             <!-- Modal d'ajout de client -->

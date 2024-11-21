@@ -11,17 +11,18 @@ use Illuminate\Http\Request;
 class ClientController extends Controller
 {
     // Affiche la liste des clients avec leurs transactions et notes
-    public function index()
+    public function index($user = null)
     {
-        // Récupère les clients avec leurs transactions et notes
-        $clients = Client::with(['notes'])->get();
-
-        // Envoie les données à la vue Inertia
+        // Récupérer les clients, etc.
+        $clients = Client::all();
+    
         return Inertia::render('ManagementCall', [
             'clients' => $clients,
             'currentUser' => Auth::user(),
+            'selectedUserId' => $user, // Passer l'ID de l'utilisateur sélectionné
         ]);
     }
+    
 
     // Affiche les détails d'un client spécifique
     public function show($id)
