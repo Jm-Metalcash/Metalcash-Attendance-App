@@ -117,8 +117,6 @@ const selectUser = (user) => {
         return;
     }
 
-    console.log("Utilisateur sélectionné :", user);
-
     Inertia.visit(route("management-call", { user: user.id }), {
         method: "get",
         preserveScroll: true, // Retirer preserveState pour permettre la mise à jour des props
