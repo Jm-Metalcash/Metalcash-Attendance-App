@@ -197,7 +197,6 @@ function recordTime(actionType) {
         });
 }
 
-
 // Calculer le total des heures travaillées pour un jour
 function calculateDailyTotal(arrivals, departures) {
     let totalMinutes = 0;
@@ -423,7 +422,9 @@ watch(() => days.value, updateButtonStates, { deep: true });
                     Cette semaine :
                 </h3>
 
-                <div class="w-full max-w-4xl mx-auto overflow-x-auto border mt-0">
+                <div
+                    class="w-full max-w-4xl mx-auto overflow-x-auto border mt-0"
+                >
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
@@ -506,7 +507,9 @@ watch(() => days.value, updateButtonStates, { deep: true });
                                             ></i>
                                         </button>
                                     </td>
-                                    <td class="px-6 py-4 text-right font-bold opacity-70">
+                                    <td
+                                        class="px-6 py-4 text-right font-bold opacity-70"
+                                    >
                                         {{ day.total || "--:--" }}
                                     </td>
                                 </tr>

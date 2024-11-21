@@ -9,6 +9,7 @@ use Carbon\Carbon;
 
 class DayController extends Controller
 {
+    // Ajouter ou mettre à jour un jour
     public function store(Request $request)
     {
         // Valider les données reçues
@@ -23,7 +24,7 @@ class DayController extends Controller
         ]);
 
         // Créer ou mettre à jour l'enregistrement dans la table `days`
-        Day::updateOrCreate(
+        $day = Day::updateOrCreate(
             ['user_id' => Auth::id(), 'date' => $validated['date']],
             [
                 'day' => $validated['day'],
@@ -35,12 +36,14 @@ class DayController extends Controller
             ]
         );
 
+        // Plus besoin d'appeler updateDayStatus ici
+
         return response()->json(['message' => 'Données enregistrées avec succès !'], 200);
     }
 
+    // Récupérer tous les jours pour l'utilisateur connecté
     public function index()
     {
-        // Récupérer les jours avec leurs entrées de temps pour l'utilisateur connecté
         $days = Day::with(['timeEntries' => function ($query) {
             $query->orderBy('time', 'asc'); // Trier les entrées de temps par heure
         }])
@@ -57,27 +60,29 @@ class DayController extends Controller
         return response()->json($days);
     }
 
-
+    // Mettre à jour le total pour un jour spécifique
     public function updateTotal(Request $request)
-{
-    try {
-        // Valider les données entrantes
-        $validated = $request->validate([
-            'day_id' => 'required|exists:days,id',
-            'total' => 'required|regex:/^\d{2}:\d{2}$/', // Format HH:mm
-        ]);
+    {
+        try {
+            // Valider les données entrantes
+            $validated = $request->validate([
+                'day_id' => 'required|exists:days,id',
+                'total' => 'required|regex:/^\d{2}:\d{2}$/', // Format HH:mm
+            ]);
 
-        // Mettre à jour le total
-        $day = Day::findOrFail($validated['day_id']);
-        $day->update(['total' => $validated['total']]);
+            // Mettre à jour le total
+            $day = Day::findOrFail($validated['day_id']);
+            $day->update(['total' => $validated['total']]);
 
-        return response()->json([
-            'message' => 'Total mis à jour avec succès',
-            'day' => $day,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+            // Plus besoin d'appeler updateDayStatus ici
+
+            return response()->json([
+                'message' => 'Total mis à jour avec succès',
+                'day' => $day,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
 
 }

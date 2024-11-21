@@ -26,6 +26,9 @@ const form = useForm({
     role: "Employé",
 });
 
+// Date du jour courant pour gestion du status
+const today = new Date().toISOString().split('T')[0];
+
 // Fonction pour soumettre le formulaire
 const submit = () => {
     form.post(route("employees.store"), {
@@ -53,21 +56,6 @@ const closeModal = () => {
     // Fermer le modal
     isModalOpen.value = false;
 };
-
-// Fonction pour vérifier le statut de l'utilisateur
-const checkUserStatus = (days) => {
-    const today = new Date().toISOString().split("T")[0]; // Obtenir la date actuelle au format YYYY-MM-DD
-    // Parcourir tous les jours de l'utilisateur
-    for (let i = 0; i < days.length; i++) {
-        if (days[i].date === today) {
-            // Si on trouve une arrivée et pas encore de départ
-            if (days[i].arrival && !days[i].departure) {
-                return true; // L'utilisateur est actif
-            }
-        }
-    }
-    return false; // L'utilisateur est inactif si aucun jour ne correspond ou si une sortie est enregistrée
-};
 </script>
 
 <template>
@@ -82,7 +70,9 @@ const checkUserStatus = (days) => {
             </h2>
         </template>
 
-        <div class="container flex-grow mx-auto px-4 sm:px-8 max-w-7xl bg-white rounded-lg shadow-lg py-8">
+        <div
+            class="container flex-grow mx-auto px-4 sm:px-8 max-w-7xl bg-white rounded-lg shadow-lg py-8"
+        >
             <div class="py-8">
                 <!-- Titre de la page -->
                 <div>
@@ -168,7 +158,11 @@ const checkUserStatus = (days) => {
                                         v-if="
                                             user.days &&
                                             user.days.length &&
-                                            checkUserStatus(user.days)
+                                            user.days.some(
+                                                (day) =>
+                                                    day.date === today &&
+                                                    day.status === 1
+                                            )
                                         "
                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
                                     >
@@ -219,7 +213,8 @@ const checkUserStatus = (days) => {
                                         "
                                         class="px-3 py-2 text-sm text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
                                     >
-                                    <i class="fa-solid fa-gear"></i> Administration des employés
+                                        <i class="fa-solid fa-gear"></i>
+                                        Administration
                                     </button>
                                 </td>
                             </tr>

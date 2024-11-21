@@ -15,5 +15,24 @@ class TimeEntry extends Model
     {
         return $this->belongsTo(Day::class);
     }
+
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($timeEntry) {
+            $timeEntry->day->updateStatus();
+        });
+
+        static::updated(function ($timeEntry) {
+            $timeEntry->day->updateStatus();
+        });
+
+        static::deleted(function ($timeEntry) {
+            $timeEntry->day->updateStatus();
+        });
+    }
 }
 
