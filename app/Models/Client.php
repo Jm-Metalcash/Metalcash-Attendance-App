@@ -31,6 +31,11 @@ class Client extends Model
         return $this->hasMany(Note::class);
     }
 
+    public function recentViews()
+    {
+        return $this->hasMany(RecentView::class);
+    }
+
     public function bordereauHistoriques()
     {
         return $this->hasMany(BordereauHistorique::class);

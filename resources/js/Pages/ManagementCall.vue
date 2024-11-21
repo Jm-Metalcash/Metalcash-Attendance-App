@@ -36,8 +36,7 @@ const newUser = ref({
     country: "",
 });
 
-// Variable pour indiquer si un nouvel utilisateur a été ajouté
-const isNewUserAdded = ref(false);
+
 
 // Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
 const filteredUsers = computed(() => {
@@ -92,65 +91,54 @@ const recentUsers = ref([]);
 
 // Charger les derniers utilisateurs consultés depuis localStorage lors du montage
 onMounted(() => {
-    const storedRecentUsers = localStorage.getItem("recentUsers");
+    axios.get("/recent-views").then((response) => {
+        recentUsers.value = response.data.map((view) => ({
+            client: view.client, // Inclut toutes les informations du client
+            user: view.user.name,
+            date: new Date(view.created_at).toLocaleString(),
+        }));
+    });
 
     if (props.selectedUserId) {
-        // Rediriger automatiquement vers /gestion-appels-telephoniques
-        Inertia.visit(route("management-call"), {
-            method: 'get',
-            replace: true,
-            preserveState: true,
-            preserveScroll: true,
-            only: [],
-        });
-    }
-
-    if (storedRecentUsers) {
-        const parsedUsers = JSON.parse(storedRecentUsers);
-
-        recentUsers.value = parsedUsers.filter((user) =>
-            users.value.some((dbUser) => dbUser.id === user.id)
+        const selected = users.value.find(
+            (user) => user.id === props.selectedUserId
         );
-
-        saveRecentUsersToLocalStorage();
+        if (selected) {
+            selectedUser.value = selected;
+        } else {
+            closeUserDetails();
+        }
     }
 });
 
 
-// Fonction pour sauvegarder recentUsers dans localStorage
-const saveRecentUsersToLocalStorage = () => {
-    localStorage.setItem("recentUsers", JSON.stringify(recentUsers.value));
-};
 
 // Fonction pour sélectionner un utilisateur et mettre à jour la liste des 5 derniers utilisateurs consultés
 const selectUser = (user) => {
+    if (!user || !user.id) {
+        console.error("Utilisateur invalide ou ID manquant.", user);
+        return;
+    }
+
+    console.log("Utilisateur sélectionné :", user);
+
     axios
-        .get(`/clients/${user.id}`)
-        .then((response) => {
-            selectedUser.value = response.data.user;
+        .post(route("clients.log-view"), { client_id: user.id })
+        .then(() => {
+            console.log("Consultation enregistrée avec succès");
 
-            // Ajouter l'utilisateur dans recentUsers si non présent
-            if (!recentUsers.value.find((u) => u.id === user.id)) {
-                recentUsers.value.unshift(user);
-            }
-            // Limiter recentUsers à 10 éléments
-            if (recentUsers.value.length > 10) {
-                recentUsers.value.pop();
-            }
-            // Sauvegarder recentUsers dans localStorage
-            saveRecentUsersToLocalStorage();
+            selectedUser.value = user;
 
-            // Met à jour l'URL pour inclure l'ID utilisateur sans recharger la page
             Inertia.visit(route("management-call", { user: user.id }), {
-                method: 'get',
+                method: "get",
                 preserveState: true,
                 preserveScroll: true,
-                only: ['selectedUserId'], // Ne recharge que selectedUserId
+                only: ["selectedUserId"],
             });
         })
         .catch((error) => {
             console.error(
-                "Erreur lors de la récupération des données de l'utilisateur :",
+                "Erreur lors de l'enregistrement de la consultation :",
                 error
             );
         });
@@ -161,13 +149,12 @@ const closeUserDetails = () => {
 
     // Mettre à jour l'URL pour revenir à /gestion-appels-telephoniques
     Inertia.visit(route("management-call"), {
-        method: 'get',
+        method: "get",
         preserveState: true,
         preserveScroll: true,
         only: [],
     });
 };
-
 
 // Réinitialiser selectedUser si searchTerm change
 watch(searchTerm, () => {
@@ -230,7 +217,7 @@ const recentModifiedUsers = computed(() => {
                 new Date(user.updated_at) > new Date(user.created_at) // Seulement si modifié
         )
         .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)) // Trier par `updated_at` décroissant
-        .slice(0, 20); // Limiter à 20 résultats
+        .slice(0, 10); // Limiter à 10 résultats
 });
 
 // Fonction pour formater les dates avec les fonctionnalités natives de JavaScript
@@ -351,10 +338,21 @@ const formatDate = (date) => {
                                     >
                                         Derniers fournisseurs consultés
                                     </h3>
+
+                                    <!-- Utilisation du composant UserList -->
                                     <UserList
-                                        :filteredUsers="recentUsers"
+                                        :filteredUsers="
+                                            recentUsers.map((view) => ({
+                                                ...view.client, // Inclure les détails du client
+                                                viewedBy: view.user
+                                                    ? view.user.name
+                                                    : 'Inconnu', // Ajoute le nom de l'utilisateur ayant consulté
+                                                viewedAt:
+                                                    view.date ||
+                                                    'Date inconnue', // Ajoute la date de consultation
+                                            }))
+                                        "
                                         :selectUser="selectUser"
-                                        :isNewUserAdded="isNewUserAdded"
                                     />
                                 </div>
 

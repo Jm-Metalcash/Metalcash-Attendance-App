@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\HistoricalTransaction;
+use App\Models\RecentView;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -15,34 +16,47 @@ class ClientController extends Controller
     {
         // Récupérer les clients, etc.
         $clients = Client::all();
-    
+
         return Inertia::render('ManagementCall', [
             'clients' => $clients,
             'currentUser' => Auth::user(),
             'selectedUserId' => $user, // Passer l'ID de l'utilisateur sélectionné
         ]);
     }
-    
 
-    // Affiche les détails d'un client spécifique
+
+    // Affiche les détails d'un client spécifique// Vérifie que l'ID est correctement récupéré
     public function show($id)
     {
-        // Récupérer le client avec ses notes, ses historiques de bordereaux et les informations associées
+        if (!$id) {
+            return response()->json(['error' => 'Client ID is missing'], 400);
+        }
+
         $client = Client::with([
             'notes',
             'bordereauHistoriques.informations'
         ])->findOrFail($id);
 
-        // Vérifier si la requête est une requête AJAX
+        // Enregistrer la consultation
+        try {
+            RecentView::updateOrCreate(
+                ['user_id' => Auth::id(), 'client_id' => $id],
+                ['created_at' => now()]
+            );
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
+        }
+
         if (request()->ajax()) {
             return response()->json(['user' => $client]);
         }
 
-        // Envoie les données à la vue Inertia
         return Inertia::render('ManagementCall', [
             'user' => $client,
         ]);
     }
+
+
 
 
 
@@ -132,4 +146,39 @@ class ClientController extends Controller
             return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
         }
     }
+
+
+    // méthode pour enregistrer ou mettre à jour une vue lorsque l'utilisateur consulte un client.
+    public function logView(Request $request)
+    {
+        $request->validate([
+            'client_id' => 'required|exists:clients,id',
+        ]);
+
+        $userId = Auth::id();
+        $clientId = $request->input('client_id');
+
+        // Ajouter ou mettre à jour la consultation
+        RecentView::updateOrCreate(
+            ['user_id' => $userId, 'client_id' => $clientId],
+            ['created_at' => now()]
+        );
+
+        return response()->json(['message' => 'View logged successfully']);
+    }
+
+
+
+
+    // méthode renvoie une liste des dernières consultations
+    public function getRecentViews()
+{
+    $recentViews = RecentView::with(['user', 'client']) // Inclut le client et l'utilisateur
+        ->orderBy('created_at', 'desc')
+        ->take(10) // Limiter aux 10 dernières consultations
+        ->get();
+
+    return response()->json($recentViews);
+}
+
 }
