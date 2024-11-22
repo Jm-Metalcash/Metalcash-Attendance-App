@@ -413,7 +413,7 @@ const formatDate = (date) => {
 
                                             <!-- Date d'ajout et utilisateur ayant ajouté -->
                                             <div
-                                                class="text-sm w-full sm:w-1/6"
+                                                class="text-xs w-full sm:w-1/6"
                                             >
                                                 Ajouté par : <br />
                                                 <span
@@ -499,7 +499,7 @@ const formatDate = (date) => {
 
                                             <!-- Date de modification et utilisateur ayant modifié -->
                                             <div
-                                                class="text-sm font-normal w-full sm:w-1/6"
+                                                class="text-xs w-full sm:w-1/6"
                                             >
                                                 Modifié par : <br />
                                                 <span
