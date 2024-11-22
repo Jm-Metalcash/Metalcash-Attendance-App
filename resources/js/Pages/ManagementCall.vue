@@ -74,15 +74,6 @@ const filteredUsers = computed(() => {
             return (
                 nameMatches ||
                 phoneMatches ||
-                (user.address
-                    ? normalize(user.address).includes(searchLower)
-                    : false) ||
-                (user.locality
-                    ? normalize(user.locality).includes(searchLower)
-                    : false) ||
-                (user.postalCode
-                    ? normalize(user.postalCode).includes(searchLower)
-                    : false) ||
                 (user.country
                     ? normalize(user.country).includes(searchLower)
                     : false) ||
