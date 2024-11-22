@@ -324,7 +324,6 @@
                         Adresse
                     </p>
                 </div>
-
                 <div
                     class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
                 >
@@ -414,6 +413,74 @@
                             />
                             <p
                                 v-if="successMessages.country"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
+                </div>
+
+
+                <!-- INFORMATIONS STATUS CLIENT -->
+                <div class="px-4 py-5 sm:px-6 bg-gray-200">
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
+                        Informations complémentaires sur le fournisseur
+                    </p>
+                </div>
+
+                <div
+                    class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
+                >
+                    <div class="sm:col-span-1 px-4 md:px-0">
+                        <dt class="text-sm font-bold text-gray-500">Nom de l'entreprise</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.company"
+                                @click="editField('company')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableUser.company ||
+                                    "Ajouter un nom d'entreprise"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableUser.company"
+                                @blur="saveField('company')"
+                                @keydown.enter="saveField('company')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.company"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
+                        <dt class="text-sm font-bold text-gray-500">Numéro de TVA</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.companyvat"
+                                @click="editField('companyvat')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableUser.companyvat || "Ajouter un numéro de TVA"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableUser.companyvat"
+                                @blur="saveField('companyvat')"
+                                @keydown.enter="saveField('companyvat')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.companyvat"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
                                 Enregistré avec succès
@@ -550,6 +617,8 @@ const successMessages = reactive({
     postalCode: false,
     locality: false,
     country: false,
+    company: false,
+    companyvat: false,
     notes: [],
 });
 
@@ -587,6 +656,8 @@ const isEditing = reactive({
     postalCode: false,
     locality: false,
     country: false,
+    company: false,
+    companyvat: false,
 });
 
 // Fonctions pour gérer les champs d'édition

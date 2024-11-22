@@ -109,6 +109,8 @@ class ClientController extends Controller
             'interest' => 'nullable|string|max:255',
             'referer' => 'nullable|string|max:255',
             'birthDate' => 'nullable|date',
+            'company' => 'nullable|string|max:255',
+            'companyvat' => 'nullable|string|max:255',
         ]);
 
         // Définir recently_added en fonction du rôle
@@ -155,6 +157,8 @@ class ClientController extends Controller
             'interest' => 'nullable|string|max:255',
             'referer' => 'nullable|string|max:255',
             'birthDate' => 'nullable|date',
+            'company' => 'nullable|string|max:255',
+            'companyvat' => 'nullable|string|max:255',
         ]);
 
         // Supprimer les champs avec des valeurs nulles
