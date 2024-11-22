@@ -188,7 +188,7 @@
         <!-- Section Informations Générales -->
         <div class="px-4 py-5 sm:px-6 bg-gray-200">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                Informations générales sur le fournisseur
+                Informations générales
             </p>
         </div>
         <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
@@ -425,7 +425,7 @@
                 <!-- INFORMATIONS STATUS CLIENT -->
                 <div class="px-4 py-5 sm:px-6 bg-gray-200">
                     <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                        Informations complémentaires sur le fournisseur
+                        Informations complémentaires
                     </p>
                 </div>
 
