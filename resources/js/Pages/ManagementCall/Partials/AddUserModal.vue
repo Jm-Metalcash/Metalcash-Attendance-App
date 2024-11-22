@@ -305,10 +305,13 @@ const validatePhone = () => {
 
 // Affichage du message d'erreur pour l'e-mail
 const validateEmail = () => {
-    if (!isValidEmail(newUser.value.email)) {
+    const email = newUser.value.email;
+
+    // Vérifier si un e-mail est saisi
+    if (email && !isValidEmail(email)) {
         errors.value.email = ["Le format de l'adresse e-mail est invalide."];
     } else {
-        delete errors.value.email;
+        delete errors.value.email; // Supprime l'erreur si le format est valide ou si aucun e-mail n'est fourni
     }
 };
 
@@ -367,13 +370,7 @@ const addUserWithNote = async () => {
             noteData = noteResponse.data;
         }
 
-        newUser.value = {
-            /* Reset fields */
-        };
-        newNote.value.content = "";
-        errors.value = {};
-        formSubmitted.value = false;
-
+        resetFields(); // Réinitialiser les champs
         emit("addUser", {
             ...response.data,
             notes: noteData ? [noteData] : [],
@@ -386,6 +383,7 @@ const addUserWithNote = async () => {
         }
     }
 };
+
 
 // Fonction pour gérer le passage au champ suivant
 const focusNextField = (event) => {
