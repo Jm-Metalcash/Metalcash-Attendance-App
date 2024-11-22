@@ -374,7 +374,7 @@ const formatDate = (date) => {
                                                 @click="selectUser(user)"
                                                 class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
                                             >
-                                                <!-- Nom complet avec indicateur de statut -->
+                                                <!-- Nom complet -->
                                                 <div
                                                     class="flex w-full sm:w-1/6 items-center"
                                                 >
@@ -393,12 +393,25 @@ const formatDate = (date) => {
                                                         {{ user.familyName }}
                                                     </div>
                                                 </div>
-                                                <!-- Date d'ajout -->
+                                                <!-- Date d'ajout et utilisateur qui a ajouté -->
                                                 <div
-                                                    class="text-sm font-normal w-full sm:w-1/6"
+                                                    class="text-sm w-full sm:w-1/6"
                                                 >
-                                                    Ajouté le :
-                                                    <span class="font-bold">
+                                                    Ajouté par : <br />
+                                                    <span
+                                                        class="font-bold text-xs mr-2"
+                                                    >
+                                                        {{
+                                                            user.created_by
+                                                                ? user
+                                                                      .created_by
+                                                                      .name
+                                                                : "Inconnu"
+                                                        }}
+                                                    </span>
+                                                    <span
+                                                        class="font-bold text-xs"
+                                                    >
                                                         {{
                                                             formatDate(
                                                                 user.created_at
@@ -408,18 +421,9 @@ const formatDate = (date) => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <button
-                                            @click="toggleModal"
-                                            class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                                        >
-                                            <i
-                                                class="fa-solid fa-plus text-gray-500 mr-2"
-                                            ></i>
-                                            Ajouter un fournisseur
-                                        </button>
                                     </div>
 
-                                    <!-- Affiche les 20 derniers fournisseurs modifiés -->
+                                    <!-- Affiche les 10 derniers fournisseurs modifiés -->
                                     <div
                                         v-if="!selectedUser"
                                         class="mt-8 border p-4 bg-zinc-50"
@@ -438,7 +442,7 @@ const formatDate = (date) => {
                                                 @click="selectUser(user)"
                                                 class="flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-green-50 text-gray-700 hover:bg-green-100 hover:text-green-800"
                                             >
-                                                <!-- Nom complet avec indicateur de statut -->
+                                                <!-- Nom complet -->
                                                 <div
                                                     class="flex w-full sm:w-1/6 items-center"
                                                 >
@@ -457,12 +461,21 @@ const formatDate = (date) => {
                                                         {{ user.familyName }}
                                                     </div>
                                                 </div>
-                                                <!-- Date de modification -->
+                                                <!-- Date de modification et utilisateur qui a modifié -->
                                                 <div
                                                     class="text-sm font-normal w-full sm:w-1/6"
                                                 >
-                                                    Modifié le :
-                                                    <span class="font-bold">
+                                                    Modifié par : <br />
+                                                    <span class="font-bold text-xs mr-2">
+                                                        {{
+                                                            user.updated_by
+                                                                ? user
+                                                                      .updated_by
+                                                                      .name
+                                                                : "Inconnu"
+                                                        }}
+                                                    </span>
+                                                    <span class="font-bold text-xs">
                                                         {{
                                                             formatDate(
                                                                 user.updated_at

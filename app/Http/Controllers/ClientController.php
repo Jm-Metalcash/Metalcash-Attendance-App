@@ -14,8 +14,8 @@ class ClientController extends Controller
     // Affiche la liste des clients avec leurs transactions et notes
     public function index($user = null)
     {
-        // Récupérer tous les clients
-        $clients = Client::all();
+        // Récupérer tous les clients avec les relations
+        $clients = Client::with(['createdBy:id,name', 'updatedBy:id,name'])->get();
 
         // Initialiser la variable pour le client sélectionné
         $selectedClient = null;
@@ -24,7 +24,9 @@ class ClientController extends Controller
         if ($user) {
             $selectedClient = Client::with([
                 'notes',
-                'bordereauHistoriques.informations'
+                'bordereauHistoriques.informations',
+                'createdBy',
+                'updatedBy'
             ])->find($user);
 
             // Enregistrer la consultation si le client est trouvé
@@ -49,6 +51,7 @@ class ClientController extends Controller
 
 
 
+
     // Affiche les détails d'un client spécifique// Vérifie que l'ID est correctement récupéré
     public function show($id)
     {
@@ -58,7 +61,9 @@ class ClientController extends Controller
 
         $client = Client::with([
             'notes',
-            'bordereauHistoriques.informations'
+            'bordereauHistoriques.informations',
+            'createdBy',
+            'updatedBy'
         ])->findOrFail($id);
 
         // Enregistrer la consultation
@@ -79,8 +84,6 @@ class ClientController extends Controller
             'user' => $client,
         ]);
     }
-
-
 
 
 
@@ -108,12 +111,15 @@ class ClientController extends Controller
             'birthDate' => 'nullable|date',
         ]);
 
-        // Condition pour définir recently_added (changement de couleur pipelette) pour le rôle 'Comptabilité'
+        // Définir recently_added en fonction du rôle
         if (Auth::user() && collect(Auth::user()->roles)->contains(fn($role) => $role->name === 'Comptabilité')) {
             $validatedData['recently_added'] = true;
         } else {
             $validatedData['recently_added'] = false;
         }
+
+        // Ajouter l'ID de l'utilisateur qui modifie le client
+        $validatedData['updated_by'] = Auth::id();
 
         // Mise à jour des informations du client
         $client = Client::findOrFail($id);
@@ -121,6 +127,7 @@ class ClientController extends Controller
 
         return response()->json($client);
     }
+
 
 
 
@@ -153,13 +160,15 @@ class ClientController extends Controller
         // Supprimer les champs avec des valeurs nulles
         $validatedData = array_filter($validatedData, fn($value) => !is_null($value));
 
-        // Condition pour définir recently_added (changement de couleur pipelette) pour le rôle 'Comptabilité'
+        // Définir recently_added en fonction du rôle
         if (Auth::user() && collect(Auth::user()->roles)->contains(fn($role) => $role->name === 'Comptabilité')) {
             $validatedData['recently_added'] = true;
         } else {
             $validatedData['recently_added'] = false;
         }
 
+        // Ajouter l'ID de l'utilisateur qui crée le client
+        $validatedData['created_by'] = Auth::id();
 
         try {
             // Création du client avec les données validées
@@ -170,6 +179,7 @@ class ClientController extends Controller
             return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
         }
     }
+
 
 
     // méthode pour enregistrer ou mettre à jour une vue lorsque l'utilisateur consulte un client.
