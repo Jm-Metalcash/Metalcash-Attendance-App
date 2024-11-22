@@ -49,6 +49,15 @@ const filteredUsers = computed(() => {
             const normalize = (str) =>
                 str ? str.toLowerCase().replace(/\s+/g, "") : "";
 
+            const normalizePhone = (phone) => {
+                if (!phone) return "";
+                // Remplace les préfixes internationaux en les unifiant au format international "+XX"
+                return phone
+                    .replace(/^\+/, "00") // Remplace le "+" par "00"
+                    .replace(/\s+/g, "") // Supprime les espaces
+                    .toLowerCase();
+            };
+
             const combinedName1 = normalize(user.firstName + user.familyName);
             const combinedName2 = normalize(user.familyName + user.firstName);
 
@@ -56,8 +65,15 @@ const filteredUsers = computed(() => {
                 combinedName1.includes(searchLower) ||
                 combinedName2.includes(searchLower);
 
+            const phoneMatches = user.phone
+                ? normalizePhone(user.phone).includes(
+                      normalizePhone(searchLower)
+                  )
+                : false;
+
             return (
                 nameMatches ||
+                phoneMatches ||
                 (user.address
                     ? normalize(user.address).includes(searchLower)
                     : false) ||
@@ -72,9 +88,6 @@ const filteredUsers = computed(() => {
                     : false) ||
                 (user.email
                     ? normalize(user.email).includes(searchLower)
-                    : false) ||
-                (user.phone
-                    ? normalize(user.phone).includes(searchLower)
                     : false) ||
                 (user.company
                     ? normalize(user.company).includes(searchLower)
@@ -480,9 +493,7 @@ const formatDate = (date) => {
                                                 <div
                                                     class="font-medium text-left ml-6 md:ml-0"
                                                 >
-                                                    {{
-                                                        user.phone
-                                                    }}
+                                                    {{ user.phone }}
                                                 </div>
                                             </div>
 
@@ -491,9 +502,7 @@ const formatDate = (date) => {
                                                 <div
                                                     class="text-sm font-normal text-left ml-6 md:ml-0"
                                                 >
-                                                    {{
-                                                        user.country
-                                                    }}
+                                                    {{ user.country }}
                                                 </div>
                                             </div>
 
