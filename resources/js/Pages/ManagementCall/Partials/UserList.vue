@@ -15,7 +15,7 @@
             <div class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0">
                 <span
                     :class="[
-                        prospect.recently_added ? 'bg-fuchsia-500' : 'bg-green-400',
+                        prospect.recently_added ? 'bg-fuchsia-500' : 'bg-blue-400',
                         'h-2 w-2 mr-4 rounded-full',
                     ]"
                 ></span>
