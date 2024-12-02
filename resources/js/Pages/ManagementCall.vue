@@ -10,20 +10,20 @@ import FlashMessage from "@/Components/FlashMessage.vue";
 
 const page = usePage();
 
-// Les clients sont passés via Inertia
-const props = defineProps(["clients", "currentUser", "selectedUser"]);
+// Les prospects sont passés via Inertia
+const props = defineProps(["prospects", "currentUser", "selectedProspect"]);
 
-// Les données des clients à partir des props
-const users = ref(props.clients);
+// Les données des prospects à partir des props
+const prospects = ref(props.prospects);
 
 // Terme de recherche
 const searchTerm = ref("");
 
-// Utilisateur sélectionné
-const selectedUser = ref(null);
+// Prospect sélectionné
+const selectedProspect = ref(null);
 
-// Nouvel utilisateur à ajouter
-const newUser = ref({
+// Nouveau prospect à ajouter
+const newProspect = ref({
     firstName: "",
     familyName: "",
     phone: "",
@@ -36,16 +36,16 @@ const newUser = ref({
     country: "",
 });
 
-// Liste pour stocker les utilisateurs filtrés par la recherche (limité à 5)
-const filteredUsers = computed(() => {
+// Liste pour stocker les prospects filtrés par la recherche (limité à 5)
+const filteredProspects = computed(() => {
     const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
 
     if (!searchLower) {
         return [];
     }
 
-    return users.value
-        .filter((user) => {
+    return prospects.value
+        .filter((prospect) => {
             const normalize = (str) =>
                 str ? str.toLowerCase().replace(/\s+/g, "") : "";
 
@@ -58,15 +58,15 @@ const filteredUsers = computed(() => {
                     .toLowerCase();
             };
 
-            const combinedName1 = normalize(user.firstName + user.familyName);
-            const combinedName2 = normalize(user.familyName + user.firstName);
+            const combinedName1 = normalize(prospect.firstName + prospect.familyName);
+            const combinedName2 = normalize(prospect.familyName + prospect.firstName);
 
             const nameMatches =
                 combinedName1.includes(searchLower) ||
                 combinedName2.includes(searchLower);
 
-            const phoneMatches = user.phone
-                ? normalizePhone(user.phone).includes(
+            const phoneMatches = prospect.phone
+                ? normalizePhone(prospect.phone).includes(
                       normalizePhone(searchLower)
                   )
                 : false;
@@ -74,61 +74,61 @@ const filteredUsers = computed(() => {
             return (
                 nameMatches ||
                 phoneMatches ||
-                (user.country
-                    ? normalize(user.country).includes(searchLower)
+                (prospect.country
+                    ? normalize(prospect.country).includes(searchLower)
                     : false) ||
-                (user.email
-                    ? normalize(user.email).includes(searchLower)
+                (prospect.email
+                    ? normalize(prospect.email).includes(searchLower)
                     : false) ||
-                (user.company
-                    ? normalize(user.company).includes(searchLower)
+                (prospect.company
+                    ? normalize(prospect.company).includes(searchLower)
                     : false)
             );
         })
         .slice(0, 5); // Limiter à 5 résultats maximum
 });
 
-// Liste pour stocker les 5 derniers utilisateurs consultés (à sauvegarder dans localStorage)
-const recentUsers = ref([]);
+// Liste pour stocker les 5 derniers prospects consultés
+const recentProspects = ref([]);
 
-// Charger les derniers utilisateurs consultés depuis localStorage lors du montage
+// Charger les derniers prospects consultés lors du montage
 onMounted(() => {
     axios.get("/recent-views").then((response) => {
-        recentUsers.value = response.data.map((view) => ({
-            client: view.client,
+        recentProspects.value = response.data.map((view) => ({
+            prospect: view.prospect,
             viewedBy: view.viewedBy || "Inconnu",
             viewedAt: view.viewedAt || "Date inconnue",
         }));
     });
 
-    if (props.selectedUser) {
-        selectedUser.value = props.selectedUser;
+    if (props.selectedProspect) {
+        selectedProspect.value = props.selectedProspect;
     }
 });
 
-// Watch pour mettre à jour selectedUser lorsque props.selectedUser change
+// Watch pour mettre à jour selectedProspect lorsque props.selectedProspect change
 watch(
-    () => props.selectedUser,
-    (newSelectedUser) => {
-        selectedUser.value = newSelectedUser;
+    () => props.selectedProspect,
+    (newSelectedProspect) => {
+        selectedProspect.value = newSelectedProspect;
     }
 );
 
-// Fonction pour sélectionner un utilisateur et mettre à jour la liste des 5 derniers utilisateurs consultés
-const selectUser = (user) => {
-    if (!user || !user.id) {
-        console.error("Utilisateur invalide ou ID manquant.", user);
+// Fonction pour sélectionner un prospect
+const selectProspect = (prospect) => {
+    if (!prospect || !prospect.id) {
+        console.error("Prospect invalide ou ID manquant.", prospect);
         return;
     }
 
-    Inertia.visit(route("management-call", { user: user.id }), {
+    Inertia.visit(route("management-call", { prospect: prospect.id }), {
         method: "get",
-        preserveScroll: true, // Retirer preserveState pour permettre la mise à jour des props
+        preserveScroll: true,
     });
 };
 
-const closeUserDetails = () => {
-    selectedUser.value = null;
+const closeProspectDetails = () => {
+    selectedProspect.value = null;
 
     // Mettre à jour l'URL pour revenir à /gestion-appels-telephoniques
     Inertia.visit(route("management-call"), {
@@ -137,12 +137,12 @@ const closeUserDetails = () => {
     });
 };
 
-// Réinitialiser selectedUser si searchTerm change
+// Réinitialiser selectedProspect si searchTerm change
 watch(searchTerm, () => {
-    selectedUser.value = null;
+    selectedProspect.value = null;
 });
 
-// État du modal pour ajouter un utilisateur
+// État du modal pour ajouter un prospect
 const showModal = ref(false);
 
 // Fonction pour ouvrir et fermer le modal
@@ -150,16 +150,16 @@ const toggleModal = () => {
     showModal.value = !showModal.value;
 };
 
-// Variable pour stocker l'ID du fournisseur récemment ajouté
-const newUserId = ref(null);
+// Variable pour stocker l'ID du prospect récemment ajouté
+const newProspectId = ref(null);
 
-// État pour afficher le message de confirmation de l'ajout d'un utilisateur
+// État pour afficher le message de confirmation de l'ajout d'un prospect
 const showAddConfirmation = ref(false);
 
-const handleAddUser = (newUser) => {
-    users.value.push(newUser);
-    selectedUser.value = newUser;
-    newUserId.value = newUser.id;
+const handleAddProspect = (newProspect) => {
+    prospects.value.push(newProspect);
+    selectedProspect.value = newProspect;
+    newProspectId.value = newProspect.id;
     showAddConfirmation.value = true;
     setTimeout(() => {
         showAddConfirmation.value = false; // Cache le message après 4 secondes
@@ -167,35 +167,40 @@ const handleAddUser = (newUser) => {
     toggleModal();
 };
 
-// Fonction pour mettre à jour l'utilisateur dans la liste
-const updateUserInList = (updatedUser) => {
-    const index = users.value.findIndex((user) => user.id === updatedUser.id);
+// Fonction pour mettre à jour le prospect dans la liste
+const updateProspectInList = (updatedProspect) => {
+    const index = prospects.value.findIndex(
+        (prospect) => prospect.id === updatedProspect.id
+    );
 
     if (index !== -1) {
-        users.value[index] = { ...updatedUser };
+        prospects.value[index] = { ...updatedProspect };
     }
 
-    if (selectedUser.value && selectedUser.value.id === updatedUser.id) {
-        selectedUser.value = users.value[index];
+    if (
+        selectedProspect.value &&
+        selectedProspect.value.id === updatedProspect.id
+    ) {
+        selectedProspect.value = prospects.value[index];
     }
 };
 
-// Les 20 derniers clients ajoutés
-const recentAddedUsers = computed(() => {
-    return users.value
-        .filter((user) => user.created_at)
+// Les 20 derniers prospects ajoutés
+const recentAddedProspects = computed(() => {
+    return prospects.value
+        .filter((prospect) => prospect.created_at)
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 20);
 });
 
-// Les 10 derniers clients modifiés
-const recentModifiedUsers = computed(() => {
-    return users.value
+// Les 10 derniers prospects modifiés
+const recentModifiedProspects = computed(() => {
+    return prospects.value
         .filter(
-            (user) =>
-                user.updated_at &&
-                user.created_at &&
-                new Date(user.updated_at) > new Date(user.created_at)
+            (prospect) =>
+                prospect.updated_at &&
+                prospect.created_at &&
+                new Date(prospect.updated_at) > new Date(prospect.created_at)
         )
         .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
         .slice(0, 10);
@@ -214,6 +219,7 @@ const formatDate = (date) => {
     });
 };
 </script>
+
 
 <template>
     <Head title="Gestion des appels téléphoniques" />
@@ -242,17 +248,17 @@ const formatDate = (date) => {
                         <div
                             class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4"
                         >
-                            <!-- Conteneur pour le texte "Rechercher un client" et le bouton -->
+                            <!-- Conteneur pour le texte "Rechercher un prospect" et le bouton -->
                             <div
                                 class="flex flex-row justify-between items-center mb-1 md:mb-6"
                             >
-                                <!-- Rechercher un client -->
+                                <!-- Rechercher un prospect -->
                                 <div
                                     class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0"
                                 >
                                     Rechercher un fournisseur
                                 </div>
-                                <!-- Bouton Ajouter un client -->
+                                <!-- Bouton Ajouter un prospect -->
                                 <button
                                     @click="toggleModal"
                                     class="text-xs md:text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -286,12 +292,12 @@ const formatDate = (date) => {
                                 />
                             </div>
 
-                            <!-- Affichage de la liste des utilisateurs filtrés (max 5) -->
+                            <!-- Affichage de la liste des prospects filtrés (max 5) -->
                             <div
                                 v-if="
-                                    !selectedUser &&
+                                    !selectedProspect &&
                                     searchTerm &&
-                                    filteredUsers.length > 0
+                                    filteredProspects.length > 0
                                 "
                             >
                                 <h3 class="text-lg font-semibold text-gray-700">
@@ -299,18 +305,19 @@ const formatDate = (date) => {
                                 </h3>
 
                                 <UserList
-                                    :filteredUsers="filteredUsers"
-                                    :selectUser="selectUser"
-                                    :newUserId="newUserId"
+                                    :filteredProspects="filteredProspects"
+                                    :selectProspect="selectProspect"
+                                    :newProspectId="newProspectId"
                                 />
                             </div>
 
                             <!-- Historique des modifications des fournisseurs -->
                             <div v-if="!searchTerm" class="client-manage-panel">
-                                <!-- Affichage des 5 derniers utilisateurs consultés -->
+                                <!-- Affichage des derniers prospects consultés -->
                                 <div
                                     v-if="
-                                        !selectedUser && recentUsers.length > 0
+                                        !selectedProspect &&
+                                        recentProspects.length > 0
                                     "
                                     class="mt-8 border p-4 bg-zinc-0"
                                 >
@@ -322,24 +329,24 @@ const formatDate = (date) => {
 
                                     <!-- Utilisation du composant UserList -->
                                     <UserList
-                                        :filteredUsers="
-                                            recentUsers.map((view) => ({
-                                                ...view.client, // Inclure les détails du client
+                                        :filteredProspects="
+                                            recentProspects.map((view) => ({
+                                                ...view.prospect,
                                                 viewedBy:
-                                                    view.viewedBy || 'Inconnu', // Nom de l'utilisateur ayant consulté
+                                                    view.viewedBy || 'Inconnu',
                                                 viewedAt:
                                                     view.viewedAt ||
-                                                    'Date inconnue', // Date de consultation
+                                                    'Date inconnue',
                                             }))
                                         "
-                                        :selectUser="selectUser"
+                                        :selectProspect="selectProspect"
                                     />
                                 </div>
 
                                 <!-- PANEL ADMIN -->
                                 <div
                                     v-if="
-                                        recentAddedUsers.length > 0 &&
+                                        recentAddedProspects.length > 0 &&
                                         page.props.auth.roles &&
                                         (page.props.auth.roles.includes(
                                             'Admin'
@@ -359,9 +366,9 @@ const formatDate = (date) => {
                                         Administration
                                     </h2>
 
-                                    <!-- Affiche les 20 derniers fournisseurs ajoutés -->
+                                    <!-- Affiche les 20 derniers prospects ajoutés -->
                                     <div
-                                        v-if="!selectedUser"
+                                        v-if="!selectedProspect"
                                         class="mt-0 border p-4 bg-zinc-50"
                                     >
                                         <h3
@@ -371,10 +378,10 @@ const formatDate = (date) => {
                                         </h3>
                                         <div
                                             v-for="(
-                                                user, index
-                                            ) in recentAddedUsers"
-                                            :key="user.id || index"
-                                            @click="selectUser(user)"
+                                                prospect, index
+                                            ) in recentAddedProspects"
+                                            :key="prospect.id || index"
+                                            @click="selectProspect(prospect)"
                                             class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
                                         >
                                             <!-- Nom complet -->
@@ -383,7 +390,7 @@ const formatDate = (date) => {
                                             >
                                                 <span
                                                     :class="[
-                                                        user.recently_added
+                                                        prospect.recently_added
                                                             ? 'bg-fuchsia-500'
                                                             : 'bg-green-400',
                                                         'h-2 w-2 mr-4 rounded-full',
@@ -392,8 +399,8 @@ const formatDate = (date) => {
                                                 <div
                                                     class="font-medium text-left"
                                                 >
-                                                    {{ user.firstName }}
-                                                    {{ user.familyName }}
+                                                    {{ prospect.firstName }}
+                                                    {{ prospect.familyName }}
                                                 </div>
                                             </div>
 
@@ -402,7 +409,7 @@ const formatDate = (date) => {
                                                 <div
                                                     class="font-medium text-left ml-6 md:ml-0"
                                                 >
-                                                    {{ user.phone }}
+                                                    {{ prospect.phone }}
                                                 </div>
                                             </div>
 
@@ -411,7 +418,7 @@ const formatDate = (date) => {
                                                 <div
                                                     class="text-sm font-normal text-left ml-6 md:ml-0"
                                                 >
-                                                    {{ user.country }}
+                                                    {{ prospect.country }}
                                                 </div>
                                             </div>
 
@@ -424,8 +431,9 @@ const formatDate = (date) => {
                                                     class="font-bold text-xs mr-2"
                                                 >
                                                     {{
-                                                        user.created_by
-                                                            ? user.created_by
+                                                        prospect.created_by
+                                                            ? prospect
+                                                                  .created_by
                                                                   .name
                                                             : "Inconnu"
                                                     }}
@@ -433,7 +441,7 @@ const formatDate = (date) => {
                                                 <span class="font-bold text-xs">
                                                     {{
                                                         formatDate(
-                                                            user.created_at
+                                                            prospect.created_at
                                                         )
                                                     }}
                                                 </span>
@@ -441,9 +449,9 @@ const formatDate = (date) => {
                                         </div>
                                     </div>
 
-                                    <!-- Affiche les 10 derniers fournisseurs modifiés -->
+                                    <!-- Affiche les 10 derniers prospects modifiés -->
                                     <div
-                                        v-if="!selectedUser"
+                                        v-if="!selectedProspect"
                                         class="mt-8 border p-4 bg-zinc-50"
                                     >
                                         <h3
@@ -453,10 +461,10 @@ const formatDate = (date) => {
                                         </h3>
                                         <div
                                             v-for="(
-                                                user, index
-                                            ) in recentModifiedUsers"
-                                            :key="user.id || index"
-                                            @click="selectUser(user)"
+                                                prospect, index
+                                            ) in recentModifiedProspects"
+                                            :key="prospect.id || index"
+                                            @click="selectProspect(prospect)"
                                             class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-green-50 text-gray-700 hover:bg-green-100 hover:text-green-800"
                                         >
                                             <!-- Nom complet -->
@@ -465,7 +473,7 @@ const formatDate = (date) => {
                                             >
                                                 <span
                                                     :class="[
-                                                        user.recently_added
+                                                        prospect.recently_added
                                                             ? 'bg-fuchsia-500'
                                                             : 'bg-green-400',
                                                         'h-2 w-2 mr-4 rounded-full',
@@ -474,8 +482,8 @@ const formatDate = (date) => {
                                                 <div
                                                     class="font-medium text-left"
                                                 >
-                                                    {{ user.firstName }}
-                                                    {{ user.familyName }}
+                                                    {{ prospect.firstName }}
+                                                    {{ prospect.familyName }}
                                                 </div>
                                             </div>
 
@@ -484,7 +492,7 @@ const formatDate = (date) => {
                                                 <div
                                                     class="font-medium text-left ml-6 md:ml-0"
                                                 >
-                                                    {{ user.phone }}
+                                                    {{ prospect.phone }}
                                                 </div>
                                             </div>
 
@@ -493,7 +501,7 @@ const formatDate = (date) => {
                                                 <div
                                                     class="text-sm font-normal text-left ml-6 md:ml-0"
                                                 >
-                                                    {{ user.country }}
+                                                    {{ prospect.country }}
                                                 </div>
                                             </div>
 
@@ -506,8 +514,9 @@ const formatDate = (date) => {
                                                     class="font-bold text-xs mr-2"
                                                 >
                                                     {{
-                                                        user.updated_by
-                                                            ? user.updated_by
+                                                        prospect.updated_by
+                                                            ? prospect
+                                                                  .updated_by
                                                                   .name
                                                             : "Inconnu"
                                                     }}
@@ -515,7 +524,7 @@ const formatDate = (date) => {
                                                 <span class="font-bold text-xs">
                                                     {{
                                                         formatDate(
-                                                            user.updated_at
+                                                            prospect.updated_at
                                                         )
                                                     }}
                                                 </span>
@@ -525,20 +534,20 @@ const formatDate = (date) => {
                                 </div>
                             </div>
 
-                            <!-- Détails de l'utilisateur sélectionné -->
+                            <!-- Détails du prospect sélectionné -->
                             <UserDetails
-                                v-if="selectedUser"
-                                :user="selectedUser"
-                                @user-updated="updateUserInList"
-                                @closeUserDetails="closeUserDetails"
+                                v-if="selectedProspect"
+                                :prospect="selectedProspect"
+                                @prospect-updated="updateProspectInList"
+                                @closeUserDetails="closeProspectDetails"
                             />
 
-                            <!-- Modal d'ajout de client -->
+                            <!-- Modal d'ajout de prospect -->
                             <AddUserModal
                                 :showModal="showModal"
-                                :newUser="newUser"
+                                :newProspect="newProspect"
                                 @toggleModal="toggleModal"
-                                @addUser="handleAddUser"
+                                @addProspect="handleAddProspect"
                             />
                         </div>
                     </div>

@@ -6,7 +6,7 @@
         <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-3xl">
             <!-- Header -->
             <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">
-                Ajouter un fournisseur
+                Ajouter un prospect
             </h2>
 
             <!-- Message d'erreur général -->
@@ -18,7 +18,7 @@
             </div>
 
             <!-- Formulaire -->
-            <form @submit.prevent="addUserWithNote" class="space-y-4">
+            <form @submit.prevent="addProspectWithNote" class="space-y-4">
                 <!-- Champs du formulaire en 2 colonnes -->
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Prénom -->
@@ -27,7 +27,7 @@
                             Prénom
                         </label>
                         <input
-                            v-model="newUser.firstName"
+                            v-model="newProspect.firstName"
                             id="prenom"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -47,7 +47,7 @@
                             Nom
                         </label>
                         <input
-                            v-model="newUser.familyName"
+                            v-model="newProspect.familyName"
                             id="nom"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -70,14 +70,17 @@
                             Téléphone
                         </label>
                         <input
-                            v-model="newUser.phone"
+                            v-model="newProspect.phone"
                             id="telephone"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
                             @blur="validatePhone"
                             @keydown="focusNextField($event)"
                         />
-                        <span v-if="errors.phone" class="text-xs text-red-500">
+                        <span
+                            v-if="errors.phone"
+                            class="text-xs text-red-500"
+                        >
                             {{ errors.phone[0] }}
                         </span>
                     </div>
@@ -88,14 +91,17 @@
                             Email
                         </label>
                         <input
-                            v-model="newUser.email"
+                            v-model="newProspect.email"
                             id="email"
                             type="email"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
                             @blur="validateEmail"
                             @keydown="focusNextField($event)"
                         />
-                        <span v-if="errors.email" class="text-xs text-red-500">
+                        <span
+                            v-if="errors.email"
+                            class="text-xs text-red-500"
+                        >
                             {{ errors.email[0] }}
                         </span>
                     </div>
@@ -109,7 +115,7 @@
                             Rue et numéro
                         </label>
                         <input
-                            v-model="newUser.address"
+                            v-model="newProspect.address"
                             id="address"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -126,7 +132,7 @@
                             Code Postal
                         </label>
                         <input
-                            v-model="newUser.postalCode"
+                            v-model="newProspect.postalCode"
                             id="codePostal"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -143,7 +149,7 @@
                             Localité
                         </label>
                         <input
-                            v-model="newUser.locality"
+                            v-model="newProspect.locality"
                             id="locality"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -160,7 +166,7 @@
                             Pays
                         </label>
                         <input
-                            v-model="newUser.country"
+                            v-model="newProspect.country"
                             id="country"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -177,7 +183,7 @@
                             Société
                         </label>
                         <input
-                            v-model="newUser.company"
+                            v-model="newProspect.company"
                             id="company"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -194,7 +200,7 @@
                             Numéro TVA
                         </label>
                         <input
-                            v-model="newUser.companyvat"
+                            v-model="newProspect.companyvat"
                             id="companyvat"
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
@@ -248,16 +254,16 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
-    newUser: {
+    newProspect: {
         type: Object,
         required: true,
     },
 });
 
-const emit = defineEmits(["toggleModal", "addUser"]);
+const emit = defineEmits(["toggleModal", "addProspect"]);
 
 // Réactifs pour le formulaire
-const newUser = ref({
+const newProspect = ref({
     firstName: "",
     familyName: "",
     phone: "",
@@ -270,55 +276,39 @@ const newUser = ref({
     country: "",
 });
 
-// Réactif pour la note
 const newNote = ref({
     content: "",
-    note_date: new Date().toISOString(), // Initialisation de la date ici
 });
 
-// Vérifie si des erreurs existent
+// Erreurs
 const errors = ref({});
 const hasErrors = computed(() => Object.keys(errors.value).length > 0);
 
-const formSubmitted = ref(false); // Variable pour suivre l'état de soumission
+const formSubmitted = ref(false);
 
-//fonction pour vérifier le format du numéro de téléphone
-const isValidPhone = (phone) => {
-    const phoneRegex = /^\+?[0-9\s-]{7,15}$/; // Accepte les numéros de 7 à 15 chiffres, avec espaces, tirets ou le préfixe "+"
-    return phoneRegex.test(phone);
-};
-
-// Fonction pour vérifier le format de l'adresse e-mail
-const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-};
-
-//Affichage du message d'erreur pour le numéro de téléphone
+// Valider téléphone
+const isValidPhone = (phone) => /^\+?[0-9\s-]{7,15}$/.test(phone);
 const validatePhone = () => {
-    if (!isValidPhone(newUser.value.phone)) {
+    if (!isValidPhone(newProspect.value.phone)) {
         errors.value.phone = ["Le format du numéro de téléphone est invalide."];
     } else {
-        delete errors.value.phone; // Supprime l'erreur si le format est valide
+        delete errors.value.phone;
     }
 };
 
-// Affichage du message d'erreur pour l'e-mail
+// Valider email
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validateEmail = () => {
-    const email = newUser.value.email;
-
-    // Vérifier si un e-mail est saisi
-    if (email && !isValidEmail(email)) {
+    if (newProspect.value.email && !isValidEmail(newProspect.value.email)) {
         errors.value.email = ["Le format de l'adresse e-mail est invalide."];
     } else {
-        delete errors.value.email; // Supprime l'erreur si le format est valide ou si aucun e-mail n'est fourni
+        delete errors.value.email;
     }
 };
 
-
-// Fonction pour réinitialiser les champs
+// Réinitialiser
 const resetFields = () => {
-    newUser.value = {
+    newProspect.value = {
         firstName: "",
         familyName: "",
         phone: "",
@@ -335,32 +325,28 @@ const resetFields = () => {
     formSubmitted.value = false;
 };
 
-// Fonction pour fermer le modal
+// Fermer le modal
 const closeModal = () => {
-    resetFields(); // Réinitialiser les champs
-    emit("toggleModal"); 
+    resetFields();
+    emit("toggleModal");
 };
 
-// Fonction pour ajouter un client avec une note
-const addUserWithNote = async () => {
-    formSubmitted.value = true; // Activer l'état de soumission
-
-    // Valider les champs
+// Ajouter un prospect avec une note
+const addProspectWithNote = async () => {
+    formSubmitted.value = true;
     validatePhone();
     validateEmail();
 
-    if (hasErrors.value) {
-        return; // Arrêter si des erreurs sont présentes
-    }
+    if (hasErrors.value) return;
 
     try {
-        const response = await axios.post("/clients", newUser.value);
-        const clientId = response.data.id;
+        const response = await axios.post("/prospects", newProspect.value);
+        const prospectId = response.data.id;
 
         let noteData = null;
         if (newNote.value.content) {
             const noteResponse = await axios.post(
-                `/clients/${clientId}/notes`,
+                `/prospects/${prospectId}/notes`,
                 {
                     content: newNote.value.content,
                     note_date: new Date().toISOString(),
@@ -370,8 +356,8 @@ const addUserWithNote = async () => {
             noteData = noteResponse.data;
         }
 
-        resetFields(); // Réinitialiser les champs
-        emit("addUser", {
+        resetFields();
+        emit("addProspect", {
             ...response.data,
             notes: noteData ? [noteData] : [],
         });
@@ -379,22 +365,20 @@ const addUserWithNote = async () => {
         if (error.response && error.response.status === 422) {
             errors.value = error.response.data.errors;
         } else {
-            console.error("Error:", error);
+            console.error("Erreur :", error);
         }
     }
 };
 
-
-// Fonction pour gérer le passage au champ suivant
+// Champ suivant
 const focusNextField = (event) => {
     if (event.key === "Enter") {
         event.preventDefault();
-
-        const inputs = document.querySelectorAll("input, textarea, select"); // Récupère tous les champs du formulaire
-        const currentIndex = Array.from(inputs).indexOf(event.target); // Trouve l'index de l'élément actuel
+        const inputs = document.querySelectorAll("input, textarea, select");
+        const currentIndex = Array.from(inputs).indexOf(event.target);
 
         if (inputs[currentIndex + 1]) {
-            inputs[currentIndex + 1].focus(); // Met le focus sur l'élément suivant
+            inputs[currentIndex + 1].focus();
         }
     }
 };

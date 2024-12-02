@@ -9,14 +9,13 @@ class Note extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['content', 'note_date', 'client_id', 'type'];
+    protected $fillable = ['content', 'note_date', 'prospect_id', 'type'];
 
     protected $dates = ['note_date'];
 
-    // Relation inverse avec la table clients
-    public function client()
+    // Relation inverse avec la table prospects
+    public function prospect()
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Prospect::class);
     }
 }
-

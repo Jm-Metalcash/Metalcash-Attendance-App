@@ -3,26 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Client;
+use App\Models\Prospect;
 use App\Models\BordereauHistorique;
 use Illuminate\Http\Request;
 
 class BordereauHistoriqueController extends Controller
 {
-    public function show($clientId, $bordereauHistoriqueId)
+    /**
+     * Show a specific Bordereau Historique for a given prospect.
+     */
+    public function show($prospectId, $bordereauHistoriqueId)
     {
         $bordereauHistorique = BordereauHistorique::with('informations')
-            ->where('client_id', $clientId)
+            ->where('prospect_id', $prospectId)
             ->findOrFail($bordereauHistoriqueId);
     
         return response()->json($bordereauHistorique);
     }
     
-
-
-    public function store(Request $request, $clientId)
+    /**
+     * Store a new Bordereau Historique for a given prospect.
+     */
+    public function store(Request $request, $prospectId)
     {
-        $client = Client::findOrFail($clientId);
+        $prospect = Prospect::findOrFail($prospectId);
     
         $data = $request->validate([
             'action' => 'required|string|max:255',
@@ -34,17 +38,16 @@ class BordereauHistoriqueController extends Controller
             'informations.*.status' => 'boolean',
         ]);
     
-        $data['client_id'] = $client->id;
+        $data['prospect_id'] = $prospect->id;
     
-        // Créer le bordereau historique
+        // Create the Bordereau Historique
         $bordereauHistorique = BordereauHistorique::create($data);
     
-        // Ajouter les informations
+        // Add the associated information
         foreach ($data['informations'] as $infoData) {
             $bordereauHistorique->informations()->create($infoData);
         }
     
         return response()->json($bordereauHistorique->load('informations'), 201);
     }
-    
 }

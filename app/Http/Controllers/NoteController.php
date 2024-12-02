@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Note;
-use App\Models\Client;
+use App\Models\Prospect;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class NoteController extends Controller
 {
     // Mise à jour d'une note
-    public function update(Request $request, Client $client, Note $note)
+    public function update(Request $request, Prospect $prospect, Note $note)
     {
-        // Vérifier que la note appartient bien au client
-        if ($note->client_id !== $client->id) {
+        // Vérifier que la note appartient bien au prospect
+        if ($note->prospect_id !== $prospect->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -27,7 +27,7 @@ class NoteController extends Controller
     }
 
     // Ajout d'une nouvelle note
-    public function store(Request $request, Client $client)
+    public function store(Request $request, Prospect $prospect)
     {
         $validatedData = $request->validate([
             'content' => 'nullable|string|max:1000',
@@ -40,11 +40,11 @@ class NoteController extends Controller
 
         // Créer une note uniquement si `content` est renseigné
         if (!empty($validatedData['content'])) {
-            $note = $client->notes()->create($validatedData);
+            $note = $prospect->notes()->create($validatedData);
 
             // Si la note est un avertissement, mettre à jour le blacklist
             if ($validatedData['type'] === 'avertissement') {
-                $client->update(['blacklist' => 1]);
+                $prospect->update(['blacklist' => 1]);
             }
 
             return response()->json([
@@ -58,15 +58,11 @@ class NoteController extends Controller
         return response()->json(['message' => 'Note not created as content is empty'], 200);
     }
 
-
-
-
-
-    //Suppression d'une note
-    public function destroy(Client $client, Note $note)
+    // Suppression d'une note
+    public function destroy(Prospect $prospect, Note $note)
     {
-        // Vérifier que la note appartient bien au client
-        if ($note->client_id !== $client->id) {
+        // Vérifier que la note appartient bien au prospect
+        if ($note->prospect_id !== $prospect->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -76,13 +72,13 @@ class NoteController extends Controller
         // Supprime la note
         $note->delete();
 
-        // Si c'était un avertissement, vérifie s'il reste d'autres avertissements pour ce client
+        // Si c'était un avertissement, vérifie s'il reste d'autres avertissements pour ce prospect
         if ($isWarning) {
-            $hasOtherWarnings = $client->notes()->where('type', 'avertissement')->exists();
+            $hasOtherWarnings = $prospect->notes()->where('type', 'avertissement')->exists();
 
-            // Si aucun autre avertissement n'existe, retirer le client de la blacklist
+            // Si aucun autre avertissement n'existe, retirer le prospect de la blacklist
             if (!$hasOtherWarnings) {
-                $client->update(['blacklist' => 0]);
+                $prospect->update(['blacklist' => 0]);
             }
         }
 

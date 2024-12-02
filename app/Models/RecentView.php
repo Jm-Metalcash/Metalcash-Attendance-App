@@ -9,16 +9,15 @@ class RecentView extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'client_id', 'created_at', 'updated_at'];
+    protected $fillable = ['user_id', 'prospect_id', 'created_at', 'updated_at'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function client()
+    public function prospect()
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Prospect::class);
     }
 }
-

@@ -14,16 +14,17 @@ class BordereauHistorique extends Model
 
     // Colonnes pouvant être assignées en masse
     protected $fillable = [
-        'client_id',
+        'prospect_id',
         'action',
         'details',
     ];
 
     // Relation avec le modèle Client
-    public function client()
+    public function prospect()
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Prospect::class, 'prospect_id');
     }
+    
 
     public function informations()
     {

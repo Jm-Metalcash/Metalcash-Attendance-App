@@ -1,20 +1,20 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
         <!-- Section blacklist -->
-        <div v-if="user.blacklist === 1" class="warning-blacklist mb-4">
+        <div v-if="prospect.blacklist === 1" class="warning-blacklist mb-4">
             <div
                 class="bg-red-100 text-red-700 px-4 py-2 relative"
                 role="alert"
             >
                 <span class="font-bold text-sm">Note :</span>
                 <span class="block sm:inline text-sm md:ml-1"
-                    >Ce fournisseur possède un avertissement (voir notes)</span
+                    >Ce prospect possède un avertissement (voir notes)</span
                 >
             </div>
         </div>
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
-            <div v-if="editableUser.notes && editableUser.notes.length > 0">
+            <div v-if="editableProspect.notes && editableProspect.notes.length > 0">
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white">
@@ -93,7 +93,7 @@
                     </table>
                     <div class="text-center">
                         <button
-                            v-if="visibleNotesCount < editableUser.notes.length"
+                            v-if="visibleNotesCount < editableProspect.notes.length"
                             @click="showMoreNotes"
                             class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
                         >
@@ -104,8 +104,8 @@
                         <button
                             v-if="
                                 visibleNotesCount >=
-                                    editableUser.notes.length &&
-                                editableUser.notes.length > 5
+                                    editableProspect.notes.length &&
+                                editableProspect.notes.length > 5
                             "
                             @click="showLessNotes"
                             class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
@@ -117,7 +117,7 @@
             </div>
             <div v-else>
                 <p class="text-sm text-gray-400 px-2 pt-4">
-                    Aucune note actuellement pour ce fournisseur.
+                    Aucune note actuellement pour ce prospect.
                 </p>
             </div>
 
@@ -206,13 +206,13 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.firstName ||
+                                    editableProspect.firstName ||
                                     "Ajouter un prénom"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.firstName"
+                                v-model="editableProspect.firstName"
                                 @blur="saveField('firstName')"
                                 @keydown.enter="saveField('firstName')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -234,12 +234,12 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.familyName || "Ajouter un nom"
+                                    editableProspect.familyName || "Ajouter un nom"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.familyName"
+                                v-model="editableProspect.familyName"
                                 @blur="saveField('familyName')"
                                 @keydown.enter="saveField('familyName')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -267,13 +267,13 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.email ||
+                                    editableProspect.email ||
                                     "Ajouter une adresse e-mail"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.email"
+                                v-model="editableProspect.email"
                                 @blur="saveField('email')"
                                 @keydown.enter="saveField('email')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -297,13 +297,13 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.phone ||
+                                    editableProspect.phone ||
                                     "Ajouter un numéro de téléphone"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.phone"
+                                v-model="editableProspect.phone"
                                 @blur="saveField('phone')"
                                 @keydown.enter="saveField('phone')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -339,13 +339,13 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.address ||
+                                    editableProspect.address ||
                                     "Ajouter une adresse"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.address"
+                                v-model="editableProspect.address"
                                 @blur="saveField('address')"
                                 @keydown.enter="saveField('address')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -371,13 +371,13 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.locality ||
+                                    editableProspect.locality ||
                                     "Ajouter une localité"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.locality"
+                                v-model="editableProspect.locality"
                                 @blur="saveField('locality')"
                                 @keydown.enter="saveField('locality')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -402,11 +402,11 @@
                                 @click="editField('country')"
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
-                                {{ editableUser.country || "Ajouter un pays" }}
+                                {{ editableProspect.country || "Ajouter un pays" }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.country"
+                                v-model="editableProspect.country"
                                 @blur="saveField('country')"
                                 @keydown.enter="saveField('country')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -422,7 +422,7 @@
                 </div>
 
 
-                <!-- INFORMATIONS STATUS CLIENT -->
+                <!-- INFORMATIONS COMPLÉMENTAIRES -->
                 <div class="px-4 py-5 sm:px-6 bg-gray-200">
                     <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
                         Informations complémentaires
@@ -441,13 +441,13 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.company ||
+                                    editableProspect.company ||
                                     "Ajouter un nom d'entreprise"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.company"
+                                v-model="editableProspect.company"
                                 @blur="saveField('company')"
                                 @keydown.enter="saveField('company')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -469,12 +469,12 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableUser.companyvat || "Ajouter un numéro de TVA"
+                                    editableProspect.companyvat || "Ajouter un numéro de TVA"
                                 }}
                             </span>
                             <input
                                 v-else
-                                v-model="editableUser.companyvat"
+                                v-model="editableProspect.companyvat"
                                 @blur="saveField('companyvat')"
                                 @keydown.enter="saveField('companyvat')"
                                 class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
@@ -524,7 +524,7 @@
                             <tr
                                 v-for="(
                                     historique, index
-                                ) in editableUser.bordereauHistoriques"
+                                ) in editableProspect.bordereauHistoriques"
                                 :key="historique.id"
                             >
                                 <!-- Numéro de ligne -->
@@ -573,30 +573,28 @@ import axios from "axios";
 
 // Props
 const props = defineProps({
-    user: {
+    prospect: {
         type: Object,
         required: true,
     },
 });
 
 // Émission d'événements
-const emit = defineEmits(["user-updated"]);
+const emit = defineEmits(["prospect-updated"]);
 
-
-
-// État réactif pour l'utilisateur modifiable
-const editableUser = reactive({
-    ...props.user,
-    notes: props.user.notes || [],
-    bordereauHistoriques: props.user.bordereauHistoriques || [],
+// État réactif pour le prospect modifiable
+const editableProspect = reactive({
+    ...props.prospect,
+    notes: props.prospect.notes || [],
+    bordereauHistoriques: props.prospect.bordereauHistoriques || [],
 });
 
-// nb reactif d'affichage des notes
+// Nombre réactif d'affichage des notes
 const visibleNotesCount = ref(5);
 
 // Fonction pour afficher plus de notes
 const showMoreNotes = () => {
-    visibleNotesCount.value = editableUser.notes.length;
+    visibleNotesCount.value = editableProspect.notes.length;
 };
 
 // Fonction pour revenir aux 5 premières notes
@@ -604,7 +602,7 @@ const showLessNotes = () => {
     visibleNotesCount.value = 5;
 };
 
-// Initialiser isEditingNotes comme un tableau réactif
+// Initialiser isEditingNotes comme un objet réactif
 const isEditingNotes = reactive({});
 
 // Réactif pour afficher les messages de succès
@@ -624,14 +622,14 @@ const successMessages = reactive({
 
 // Initialiser isEditingNotes et successMessages.notes
 const initializeNotesState = () => {
-    editableUser.notes.forEach((note) => {
+    editableProspect.notes.forEach((note) => {
         isEditingNotes[note.id] = false;
     });
 };
 initializeNotesState();
 
 watch(
-    () => editableUser.notes,
+    () => editableProspect.notes,
     (newNotes) => {
         newNotes.forEach((note) => {
             if (!(note.id in isEditingNotes)) {
@@ -670,20 +668,20 @@ const saveField = (field) => {
     isEditing[field] = false;
 
     axios
-        .put(`/clients/${editableUser.id}`, {
-            [field]: editableUser[field],
+        .put(`/prospects/${editableProspect.id}`, {
+            [field]: editableProspect[field],
         })
         .then((response) => {
-            // Mettre à jour editableUser avec les données du serveur
-            Object.assign(editableUser, response.data);
+            // Mettre à jour editableProspect avec les données du serveur
+            Object.assign(editableProspect, response.data);
 
             // Émettre l'événement avec les données mises à jour
-            emit("user-updated", JSON.parse(JSON.stringify(editableUser)));
+            emit("prospect-updated", JSON.parse(JSON.stringify(editableProspect)));
 
             displaySuccessMessage(field);
         })
         .catch((error) => {
-            console.error("Failed to update the client:", error);
+            console.error("Failed to update the prospect:", error);
         });
 };
 
@@ -700,16 +698,15 @@ const editNote = (noteId) => {
 };
 
 const reversedNotes = computed(() => {
-    return [...editableUser.notes].reverse();
+    return [...editableProspect.notes].reverse();
 });
-
 
 // Fonction pour supprimer une note
 const deleteNote = async (noteId) => {
     try {
-        await axios.delete(`/clients/${editableUser.id}/notes/${noteId}`);
+        await axios.delete(`/prospects/${editableProspect.id}/notes/${noteId}`);
         // Filtrer les notes pour retirer celle qui est supprimée
-        editableUser.notes = editableUser.notes.filter((note) => note.id !== noteId);
+        editableProspect.notes = editableProspect.notes.filter((note) => note.id !== noteId);
     } catch (error) {
         console.error("Erreur lors de la suppression de la note :", error);
     }
@@ -720,14 +717,14 @@ const saveNote = (note) => {
     isEditingNotes[note.id] = false;
 
     axios
-        .put(`/clients/${editableUser.id}/notes/${note.id}`, {
+        .put(`/prospects/${editableProspect.id}/notes/${note.id}`, {
             content: note.content,
         })
         .then((response) => {
-            // Mettre à jour la note dans editableUser.notes
-            const index = editableUser.notes.findIndex((n) => n.id === note.id);
+            // Mettre à jour la note dans editableProspect.notes
+            const index = editableProspect.notes.findIndex((n) => n.id === note.id);
             if (index !== -1) {
-                editableUser.notes[index] = response.data;
+                editableProspect.notes[index] = response.data;
             }
 
             displayNoteSuccessMessage(note.id);
@@ -760,28 +757,28 @@ const saveNewNote = () => {
         const blacklistValue = newNote.value.type === "avertissement" ? 1 : 0;
 
         axios
-            .post(`/clients/${editableUser.id}/notes`, {
+            .post(`/prospects/${editableProspect.id}/notes`, {
                 content: newNote.value.content,
                 note_date: now,
                 type: newNote.value.type, // Envoie le type de la note
             })
             .then((response) => {
-                editableUser.notes.push({
+                editableProspect.notes.push({
                     id: response.data.id,
                     content: newNote.value.content,
                     note_date: now,
                     type: newNote.value.type, // Ajoute le type de la note
                 });
 
-                return axios.put(`/clients/${editableUser.id}`, {
+                return axios.put(`/prospects/${editableProspect.id}`, {
                     blacklist: blacklistValue,
                 });
             })
             .then(() => {
-                editableUser.blacklist = blacklistValue;
+                editableProspect.blacklist = blacklistValue;
 
                 // Émettre un événement pour informer le parent que le blacklist a été mis à jour
-                emit("user-updated", JSON.parse(JSON.stringify(editableUser)));
+                emit("prospect-updated", JSON.parse(JSON.stringify(editableProspect)));
 
                 newNote.value.content = "";
                 newNote.value.type = "information"; // Réinitialiser à la valeur par défaut
@@ -794,7 +791,7 @@ const saveNewNote = () => {
             })
             .catch((error) => {
                 console.error(
-                    "Erreur lors de l'ajout de la note ou de la mise à jour du client :",
+                    "Erreur lors de l'ajout de la note ou de la mise à jour du prospect :",
                     error
                 );
             });
@@ -838,7 +835,7 @@ const formatStatus = (status) => {
 };
 
 watch(
-    () => editableUser.notes,
+    () => editableProspect.notes,
     (newNotes) => {
         newNotes.forEach((note) => {
             if (!(note.id in isEditingNotes)) {

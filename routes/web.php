@@ -6,7 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
-use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProspectController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\BordereauHistoriqueController;
 use App\Http\Controllers\BordereauInformationController;
@@ -70,22 +70,23 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 
     //Management appel téléphonique et clients
-    Route::get('/gestion-appels-telephoniques', [ClientController::class, 'index'])->name('managementCall');
-    Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
-    Route::post('/clients', [ClientController::class, 'store']);
-    Route::get('/gestion-appels-telephoniques/{user?}', [ClientController::class, 'index'])->name('management-call');
-    Route::post('/clients/log-view', [ClientController::class, 'logView'])->name('clients.log-view');
-    Route::get('/recent-views', [ClientController::class, 'getRecentViews'])->name('recent-views');
+    // Gestion des appels téléphoniques et prospects
+    Route::get('/gestion-appels-telephoniques', [ProspectController::class, 'index'])->name('managementCall');
+    Route::put('/prospects/{id}', [ProspectController::class, 'update'])->name('prospects.update');
+    Route::post('/prospects', [ProspectController::class, 'store']);
+    Route::get('/gestion-appels-telephoniques/{prospect?}', [ProspectController::class, 'index'])->name('management-call');
+    Route::post('/prospects/log-view', [ProspectController::class, 'logView'])->name('prospects.log-view');
+    Route::get('/recent-views', [ProspectController::class, 'getRecentViews'])->name('recent-views');
 
 
-    //gestion des notes des clients
-    Route::put('/clients/{client}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
-    Route::post('/clients/{client}/notes', [NoteController::class, 'store'])->name('notes.store');
-    Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
-    Route::delete('/clients/{client}/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
+    //Gestion des notes pour les prospects
+    Route::put('/prospects/{prospect}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
+    Route::post('/prospects/{prospect}/notes', [NoteController::class, 'store'])->name('notes.store');
+    Route::get('/prospects/{id}', [ProspectController::class, 'show'])->name('prospects.show');
+    Route::delete('/prospects/{prospect}/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
 
     // Routes pour les bordereaux historiques
-    Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
+    Route::post('prospects/{prospect}/bordereau_historique', [BordereauHistoriqueController::class, 'store']);
     Route::post('clients/{client}/bordereau_historique', [BordereauHistoriqueController::class, 'store']);
 });
 

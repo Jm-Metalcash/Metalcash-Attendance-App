@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Client extends Model
+class Prospect extends Model
 {
     use HasFactory;
 
@@ -40,8 +40,8 @@ class Client extends Model
     {
         parent::boot();
 
-        static::saving(function ($client) {
-            $client->fullName = trim($client->firstName . ' ' . $client->familyName);
+        static::saving(function ($prospect) {
+            $prospect->fullName = trim($prospect->firstName . ' ' . $prospect->familyName);
         });
     }
 
@@ -60,8 +60,6 @@ class Client extends Model
     {
         return $this->hasMany(BordereauHistorique::class);
     }
-
-
 
     public function createdBy()
     {

@@ -2,93 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
-use App\Models\HistoricalTransaction;
+use App\Models\Prospect;
 use App\Models\RecentView;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
-class ClientController extends Controller
+class ProspectController extends Controller
 {
-    // Affiche la liste des clients avec leurs transactions et notes
-    public function index($user = null)
+    // Affiche la liste des prospects avec leurs transactions et notes
+    public function index($prospectId = null)
     {
-        // Récupérer tous les clients avec les relations
-        $clients = Client::with(['createdBy:id,name', 'updatedBy:id,name'])->get();
+        // Récupérer tous les prospects avec leurs relations
+        $prospects = Prospect::with(['createdBy:id,name', 'updatedBy:id,name'])->get();
 
-        // Initialiser la variable pour le client sélectionné
-        $selectedClient = null;
+        // Initialiser la variable pour le prospect sélectionné
+        $selectedProspect = null;
 
-        // Si un ID de client est fourni, charger le client avec ses relations
-        if ($user) {
-            $selectedClient = Client::with([
+        // Si un ID de prospect est fourni, charger le prospect avec ses relations
+        if ($prospectId) {
+            $selectedProspect = Prospect::with([
                 'notes',
                 'bordereauHistoriques.informations',
                 'createdBy',
                 'updatedBy'
-            ])->find($user);
+            ])->find($prospectId);
 
-            // Enregistrer la consultation si le client est trouvé
-            if ($selectedClient) {
-                try {
-                    RecentView::updateOrCreate(
-                        ['user_id' => Auth::id(), 'client_id' => $user],
-                        ['created_at' => now()]
-                    );
-                } catch (\Exception $e) {
-                    return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
-                }
+            // Si le prospect n'est pas trouvé, rediriger avec un message d'erreur
+            if (!$selectedProspect) {
+                return redirect()->route('management-call')->withErrors('Prospect introuvable.');
+            }
+
+            // Enregistrer la consultation si le prospect est trouvé
+            try {
+                RecentView::updateOrCreate(
+                    ['user_id' => Auth::id(), 'prospect_id' => $prospectId],
+                    ['created_at' => now()]
+                );
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Échec de l\'enregistrement de la vue : ' . $e->getMessage()], 500);
             }
         }
 
         return Inertia::render('ManagementCall', [
-            'clients' => $clients,
+            'prospects' => $prospects,
             'currentUser' => Auth::user(),
-            'selectedUser' => $selectedClient,
+            'selectedProspect' => $selectedProspect,
         ]);
     }
 
 
 
-
-    // Affiche les détails d'un client spécifique// Vérifie que l'ID est correctement récupéré
+    // Affiche les détails d'un prospect spécifique
     public function show($id)
     {
         if (!$id) {
-            return response()->json(['error' => 'Client ID is missing'], 400);
+            return response()->json(['error' => 'Prospect ID is missing'], 400);
         }
-
-        $client = Client::with([
+    
+        $prospect = Prospect::with([
             'notes',
             'bordereauHistoriques.informations',
             'createdBy',
             'updatedBy'
         ])->findOrFail($id);
-
+    
         // Enregistrer la consultation
         try {
             RecentView::updateOrCreate(
-                ['user_id' => Auth::id(), 'client_id' => $id],
+                ['user_id' => Auth::id(), 'prospect_id' => $id],
                 ['created_at' => now()]
             );
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
         }
-
+    
         if (request()->ajax()) {
-            return response()->json(['user' => $client]);
+            return response()->json(['prospect' => $prospect]);
         }
-
+    
         return Inertia::render('ManagementCall', [
-            'user' => $client,
+            'prospect' => $prospect,
         ]);
     }
+    
 
-
-
-
-    // Modifie les données d'un client
+    // Modifie les données d'un prospect
     public function update(Request $request, $id)
     {
         // Validation des données d'entrée
@@ -120,28 +119,24 @@ class ClientController extends Controller
             $validatedData['recently_added'] = false;
         }
 
-        // Ajouter l'ID de l'utilisateur qui modifie le client
+        // Ajouter l'ID de l'utilisateur qui modifie le prospect
         $validatedData['updated_by'] = Auth::id();
 
-        // Mise à jour des informations du client
-        $client = Client::findOrFail($id);
-        $client->update($validatedData);
+        // Mise à jour des informations du prospect
+        $prospect = Prospect::findOrFail($id);
+        $prospect->update($validatedData);
 
-        return response()->json($client);
+        return response()->json($prospect);
     }
 
-
-
-
-
-    //Ajoute un nouveau fournisseur
+    // Ajoute un nouveau prospect
     public function store(Request $request)
     {
         // Validation des données d'entrée
         $validatedData = $request->validate([
             'firstName' => 'nullable|string|max:255',
             'familyName' => 'nullable|string|max:255',
-            'phone' => 'required|string|max:255|unique:clients,phone',
+            'phone' => 'required|string|max:255|unique:prospects,phone',
             'email' => 'nullable|email|max:255',
             'company' => 'nullable|string|max:255',
             'companyvat' => 'nullable|string|max:255',
@@ -171,49 +166,44 @@ class ClientController extends Controller
             $validatedData['recently_added'] = false;
         }
 
-        // Ajouter l'ID de l'utilisateur qui crée le client
+        // Ajouter l'ID de l'utilisateur qui crée le prospect
         $validatedData['created_by'] = Auth::id();
 
         try {
-            // Création du client avec les données validées
-            $client = Client::create($validatedData);
+            // Création du prospect avec les données validées
+            $prospect = Prospect::create($validatedData);
 
-            return response()->json($client, 201);
+            return response()->json($prospect, 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la création du client: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Erreur lors de la création du prospect: ' . $e->getMessage()], 500);
         }
     }
 
-
-
-    // méthode pour enregistrer ou mettre à jour une vue lorsque l'utilisateur consulte un client.
+    // Enregistre ou met à jour une vue lorsque l'utilisateur consulte un prospect
     public function logView(Request $request)
     {
         $request->validate([
-            'client_id' => 'required|exists:clients,id',
+            'prospect_id' => 'required|exists:prospects,id',
         ]);
 
         $userId = Auth::id();
-        $clientId = $request->input('client_id');
+        $prospectId = $request->input('prospect_id');
 
         // Ajouter ou mettre à jour la consultation
         RecentView::updateOrCreate(
-            ['user_id' => $userId, 'client_id' => $clientId],
+            ['user_id' => $userId, 'prospect_id' => $prospectId],
             ['created_at' => now()]
         );
 
         return response()->json(['message' => 'View logged successfully']);
     }
 
-
-
-
-    // méthode renvoie une liste des dernières consultations
+    // Renvoie une liste des dernières consultations
     public function getRecentViews()
     {
-        $recentViews = RecentView::with(['user', 'client']) // Charge les relations
+        $recentViews = RecentView::with(['user', 'prospect']) // Charge les relations
             ->whereHas('user') // Filtre les vues avec un utilisateur valide
-            ->whereHas('client') // Filtre les vues avec un client valide
+            ->whereHas('prospect') // Filtre les vues avec un prospect valide
             ->orderBy('created_at', 'desc')
             ->take(10) // Limiter aux 10 dernières consultations
             ->get();
@@ -221,7 +211,7 @@ class ClientController extends Controller
         return response()->json(
             $recentViews->map(function ($view) {
                 return [
-                    'client' => $view->client,
+                    'prospect' => $view->prospect,
                     'viewedBy' => $view->user ? $view->user->name : 'Inconnu',
                     'viewedAt' => $view->created_at->format('d/m/Y H:i'),
                 ];
