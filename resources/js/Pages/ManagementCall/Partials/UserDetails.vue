@@ -14,7 +14,11 @@
         </div>
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
-            <div v-if="editableProspect.notes && editableProspect.notes.length > 0">
+            <div
+                v-if="
+                    editableProspect.notes && editableProspect.notes.length > 0
+                "
+            >
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white">
@@ -32,9 +36,7 @@
                                 </th>
                                 <th
                                     class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-4/5"
-                                >
-                                    
-                                </th>
+                                ></th>
                             </tr>
                         </thead>
                         <transition-group name="slide" tag="tbody">
@@ -84,16 +86,25 @@
                                         Enregistré avec succès
                                     </p>
                                 </td>
-                                <td class="py-2 px-4 border-b text-sm text-left w-1/5">
-                                    <button @click="deleteNote(note.id)"
-                                        class="text-red-600 hover:text-red-800 font-semibold">Supprimer</button>
+                                <td
+                                    class="py-2 px-4 border-b text-sm text-left w-1/5"
+                                >
+                                    <button
+                                        @click="deleteNote(note.id)"
+                                        class="text-red-600 hover:text-red-800 font-semibold"
+                                    >
+                                        Supprimer
+                                    </button>
                                 </td>
                             </tr>
                         </transition-group>
                     </table>
                     <div class="text-center">
                         <button
-                            v-if="visibleNotesCount < editableProspect.notes.length"
+                            v-if="
+                                visibleNotesCount <
+                                editableProspect.notes.length
+                            "
                             @click="showMoreNotes"
                             class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
                         >
@@ -195,7 +206,7 @@
             <div class="sm:divide-y sm:divide-gray-200">
                 <!-- Première ligne : Prénom & Nom -->
                 <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
+                    class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
                 >
                     <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">Prénom</dt>
@@ -234,7 +245,8 @@
                                 class="editable-text cursor-pointer hover:text-gray-500"
                             >
                                 {{
-                                    editableProspect.familyName || "Ajouter un nom"
+                                    editableProspect.familyName ||
+                                    "Ajouter un nom"
                                 }}
                             </span>
                             <input
@@ -252,11 +264,41 @@
                             </p>
                         </dd>
                     </div>
+                    <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
+                        <dt class="text-sm font-bold text-gray-500">Pays</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.country"
+                                @click="editField('country')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableProspect.country ||
+                                    "Ajouter un pays"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableProspect.country"
+                                @blur="saveField('country')"
+                                @keydown.enter="saveField('country')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.country"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
                 </div>
 
                 <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
                 <div
-                    class="py-0 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
+                    class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
                 >
                     <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">E-mail</dt>
@@ -316,254 +358,11 @@
                             </p>
                         </dd>
                     </div>
-                </div>
-
-                <!-- Troisième ligne : Rue et numéro, Localité, et Pays -->
-                <div class="px-4 py-5 sm:px-6 bg-gray-200">
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                        Adresse
-                    </p>
-                </div>
-                <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
-                >
-                    <!-- Rue et numéro -->
-                    <div class="sm:col-span-1 px-4 md:px-0">
-                        <dt class="text-sm font-bold text-gray-500">
-                            Rue et numéro
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.address"
-                                @click="editField('address')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableProspect.address ||
-                                    "Ajouter une adresse"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.address"
-                                @blur="saveField('address')"
-                                @keydown.enter="saveField('address')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.address"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-
-                    <!-- Localité -->
-                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
-                        <dt class="text-sm font-bold text-gray-500">
-                            Localité
-                        </dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.locality"
-                                @click="editField('locality')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableProspect.locality ||
-                                    "Ajouter une localité"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.locality"
-                                @blur="saveField('locality')"
-                                @keydown.enter="saveField('locality')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.locality"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-
-                    <!-- Pays -->
-                    <div
-                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
-                    >
-                        <dt class="text-sm font-bold text-gray-500">Pays</dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.country"
-                                @click="editField('country')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{ editableProspect.country || "Ajouter un pays" }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.country"
-                                @blur="saveField('country')"
-                                @keydown.enter="saveField('country')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.country"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                </div>
-
-
-                <!-- INFORMATIONS COMPLÉMENTAIRES -->
-                <div class="px-4 py-5 sm:px-6 bg-gray-200">
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                        Informations complémentaires
-                    </p>
-                </div>
-
-                <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-6"
-                >
-                    <div class="sm:col-span-1 px-4 md:px-0">
-                        <dt class="text-sm font-bold text-gray-500">Nom de l'entreprise</dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.company"
-                                @click="editField('company')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableProspect.company ||
-                                    "Ajouter un nom d'entreprise"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.company"
-                                @blur="saveField('company')"
-                                @keydown.enter="saveField('company')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.company"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
-                        <dt class="text-sm font-bold text-gray-500">Numéro de TVA</dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.companyvat"
-                                @click="editField('companyvat')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableProspect.companyvat || "Ajouter un numéro de TVA"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.companyvat"
-                                @blur="saveField('companyvat')"
-                                @keydown.enter="saveField('companyvat')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.companyvat"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
+                   
                 </div>
             </div>
         </div>
 
-        <!-- Section Historiques des Bordereaux -->
-        <div class="max-w-7xl mx-auto">
-            <div class="inline-block min-w-full py-2 align-middle">
-                <div
-                    class="overflow-hidden shadow ring-opacity-5 md:rounded-lg"
-                >
-                    <table class="min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    scope="col"
-                                    class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-600 sm:pl-6"
-                                >
-                                    #
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-600"
-                                >
-                                    Date
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-3 py-3.5 text-sm font-semibold text-center text-gray-600"
-                                >
-                                    Statut
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr
-                                v-for="(
-                                    historique, index
-                                ) in editableProspect.bordereauHistoriques"
-                                :key="historique.id"
-                            >
-                                <!-- Numéro de ligne -->
-                                <td
-                                    class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-center font-normal text-gray-600 sm:pl-6"
-                                >
-                                    {{ index + 1 }}
-                                </td>
-
-                                <!-- Date du bordereau -->
-                                <td
-                                    class="whitespace-nowrap px-3 py-4 text-sm text-center text-gray-600"
-                                >
-                                    {{ formatDateTime(historique.date) }}
-                                </td>
-
-                                <!-- Statut du bordereau -->
-                                <td
-                                    class="whitespace-nowrap px-3 py-4 text-sm text-center"
-                                >
-                                    <span
-                                        :class="{
-                                            'bg-green-100 text-green-800 py-1 px-4 rounded-xl text-center':
-                                                historique.status === 1,
-                                            'bg-yellow-100 text-yellow-800 py-1 px-4 rounded-xl text-center':
-                                                historique.status === 0,
-                                            'bg-red-100 text-red-800 py-1 px-4 rounded-xl text-center':
-                                                historique.status === 2,
-                                        }"
-                                    >
-                                        {{ formatStatus(historique.status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -611,12 +410,7 @@ const successMessages = reactive({
     familyName: false,
     email: false,
     phone: false,
-    address: false,
-    postalCode: false,
-    locality: false,
     country: false,
-    company: false,
-    companyvat: false,
     notes: [],
 });
 
@@ -650,12 +444,7 @@ const isEditing = reactive({
     familyName: false,
     email: false,
     phone: false,
-    address: false,
-    postalCode: false,
-    locality: false,
     country: false,
-    company: false,
-    companyvat: false,
 });
 
 // Fonctions pour gérer les champs d'édition
@@ -676,7 +465,10 @@ const saveField = (field) => {
             Object.assign(editableProspect, response.data);
 
             // Émettre l'événement avec les données mises à jour
-            emit("prospect-updated", JSON.parse(JSON.stringify(editableProspect)));
+            emit(
+                "prospect-updated",
+                JSON.parse(JSON.stringify(editableProspect))
+            );
 
             displaySuccessMessage(field);
         })
@@ -706,7 +498,9 @@ const deleteNote = async (noteId) => {
     try {
         await axios.delete(`/prospects/${editableProspect.id}/notes/${noteId}`);
         // Filtrer les notes pour retirer celle qui est supprimée
-        editableProspect.notes = editableProspect.notes.filter((note) => note.id !== noteId);
+        editableProspect.notes = editableProspect.notes.filter(
+            (note) => note.id !== noteId
+        );
     } catch (error) {
         console.error("Erreur lors de la suppression de la note :", error);
     }
@@ -722,7 +516,9 @@ const saveNote = (note) => {
         })
         .then((response) => {
             // Mettre à jour la note dans editableProspect.notes
-            const index = editableProspect.notes.findIndex((n) => n.id === note.id);
+            const index = editableProspect.notes.findIndex(
+                (n) => n.id === note.id
+            );
             if (index !== -1) {
                 editableProspect.notes[index] = response.data;
             }
@@ -778,7 +574,10 @@ const saveNewNote = () => {
                 editableProspect.blacklist = blacklistValue;
 
                 // Émettre un événement pour informer le parent que le blacklist a été mis à jour
-                emit("prospect-updated", JSON.parse(JSON.stringify(editableProspect)));
+                emit(
+                    "prospect-updated",
+                    JSON.parse(JSON.stringify(editableProspect))
+                );
 
                 newNote.value.content = "";
                 newNote.value.type = "information"; // Réinitialiser à la valeur par défaut

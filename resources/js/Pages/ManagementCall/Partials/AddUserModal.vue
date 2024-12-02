@@ -77,10 +77,7 @@
                             @blur="validatePhone"
                             @keydown="focusNextField($event)"
                         />
-                        <span
-                            v-if="errors.phone"
-                            class="text-xs text-red-500"
-                        >
+                        <span v-if="errors.phone" class="text-xs text-red-500">
                             {{ errors.phone[0] }}
                         </span>
                     </div>
@@ -98,63 +95,9 @@
                             @blur="validateEmail"
                             @keydown="focusNextField($event)"
                         />
-                        <span
-                            v-if="errors.email"
-                            class="text-xs text-red-500"
-                        >
+                        <span v-if="errors.email" class="text-xs text-red-500">
                             {{ errors.email[0] }}
                         </span>
-                    </div>
-
-                    <!-- Adresse -->
-                    <div>
-                        <label
-                            for="address"
-                            class="block text-sm text-gray-600"
-                        >
-                            Rue et numéro
-                        </label>
-                        <input
-                            v-model="newProspect.address"
-                            id="address"
-                            type="text"
-                            class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
-                            @keydown="focusNextField($event)"
-                        />
-                    </div>
-
-                    <!-- Code Postal -->
-                    <div>
-                        <label
-                            for="codePostal"
-                            class="block text-sm text-gray-600"
-                        >
-                            Code Postal
-                        </label>
-                        <input
-                            v-model="newProspect.postalCode"
-                            id="codePostal"
-                            type="text"
-                            class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
-                            @keydown="focusNextField($event)"
-                        />
-                    </div>
-
-                    <!-- Localité -->
-                    <div>
-                        <label
-                            for="locality"
-                            class="block text-sm text-gray-600"
-                        >
-                            Localité
-                        </label>
-                        <input
-                            v-model="newProspect.locality"
-                            id="locality"
-                            type="text"
-                            class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
-                            @keydown="focusNextField($event)"
-                        />
                     </div>
 
                     <!-- Pays -->
@@ -171,39 +114,6 @@
                             type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
                             @keydown="focusNextField($event)"
-                        />
-                    </div>
-
-                    <!-- Société -->
-                    <div>
-                        <label
-                            for="company"
-                            class="block text-sm text-gray-600"
-                        >
-                            Société
-                        </label>
-                        <input
-                            v-model="newProspect.company"
-                            id="company"
-                            type="text"
-                            class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
-                            @keydown="focusNextField($event)"
-                        />
-                    </div>
-
-                    <!-- Numéro TVA -->
-                    <div>
-                        <label
-                            for="companyvat"
-                            class="block text-sm text-gray-600"
-                        >
-                            Numéro TVA
-                        </label>
-                        <input
-                            v-model="newProspect.companyvat"
-                            id="companyvat"
-                            type="text"
-                            class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
                         />
                     </div>
                 </div>
@@ -268,11 +178,6 @@ const newProspect = ref({
     familyName: "",
     phone: "",
     email: "",
-    company: "",
-    companyvat: "",
-    address: "",
-    postalCode: "",
-    locality: "",
     country: "",
 });
 
@@ -313,11 +218,6 @@ const resetFields = () => {
         familyName: "",
         phone: "",
         email: "",
-        company: "",
-        companyvat: "",
-        address: "",
-        postalCode: "",
-        locality: "",
         country: "",
     };
     newNote.value.content = "";

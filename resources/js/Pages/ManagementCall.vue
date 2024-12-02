@@ -28,11 +28,6 @@ const newProspect = ref({
     familyName: "",
     phone: "",
     email: "",
-    company: "",
-    companyvat: "",
-    address: "",
-    postalCode: "",
-    locality: "",
     country: "",
 });
 
@@ -79,9 +74,6 @@ const filteredProspects = computed(() => {
                     : false) ||
                 (prospect.email
                     ? normalize(prospect.email).includes(searchLower)
-                    : false) ||
-                (prospect.company
-                    ? normalize(prospect.company).includes(searchLower)
                     : false)
             );
         })

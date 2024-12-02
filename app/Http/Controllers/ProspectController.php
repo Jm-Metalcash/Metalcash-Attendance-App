@@ -96,20 +96,8 @@ class ProspectController extends Controller
             'familyName' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'locality' => 'nullable|string|max:255',
-            'postalCode' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:255',
             'blacklist' => 'nullable|boolean',
-            'entity' => 'nullable|string|max:255',
-            'docType' => 'nullable|string|max:255',
-            'docNumber' => 'nullable|string|max:255',
-            'docExp' => 'nullable|date',
-            'interest' => 'nullable|string|max:255',
-            'referer' => 'nullable|string|max:255',
-            'birthDate' => 'nullable|date',
-            'company' => 'nullable|string|max:255',
-            'companyvat' => 'nullable|string|max:255',
         ]);
 
         // Définir recently_added en fonction du rôle
@@ -138,22 +126,8 @@ class ProspectController extends Controller
             'familyName' => 'nullable|string|max:255',
             'phone' => 'required|string|max:255|unique:prospects,phone',
             'email' => 'nullable|email|max:255',
-            'company' => 'nullable|string|max:255',
-            'companyvat' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'postalCode' => 'nullable|string|max:10',
-            'locality' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'blacklist' => 'nullable|boolean',
-            'entity' => 'nullable|string|max:255',
-            'docType' => 'nullable|string|max:255',
-            'docNumber' => 'nullable|string|max:255',
-            'docExp' => 'nullable|date',
-            'interest' => 'nullable|string|max:255',
-            'referer' => 'nullable|string|max:255',
-            'birthDate' => 'nullable|date',
-            'company' => 'nullable|string|max:255',
-            'companyvat' => 'nullable|string|max:255',
         ]);
 
         // Supprimer les champs avec des valeurs nulles
