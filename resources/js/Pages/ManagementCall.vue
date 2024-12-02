@@ -392,7 +392,7 @@ const formatDate = (date) => {
                                                     :class="[
                                                         prospect.recently_added
                                                             ? 'bg-fuchsia-500'
-                                                            : 'bg-green-400',
+                                                            : 'bg-blue-400',
                                                         'h-2 w-2 mr-4 rounded-full',
                                                     ]"
                                                 ></span>
@@ -475,7 +475,7 @@ const formatDate = (date) => {
                                                     :class="[
                                                         prospect.recently_added
                                                             ? 'bg-fuchsia-500'
-                                                            : 'bg-green-400',
+                                                            : 'bg-blue-400',
                                                         'h-2 w-2 mr-4 rounded-full',
                                                     ]"
                                                 ></span>
