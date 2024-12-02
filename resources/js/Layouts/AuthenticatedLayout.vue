@@ -23,7 +23,7 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="route('index')">
                                     <img
                                         :src="logoUrl"
                                         alt="Logo Metalcash"
@@ -36,12 +36,6 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
-                            <NavLink
-                                    :href="route('index')"
-                                    :active="route().current('index')"
-                                >
-                                    Accueil
-                                </NavLink>
                                 <NavLink
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
@@ -192,12 +186,7 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                     class="sm:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink
-                            :href="route('index')"
-                            :active="route().current('index')"
-                        >
-                            Accueil
-                        </ResponsiveNavLink>
+                        
                         <ResponsiveNavLink
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
