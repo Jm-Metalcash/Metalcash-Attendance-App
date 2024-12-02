@@ -82,25 +82,24 @@
                         </span>
                     </div>
 
-                    <!-- Email -->
+                   
+
+                    <!-- Pays, ville -->
                     <div>
-                        <label for="email" class="block text-sm text-gray-600">
-                            Email
+                        <label
+                            for="locality"
+                            class="block text-sm text-gray-600"
+                        >
+                            Ville
                         </label>
                         <input
-                            v-model="newProspect.email"
-                            id="email"
-                            type="email"
+                            v-model="newProspect.locality"
+                            id="locality"
+                            type="text"
                             class="mt-2 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-blue-300 focus:outline-none"
-                            @blur="validateEmail"
                             @keydown="focusNextField($event)"
                         />
-                        <span v-if="errors.email" class="text-xs text-red-500">
-                            {{ errors.email[0] }}
-                        </span>
                     </div>
-
-                    <!-- Pays -->
                     <div>
                         <label
                             for="country"
@@ -119,12 +118,12 @@
                 </div>
 
                 <!-- Note -->
-                <div class="mt-6">
+                <div class="mt-12">
                     <label
                         for="noteContent"
                         class="block text-sm text-gray-600"
                     >
-                        Contenu de la note
+                        Première note
                     </label>
                     <textarea
                         v-model="newNote.content"
@@ -177,7 +176,7 @@ const newProspect = ref({
     firstName: "",
     familyName: "",
     phone: "",
-    email: "",
+    locality: "",
     country: "",
 });
 
@@ -201,15 +200,6 @@ const validatePhone = () => {
     }
 };
 
-// Valider email
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const validateEmail = () => {
-    if (newProspect.value.email && !isValidEmail(newProspect.value.email)) {
-        errors.value.email = ["Le format de l'adresse e-mail est invalide."];
-    } else {
-        delete errors.value.email;
-    }
-};
 
 // Réinitialiser
 const resetFields = () => {
@@ -217,7 +207,7 @@ const resetFields = () => {
         firstName: "",
         familyName: "",
         phone: "",
-        email: "",
+        locality: "",
         country: "",
     };
     newNote.value.content = "";
@@ -235,7 +225,6 @@ const closeModal = () => {
 const addProspectWithNote = async () => {
     formSubmitted.value = true;
     validatePhone();
-    validateEmail();
 
     if (hasErrors.value) return;
 

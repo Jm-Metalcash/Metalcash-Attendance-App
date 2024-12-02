@@ -264,70 +264,7 @@
                             </p>
                         </dd>
                     </div>
-                    <div
-                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
-                    >
-                        <dt class="text-sm font-bold text-gray-500">Pays</dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.country"
-                                @click="editField('country')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableProspect.country ||
-                                    "Ajouter un pays"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.country"
-                                @blur="saveField('country')"
-                                @keydown.enter="saveField('country')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.country"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
-                </div>
 
-                <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
-                <div
-                    class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
-                >
-                    <div class="sm:col-span-1 px-4 md:px-0">
-                        <dt class="text-sm font-bold text-gray-500">E-mail</dt>
-                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.email"
-                                @click="editField('email')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
-                                {{
-                                    editableProspect.email ||
-                                    "Ajouter une adresse e-mail"
-                                }}
-                            </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.email"
-                                @blur="saveField('email')"
-                                @keydown.enter="saveField('email')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.email"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
-                                Enregistré avec succès
-                            </p>
-                        </dd>
-                    </div>
                     <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
                         <dt class="text-sm font-bold text-gray-500">
                             Numéro de téléphone
@@ -352,6 +289,74 @@
                             />
                             <p
                                 v-if="successMessages.phone"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
+
+                    
+                </div>
+
+                <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
+                <div
+                    class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+                >
+                <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
+                        <dt class="text-sm font-bold text-gray-500">Ville</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.locality"
+                                @click="editField('locality')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableProspect.locality ||
+                                    "Ajouter une ville"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableProspect.locality"
+                                @blur="saveField('locality')"
+                                @keydown.enter="saveField('locality')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.locality"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
+                    <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
+                        <dt class="text-sm font-bold text-gray-500">Pays</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.country"
+                                @click="editField('country')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableProspect.country ||
+                                    "Ajouter un pays"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableProspect.country"
+                                @blur="saveField('country')"
+                                @keydown.enter="saveField('country')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.country"
                                 class="text-green-500 text-xs mt-1 success-message"
                             >
                                 Enregistré avec succès
@@ -408,7 +413,7 @@ const isEditingNotes = reactive({});
 const successMessages = reactive({
     firstName: false,
     familyName: false,
-    email: false,
+    locality: false,
     phone: false,
     country: false,
     notes: [],
@@ -442,7 +447,7 @@ onMounted(() => {
 const isEditing = reactive({
     firstName: false,
     familyName: false,
-    email: false,
+    locality: false,
     phone: false,
     country: false,
 });

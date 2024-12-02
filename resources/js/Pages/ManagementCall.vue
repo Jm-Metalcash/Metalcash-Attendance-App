@@ -27,7 +27,7 @@ const newProspect = ref({
     firstName: "",
     familyName: "",
     phone: "",
-    email: "",
+    locality: "",
     country: "",
 });
 
@@ -71,9 +71,6 @@ const filteredProspects = computed(() => {
                 phoneMatches ||
                 (prospect.country
                     ? normalize(prospect.country).includes(searchLower)
-                    : false) ||
-                (prospect.email
-                    ? normalize(prospect.email).includes(searchLower)
                     : false)
             );
         })
@@ -227,7 +224,7 @@ const formatDate = (date) => {
 
         <FlashMessage
             v-if="showAddConfirmation"
-            message="Le fournisseur a bien été ajouté."
+            message="Prospect ajouté avec succès."
             @close="showAddConfirmation = false"
         />
 
@@ -248,14 +245,14 @@ const formatDate = (date) => {
                                 <div
                                     class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0"
                                 >
-                                    Rechercher un fournisseur
+                                    Rechercher un Prospect ou Fournisseur existant
                                 </div>
                                 <!-- Bouton Ajouter un prospect -->
                                 <button
                                     @click="toggleModal"
                                     class="text-xs md:text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                                 >
-                                    Encoder un appel
+                                    Ajouter un prospect
                                 </button>
                             </div>
 
@@ -280,7 +277,7 @@ const formatDate = (date) => {
                                     class="w-full rounded-md text-sm md:text-base bg-[rgb(237,242,247)] text-gray-500 leading-tight focus:outline-none focus:ring-0 border-none py-3 px-2 placeholder-gray-500 placeholder-opacity-60"
                                     id="search"
                                     type="text"
-                                    placeholder="Tapez le numéro de téléphone, nom, e-mail ou pays pour chercher"
+                                    placeholder="Numéro de téléphone, Nom ou Prénom"
                                 />
                             </div>
 

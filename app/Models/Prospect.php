@@ -15,7 +15,7 @@ class Prospect extends Model
         'familyName',
         'firstName',
         'country',
-        'email',
+        'locality',
         'phone',
         'blacklist',
         'recently_added',

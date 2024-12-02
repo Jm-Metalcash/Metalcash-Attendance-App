@@ -94,7 +94,7 @@ class ProspectController extends Controller
         $validatedData = $request->validate([
             'firstName' => 'nullable|string|max:255',
             'familyName' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'locality' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'blacklist' => 'nullable|boolean',
@@ -125,7 +125,7 @@ class ProspectController extends Controller
             'firstName' => 'nullable|string|max:255',
             'familyName' => 'nullable|string|max:255',
             'phone' => 'required|string|max:255|unique:prospects,phone',
-            'email' => 'nullable|email|max:255',
+            'locality' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'blacklist' => 'nullable|boolean',
         ]);
