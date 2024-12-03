@@ -8,7 +8,7 @@ defineProps(["recentAddedProspects", "selectProspect", "formatDate"]);
         class="mt-0 border p-4 bg-zinc-50"
     >
         <h3 class="text-lg font-semibold text-gray-700">
-            Nouveaux fournisseurs ajoutés
+            Nouveaux prospects et clients ajoutés
         </h3>
         <div
             v-for="(prospect, index) in recentAddedProspects"
@@ -19,13 +19,16 @@ defineProps(["recentAddedProspects", "selectProspect", "formatDate"]);
             <!-- Nom complet -->
             <div class="flex w-full sm:w-1/6 items-center">
                 <span
-                    :class="[
-                        prospect.recently_added
-                            ? 'bg-yellow-500'
-                            : 'bg-blue-400',
-                        'h-2 w-2 mr-4 rounded-full',
+                    :class="[ 
+                        'flex justify-center items-center mr-4 h-3 w-3 rounded-full',
+                        prospect.type === 'prospect' ? 'bg-yellow-500' : 'bg-blue-500',
                     ]"
-                ></span>
+                >
+                    <i
+                        v-if="prospect.type === 'client'"
+                        class="fa-solid fa-check text-white text-[8px]"
+                    ></i>
+                </span>
                 <div class="font-medium text-left">
                     {{ prospect.firstName }} {{ prospect.familyName }}
                 </div>

@@ -8,7 +8,7 @@ defineProps(["recentModifiedProspects", "selectProspect", "formatDate"]);
         class="mt-8 border p-4 bg-zinc-50"
     >
         <h3 class="text-lg font-semibold text-gray-700">
-            Derniers fournisseurs modifiés
+            Derniers prospects et clients modifiés
         </h3>
         <div
             v-for="(prospect, index) in recentModifiedProspects"
@@ -18,14 +18,18 @@ defineProps(["recentModifiedProspects", "selectProspect", "formatDate"]);
         >
             <!-- Nom complet -->
             <div class="flex w-full sm:w-1/6 items-center">
+                <!-- Indicateur (icône ou badge selon le type) -->
                 <span
-                    :class="[
-                        prospect.recently_added
-                            ? 'bg-yellow-500'
-                            : 'bg-blue-400',
-                        'h-2 w-2 mr-4 rounded-full',
+                    :class="[ 
+                        'flex justify-center items-center mr-4 h-3 w-3 rounded-full',
+                        prospect.type === 'prospect' ? 'bg-yellow-500' : 'bg-blue-500',
                     ]"
-                ></span>
+                >
+                    <i
+                        v-if="prospect.type === 'client'"
+                        class="fa-solid fa-check text-white text-[10px]"
+                    ></i>
+                </span>
                 <div class="font-medium text-left">
                     {{ prospect.firstName }} {{ prospect.familyName }}
                 </div>
@@ -34,14 +38,14 @@ defineProps(["recentModifiedProspects", "selectProspect", "formatDate"]);
             <!-- Numéro de téléphone -->
             <div class="flex w-full sm:w-1/6">
                 <div class="font-medium text-left ml-6 md:ml-0">
-                    {{ prospect.phone }}
+                    {{ prospect.phone || "Non disponible" }}
                 </div>
             </div>
 
             <!-- Pays -->
             <div class="flex w-full sm:w-1/6">
                 <div class="text-sm font-normal text-left ml-6 md:ml-0">
-                    {{ prospect.country }}
+                    {{ prospect.country || "Non disponible" }}
                 </div>
             </div>
 
@@ -49,11 +53,7 @@ defineProps(["recentModifiedProspects", "selectProspect", "formatDate"]);
             <div class="text-xs w-full sm:w-1/6">
                 Modifié par : <br />
                 <span class="font-bold text-xs mr-2">
-                    {{
-                        prospect.updated_by
-                            ? prospect.updated_by.name
-                            : "Inconnu"
-                    }}
+                    {{ prospect.updated_by?.name || "Inconnu" }}
                 </span>
                 <span class="font-bold text-xs">
                     {{ formatDate(prospect.updated_at) }}

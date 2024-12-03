@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import { router as Inertia } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
-import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
+import ProspectDetails from "./ManagementCall/Partials/ProspectDetails.vue";
 import RecentUser from "./ManagementCall/Partials/RecentUser.vue";
 import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
 import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
@@ -14,16 +14,31 @@ import FlashMessage from "@/Components/FlashMessage.vue";
 const page = usePage();
 
 // Les prospects sont passés via Inertia
-const props = defineProps(["prospects", "currentUser", "selectedProspect"]);
+const props = defineProps([
+    "prospects",
+    "clients",
+    "currentUser",
+    "selectedProspect",
+    "selectedClient",
+]);
 
 // Les données des prospects à partir des props
 const prospects = ref(props.prospects);
+
+// Données des clients à partir des props
+const clients = ref(props.clients);
 
 // Terme de recherche
 const searchTerm = ref("");
 
 // Prospect sélectionné
 const selectedProspect = ref(null);
+
+// Prospect ou client sélectionné
+const selectedItem = ref(null);
+
+// Déterminer si l'élément sélectionné est un prospect ou un client
+const isSelectedClient = computed(() => selectedItem.value?.type === "client");
 
 // Nouveau prospect à ajouter
 const newProspect = ref({
@@ -34,54 +49,56 @@ const newProspect = ref({
     country: "",
 });
 
-// Liste pour stocker les prospects filtrés par la recherche (limité à 5)
-const filteredProspects = computed(() => {
+// Liste pour stocker les résultats filtrés (prospects et clients)
+const filteredResults = computed(() => {
     const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
 
     if (!searchLower) {
         return [];
     }
 
-    return prospects.value
-        .filter((prospect) => {
-            const normalize = (str) =>
-                str ? str.toLowerCase().replace(/\s+/g, "") : "";
+    const normalize = (str) =>
+        str ? str.toLowerCase().replace(/\s+/g, "") : "";
+    const normalizePhone = (phone) =>
+        phone
+            ? phone.replace(/^\+/, "00").replace(/\s+/g, "").toLowerCase()
+            : "";
 
-            const normalizePhone = (phone) => {
-                if (!phone) return "";
-                // Remplace les préfixes internationaux en les unifiant au format international "+XX"
-                return phone
-                    .replace(/^\+/, "00") // Remplace le "+" par "00"
-                    .replace(/\s+/g, "") // Supprime les espaces
-                    .toLowerCase();
-            };
+    const filterFunction = (list, type) =>
+        list
+            .filter((item) => {
+                const combinedName1 = normalize(
+                    item.firstName + item.familyName
+                );
+                const combinedName2 = normalize(
+                    item.familyName + item.firstName
+                );
 
-            const combinedName1 = normalize(
-                prospect.firstName + prospect.familyName
-            );
-            const combinedName2 = normalize(
-                prospect.familyName + prospect.firstName
-            );
+                const nameMatches =
+                    combinedName1.includes(searchLower) ||
+                    combinedName2.includes(searchLower);
 
-            const nameMatches =
-                combinedName1.includes(searchLower) ||
-                combinedName2.includes(searchLower);
+                const phoneMatches = item.phone
+                    ? normalizePhone(item.phone).includes(
+                          normalizePhone(searchLower)
+                      )
+                    : false;
 
-            const phoneMatches = prospect.phone
-                ? normalizePhone(prospect.phone).includes(
-                      normalizePhone(searchLower)
-                  )
-                : false;
+                return (
+                    nameMatches ||
+                    phoneMatches ||
+                    (item.country
+                        ? normalize(item.country).includes(searchLower)
+                        : false)
+                );
+            })
+            .map((item) => ({ ...item, type })); // Ajouter le type (client ou prospect)
 
-            return (
-                nameMatches ||
-                phoneMatches ||
-                (prospect.country
-                    ? normalize(prospect.country).includes(searchLower)
-                    : false)
-            );
-        })
-        .slice(0, 5); // Limiter à 5 résultats maximum
+    // Mélanger les résultats des deux tables
+    const prospectsResults = filterFunction(prospects.value, "prospect");
+    const clientsResults = filterFunction(clients.value, "client");
+
+    return [...prospectsResults, ...clientsResults].slice(0, 5); // Limite à 5 résultats
 });
 
 // Liste pour stocker les 5 derniers prospects consultés
@@ -91,14 +108,17 @@ const recentProspects = ref([]);
 onMounted(() => {
     axios.get("/recent-views").then((response) => {
         recentProspects.value = response.data.map((view) => ({
-            prospect: view.prospect,
+            ...view.prospect,
+            type: view.prospect_type || "prospect",
             viewedBy: view.viewedBy || "Inconnu",
             viewedAt: view.viewedAt || "Date inconnue",
         }));
     });
 
     if (props.selectedProspect) {
-        selectedProspect.value = props.selectedProspect;
+        selectedItem.value = props.selectedProspect;
+    } else if (props.selectedClient) {
+        selectedItem.value = props.selectedClient;
     }
 });
 
@@ -111,20 +131,23 @@ watch(
 );
 
 // Fonction pour sélectionner un prospect
-const selectProspect = (prospect) => {
-    if (!prospect || !prospect.id) {
-        console.error("Prospect invalide ou ID manquant.", prospect);
+const selectItem = (item) => {
+    if (!item || !item.id) {
+        console.error("Élément invalide ou ID manquant.", item);
         return;
     }
 
-    Inertia.visit(route("management-call", { prospect: prospect.id }), {
+    const routeName =
+        item.type === "client" ? "management-call.client" : "management-call";
+
+    Inertia.visit(route(routeName, { id: item.id }), {
         method: "get",
         preserveScroll: true,
     });
 };
 
 const closeProspectDetails = () => {
-    selectedProspect.value = null;
+    selectedItem.value = null;
 
     // Mettre à jour l'URL pour revenir à /gestion-appels-telephoniques
     Inertia.visit(route("management-call"), {
@@ -181,25 +204,58 @@ const updateProspectInList = (updatedProspect) => {
     }
 };
 
-// Les 20 derniers prospects ajoutés
+// Les 10 derniers prospects ajoutés
 const recentAddedProspects = computed(() => {
-    return prospects.value
+    const mappedProspects = prospects.value
         .filter((prospect) => prospect.created_at)
+        .map((prospect) => ({
+            ...prospect,
+            type: "prospect", // Ajouter le type prospect
+        }));
+
+    const mappedClients = clients.value
+        .filter((client) => client.created_at)
+        .map((client) => ({
+            ...client,
+            type: "client", // Ajouter le type client
+        }));
+
+    // Fusionner les deux listes et trier par date de création
+    return [...mappedProspects, ...mappedClients]
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 20);
+        .slice(0, 10); // Limiter à 20 résultats
 });
 
 // Les 10 derniers prospects modifiés
 const recentModifiedProspects = computed(() => {
-    return prospects.value
+    const mappedProspects = prospects.value
         .filter(
             (prospect) =>
                 prospect.updated_at &&
                 prospect.created_at &&
                 new Date(prospect.updated_at) > new Date(prospect.created_at)
         )
+        .map((prospect) => ({
+            ...prospect,
+            type: "prospect", // Ajouter le type prospect
+        }));
+
+    const mappedClients = clients.value
+        .filter(
+            (client) =>
+                client.updated_at &&
+                client.created_at &&
+                new Date(client.updated_at) > new Date(client.created_at)
+        )
+        .map((client) => ({
+            ...client,
+            type: "client", // Ajouter le type client
+        }));
+
+    // Fusionner les deux listes et trier par date de modification
+    return [...mappedProspects, ...mappedClients]
         .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-        .slice(0, 10);
+        .slice(0, 10); // Limiter à 10 résultats
 });
 
 // Fonction pour formater les dates
@@ -214,6 +270,20 @@ const formatDate = (date) => {
         minute: "2-digit",
     });
 };
+
+const updateClientInList = (updatedClient) => {
+    const index = clients.value.findIndex(
+        (client) => client.id === updatedClient.id
+    );
+
+    if (index !== -1) {
+        clients.value[index] = { ...updatedClient };
+    }
+
+    if (selectedItem.value && selectedItem.value.id === updatedClient.id) {
+        selectedItem.value = clients.value[index];
+    }
+};
 </script>
 
 <template>
@@ -221,7 +291,9 @@ const formatDate = (date) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
+            <h2
+                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
+            >
                 Gestion des appels téléphoniques
             </h2>
         </template>
@@ -238,7 +310,9 @@ const formatDate = (date) => {
             <div class="w-full max-w-7xl mt-0 mx-auto px-0">
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
-                        <div class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4">
+                        <div
+                            class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4"
+                        >
                             <!-- Conteneur pour "Rechercher un prospect" et la barre de recherche -->
                             <div
                                 class="flex flex-row justify-between items-center mb-1 md:mb-6"
@@ -247,7 +321,8 @@ const formatDate = (date) => {
                                 <div
                                     class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0"
                                 >
-                                    Rechercher un Prospect ou Fournisseur existant
+                                    Rechercher un Prospect ou Fournisseur
+                                    existant
                                 </div>
                                 <!-- Bouton Ajouter un prospect -->
                                 <button
@@ -283,31 +358,41 @@ const formatDate = (date) => {
                                 />
                             </div>
 
-                            <!-- Détails du prospect sélectionné -->
-                            <UserDetails
-                                v-if="selectedProspect"
-                                :prospect="selectedProspect"
-                                @prospect-updated="updateProspectInList"
-                                @closeUserDetails="closeProspectDetails"
+                            <!-- Affichage de la liste des prospects filtrés -->
+                            <FilteredUserList
+                                v-if="searchTerm && filteredResults.length > 0"
+                                :filteredProspects="filteredResults"
+                                :selectProspect="selectItem"
                             />
+
+                            <!-- Détails de l'élément sélectionné -->
+                            <div v-if="selectedItem && !searchTerm">
+                                <ProspectDetails
+                                    v-if="!isSelectedClient"
+                                    :prospect="selectedItem"
+                                    @prospect-updated="updateProspectInList"
+                                    @closeUserDetails="closeProspectDetails"
+                                />
+                                <ClientDetails
+                                    v-else
+                                    :client="selectedItem"
+                                    @client-updated="updateClientInList"
+                                    @closeUserDetails="closeProspectDetails"
+                                />
+                            </div>
 
                             <!-- Autres composants uniquement si aucun prospect n'est sélectionné -->
                             <div v-else>
-                                <!-- Affichage de la liste des prospects filtrés -->
-                                <FilteredUserList
-                                    v-if="searchTerm && filteredProspects.length > 0"
-                                    :filteredProspects="filteredProspects"
-                                    :selectProspect="selectProspect"
-                                    :newProspectId="newProspectId"
-                                />
-
                                 <!-- Historique des modifications des prospects -->
-                                <div v-if="!searchTerm" class="client-manage-panel">
+                                <div
+                                    v-if="!searchTerm"
+                                    class="client-manage-panel"
+                                >
                                     <!-- Affichage des derniers prospects consultés -->
                                     <RecentUser
                                         v-if="recentProspects.length > 0"
                                         :recentProspects="recentProspects"
-                                        :selectProspect="selectProspect"
+                                        :selectProspect="selectItem"
                                     />
 
                                     <!-- PANEL ADMIN -->
@@ -315,29 +400,39 @@ const formatDate = (date) => {
                                         v-if="
                                             recentAddedProspects.length > 0 &&
                                             page.props.auth.roles &&
-                                            (page.props.auth.roles.includes('Admin') ||
-                                                page.props.auth.roles.includes('Informatique'))
+                                            (page.props.auth.roles.includes(
+                                                'Admin'
+                                            ) ||
+                                                page.props.auth.roles.includes(
+                                                    'Informatique'
+                                                ))
                                         "
                                         class="admin-panel-clients"
                                     >
                                         <h2
                                             class="mt-20 text-xl p-2 font-bold w-full bg-[rgb(0,86,146)] text-white"
                                         >
-                                            <i class="fa-solid fa-lock pl-2 pr-1"></i>
+                                            <i
+                                                class="fa-solid fa-lock pl-2 pr-1"
+                                            ></i>
                                             Administration
                                         </h2>
 
                                         <!-- Affiche les 20 derniers prospects ajoutés -->
                                         <RecentAddedUser
-                                            :recentAddedProspects="recentAddedProspects"
-                                            :selectProspect="selectProspect"
+                                            :recentAddedProspects="
+                                                recentAddedProspects
+                                            "
+                                            :selectProspect="selectItem"
                                             :formatDate="formatDate"
                                         />
 
                                         <!-- Affiche les 10 derniers prospects modifiés -->
                                         <RecentModifiedUser
-                                            :recentModifiedProspects="recentModifiedProspects"
-                                            :selectProspect="selectProspect"
+                                            :recentModifiedProspects="
+                                                recentModifiedProspects
+                                            "
+                                            :selectProspect="selectItem"
                                             :formatDate="formatDate"
                                         />
                                     </div>

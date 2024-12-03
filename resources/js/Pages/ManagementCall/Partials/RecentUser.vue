@@ -12,7 +12,7 @@ defineProps(["recentProspects", "selectProspect"]);
         <UserList
             :filteredProspects="
                 recentProspects.map((view) => ({
-                    ...view.prospect,
+                    ...view,
                     viewedBy: view.viewedBy || 'Inconnu',
                     viewedAt: view.viewedAt || 'Date inconnue',
                 }))

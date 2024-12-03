@@ -74,9 +74,12 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/gestion-appels-telephoniques', [ProspectController::class, 'index'])->name('managementCall');
     Route::put('/prospects/{id}', [ProspectController::class, 'update'])->name('prospects.update');
     Route::post('/prospects', [ProspectController::class, 'store']);
-    Route::get('/gestion-appels-telephoniques/{prospect?}', [ProspectController::class, 'index'])->name('management-call');
+    Route::get('/gestion-appels-telephoniques/prospect/{prospect?}', [ProspectController::class, 'index'])->name('management-call');
     Route::post('/prospects/log-view', [ProspectController::class, 'logView'])->name('prospects.log-view');
     Route::get('/recent-views', [ProspectController::class, 'getRecentViews'])->name('recent-views');
+
+    Route::get('/gestion-appels-telephoniques/client/{id?}', [ProspectController::class, 'showClient'])->name('management-call.client');
+
 
 
     //Gestion des notes pour les prospects

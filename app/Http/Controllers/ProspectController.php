@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Prospect;
 use App\Models\RecentView;
+use App\Models\Client;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -15,6 +16,30 @@ class ProspectController extends Controller
     {
         // Récupérer tous les prospects avec leurs relations
         $prospects = Prospect::with(['createdBy:id,name', 'updatedBy:id,name'])->get();
+
+        // Récupérer tous les clients avec leurs relations
+        $clients = Client::with(['notes' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])->get();
+
+        // Ajouter le type 'prospect' pour chaque prospect
+        $prospects = $prospects->map(function ($prospect) {
+            $prospect['type'] = 'prospect';
+            return $prospect;
+        });
+
+        // Ajouter le type 'client' pour chaque client
+        $clients = $clients->map(function ($client) {
+            $client['type'] = 'client';
+            return $client;
+        });
+
+        // Fusionner les prospects et clients pour 'recentAddedProspects'
+        $recentAddedProspects = $prospects
+            ->merge($clients)
+            ->sortByDesc('created_at') // Trier par date d'ajout
+            ->take(20) // Limiter à 20 résultats
+            ->values(); // Ré-indexer la collection
 
         // Initialiser la variable pour le prospect sélectionné
         $selectedProspect = null;
@@ -46,10 +71,13 @@ class ProspectController extends Controller
 
         return Inertia::render('ManagementCall', [
             'prospects' => $prospects,
+            'clients' => $clients,
+            'recentAddedProspects' => $recentAddedProspects,
             'currentUser' => Auth::user(),
             'selectedProspect' => $selectedProspect,
         ]);
     }
+
 
 
 
@@ -59,14 +87,14 @@ class ProspectController extends Controller
         if (!$id) {
             return response()->json(['error' => 'Prospect ID is missing'], 400);
         }
-    
+
         $prospect = Prospect::with([
             'notes',
             'bordereauHistoriques.informations',
             'createdBy',
             'updatedBy'
         ])->findOrFail($id);
-    
+
         // Enregistrer la consultation
         try {
             RecentView::updateOrCreate(
@@ -76,16 +104,16 @@ class ProspectController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
         }
-    
+
         if (request()->ajax()) {
             return response()->json(['prospect' => $prospect]);
         }
-    
+
         return Inertia::render('ManagementCall', [
             'prospect' => $prospect,
         ]);
     }
-    
+
 
     // Modifie les données d'un prospect
     public function update(Request $request, $id)
@@ -175,21 +203,62 @@ class ProspectController extends Controller
     // Renvoie une liste des dernières consultations
     public function getRecentViews()
     {
-        $recentViews = RecentView::with(['user', 'prospect']) // Charge les relations
-            ->whereHas('user') // Filtre les vues avec un utilisateur valide
-            ->whereHas('prospect') // Filtre les vues avec un prospect valide
+        $recentViews = RecentView::with(['user', 'prospect', 'client'])
+            ->whereHas('user')
             ->orderBy('created_at', 'desc')
-            ->take(10) // Limiter aux 10 dernières consultations
+            ->take(10)
             ->get();
 
         return response()->json(
             $recentViews->map(function ($view) {
+                $item = null;
+                $itemType = null;
+
+                if ($view->prospect) {
+                    $item = $view->prospect;
+                    $itemType = 'prospect';
+                } elseif ($view->client) {
+                    $item = $view->client;
+                    $itemType = 'client';
+                }
+
                 return [
-                    'prospect' => $view->prospect,
+                    'prospect' => $item,
+                    'prospect_type' => $itemType,
                     'viewedBy' => $view->user ? $view->user->name : 'Inconnu',
                     'viewedAt' => $view->created_at->format('d/m/Y H:i'),
                 ];
             })
         );
+    }
+
+
+
+    public function showClient($id)
+    {
+        if (!$id) {
+            return response()->json(['error' => 'Client ID is missing'], 400);
+        }
+
+        $client = Client::with([
+            'notes',
+        ])->findOrFail($id);
+
+        // Log the client view
+        try {
+            RecentView::updateOrCreate(
+                ['user_id' => Auth::id(), 'client_id' => $id],
+                ['created_at' => now(), 'prospect_id' => null]
+            );
+        } catch (\Exception $e) {
+            // Return an Inertia response with an error
+            return Inertia::render('Error', ['message' => 'Failed to log view: ' . $e->getMessage()]);
+        }
+
+        return Inertia::render('ManagementCall', [
+            'selectedClient' => $client,
+            'prospects' => Prospect::all(),
+            'clients' => Client::all(),
+        ]);
     }
 }

@@ -12,14 +12,26 @@
             ]"
         >
             <!-- Colonne Nom complet (avec indicateur de statut à gauche) -->
-            <div class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0">
+            <div
+                class="flex w-full sm:w-1/6 items-center mb-2 sm:mb-0 space-x-4"
+            >
+                <!-- Indicateur vérifié pour le client ou simple rond pour le prospect -->
                 <span
                     :class="[
-                        prospect.recently_added ? 'bg-yellow-500' : 'bg-blue-400',
-                        'h-2 w-2 mr-4 rounded-full',
+                        'flex justify-center items-center h-3 w-3 rounded-full',
+                        prospect.type === 'prospect'
+                            ? 'bg-yellow-500'
+                            : 'bg-blue-500',
                     ]"
-                ></span>
-                <div class="font-medium text-left">
+                >
+                    <i
+                        v-if="prospect.type === 'client'"
+                        class="fa-solid fa-check text-white text-[8px]"
+                    ></i>
+                </span>
+
+                <!-- Nom complet -->
+                <div class="font-medium text-left truncate">
                     {{ prospect.firstName }} {{ prospect.familyName }}
                 </div>
             </div>
@@ -45,8 +57,12 @@
             >
                 <div class="text-xs font-light text-left ml-6 md:ml-0">
                     <span>Consulté par :</span><br />
-                    <span class="font-bold mr-2">{{ prospect.viewedBy || "Inconnu" }}</span>
-                    <span class="font-bold"> {{ prospect.viewedAt || "Date inconnue" }}</span>
+                    <span class="font-bold mr-2">{{
+                        prospect.viewedBy || "Inconnu"
+                    }}</span>
+                    <span class="font-bold">
+                        {{ prospect.viewedAt || "Date inconnue" }}</span
+                    >
                 </div>
             </div>
         </div>
@@ -54,7 +70,7 @@
 
     <!-- Message si aucun prospect trouvé avec v-else -->
     <div v-else class="py-3 text-sm text-center">
-        Aucun prospect n'a été trouvé
+        Aucun prospect ou client trouvé
     </div>
 </template>
 
