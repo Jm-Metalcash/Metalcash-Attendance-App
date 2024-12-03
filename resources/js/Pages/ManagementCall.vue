@@ -4,8 +4,11 @@ import { router as Inertia } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import UserDetails from "./ManagementCall/Partials/UserDetails.vue";
-import UserList from "./ManagementCall/Partials/UserList.vue";
+import RecentUser from "./ManagementCall/Partials/RecentUser.vue";
+import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
+import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
+import FilteredUserList from "./ManagementCall/Partials/FilteredUserList.vue";
 import FlashMessage from "@/Components/FlashMessage.vue";
 
 const page = usePage();
@@ -53,8 +56,12 @@ const filteredProspects = computed(() => {
                     .toLowerCase();
             };
 
-            const combinedName1 = normalize(prospect.firstName + prospect.familyName);
-            const combinedName2 = normalize(prospect.familyName + prospect.firstName);
+            const combinedName1 = normalize(
+                prospect.firstName + prospect.familyName
+            );
+            const combinedName2 = normalize(
+                prospect.familyName + prospect.firstName
+            );
 
             const nameMatches =
                 combinedName1.includes(searchLower) ||
@@ -209,15 +216,12 @@ const formatDate = (date) => {
 };
 </script>
 
-
 <template>
     <Head title="Gestion des appels téléphoniques" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
+            <h2 class="font-semibold text-xl text-white bg-gray-800 leading-tight">
                 Gestion des appels téléphoniques
             </h2>
         </template>
@@ -234,10 +238,8 @@ const formatDate = (date) => {
             <div class="w-full max-w-7xl mt-0 mx-auto px-0">
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
-                        <div
-                            class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4"
-                        >
-                            <!-- Conteneur pour le texte "Rechercher un prospect" et le bouton -->
+                        <div class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4">
+                            <!-- Conteneur pour "Rechercher un prospect" et la barre de recherche -->
                             <div
                                 class="flex flex-row justify-between items-center mb-1 md:mb-6"
                             >
@@ -281,248 +283,6 @@ const formatDate = (date) => {
                                 />
                             </div>
 
-                            <!-- Affichage de la liste des prospects filtrés (max 5) -->
-                            <div
-                                v-if="
-                                    !selectedProspect &&
-                                    searchTerm &&
-                                    filteredProspects.length > 0
-                                "
-                            >
-                                <h3 class="text-lg font-semibold text-gray-700">
-                                    Résultat de la recherche :
-                                </h3>
-
-                                <UserList
-                                    :filteredProspects="filteredProspects"
-                                    :selectProspect="selectProspect"
-                                    :newProspectId="newProspectId"
-                                />
-                            </div>
-
-                            <!-- Historique des modifications des fournisseurs -->
-                            <div v-if="!searchTerm" class="client-manage-panel">
-                                <!-- Affichage des derniers prospects consultés -->
-                                <div
-                                    v-if="
-                                        !selectedProspect &&
-                                        recentProspects.length > 0
-                                    "
-                                    class="mt-8 border p-4 bg-zinc-0"
-                                >
-                                    <h3
-                                        class="text-lg font-semibold text-gray-700"
-                                    >
-                                        Derniers fournisseurs consultés
-                                    </h3>
-
-                                    <!-- Utilisation du composant UserList -->
-                                    <UserList
-                                        :filteredProspects="
-                                            recentProspects.map((view) => ({
-                                                ...view.prospect,
-                                                viewedBy:
-                                                    view.viewedBy || 'Inconnu',
-                                                viewedAt:
-                                                    view.viewedAt ||
-                                                    'Date inconnue',
-                                            }))
-                                        "
-                                        :selectProspect="selectProspect"
-                                    />
-                                </div>
-
-                                <!-- PANEL ADMIN -->
-                                <div
-                                    v-if="
-                                        recentAddedProspects.length > 0 &&
-                                        page.props.auth.roles &&
-                                        (page.props.auth.roles.includes(
-                                            'Admin'
-                                        ) ||
-                                            page.props.auth.roles.includes(
-                                                'Informatique'
-                                            ))
-                                    "
-                                    class="admin-panel-clients"
-                                >
-                                    <h2
-                                        class="mt-20 text-xl p-2 font-bold w-full bg-[rgb(0,86,146)] text-white"
-                                    >
-                                        <i
-                                            class="fa-solid fa-lock pl-2 pr-1"
-                                        ></i>
-                                        Administration
-                                    </h2>
-
-                                    <!-- Affiche les 20 derniers prospects ajoutés -->
-                                    <div
-                                        v-if="!selectedProspect"
-                                        class="mt-0 border p-4 bg-zinc-50"
-                                    >
-                                        <h3
-                                            class="text-lg font-semibold text-gray-700"
-                                        >
-                                            Nouveaux fournisseurs ajoutés
-                                        </h3>
-                                        <div
-                                            v-for="(
-                                                prospect, index
-                                            ) in recentAddedProspects"
-                                            :key="prospect.id || index"
-                                            @click="selectProspect(prospect)"
-                                            class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
-                                        >
-                                            <!-- Nom complet -->
-                                            <div
-                                                class="flex w-full sm:w-1/6 items-center"
-                                            >
-                                                <span
-                                                    :class="[
-                                                        prospect.recently_added
-                                                            ? 'bg-yellow-500'
-                                                            : 'bg-blue-400',
-                                                        'h-2 w-2 mr-4 rounded-full',
-                                                    ]"
-                                                ></span>
-                                                <div
-                                                    class="font-medium text-left"
-                                                >
-                                                    {{ prospect.firstName }}
-                                                    {{ prospect.familyName }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Numéro de téléphone -->
-                                            <div class="flex w-full sm:w-1/6">
-                                                <div
-                                                    class="font-medium text-left ml-6 md:ml-0"
-                                                >
-                                                    {{ prospect.phone }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Pays -->
-                                            <div class="flex w-full sm:w-1/6">
-                                                <div
-                                                    class="text-sm font-normal text-left ml-6 md:ml-0"
-                                                >
-                                                    {{ prospect.country }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Date d'ajout et utilisateur ayant ajouté -->
-                                            <div
-                                                class="text-xs w-full sm:w-1/6"
-                                            >
-                                                Ajouté par : <br />
-                                                <span
-                                                    class="font-bold text-xs mr-2"
-                                                >
-                                                    {{
-                                                        prospect.created_by
-                                                            ? prospect
-                                                                  .created_by
-                                                                  .name
-                                                            : "Inconnu"
-                                                    }}
-                                                </span>
-                                                <span class="font-bold text-xs">
-                                                    {{
-                                                        formatDate(
-                                                            prospect.created_at
-                                                        )
-                                                    }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Affiche les 10 derniers prospects modifiés -->
-                                    <div
-                                        v-if="!selectedProspect"
-                                        class="mt-8 border p-4 bg-zinc-50"
-                                    >
-                                        <h3
-                                            class="text-lg font-semibold text-gray-700"
-                                        >
-                                            Derniers fournisseurs modifiés
-                                        </h3>
-                                        <div
-                                            v-for="(
-                                                prospect, index
-                                            ) in recentModifiedProspects"
-                                            :key="prospect.id || index"
-                                            @click="selectProspect(prospect)"
-                                            class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-green-50 text-gray-700 hover:bg-green-100 hover:text-green-800"
-                                        >
-                                            <!-- Nom complet -->
-                                            <div
-                                                class="flex w-full sm:w-1/6 items-center"
-                                            >
-                                                <span
-                                                    :class="[
-                                                        prospect.recently_added
-                                                            ? 'bg-yellow-500'
-                                                            : 'bg-blue-400',
-                                                        'h-2 w-2 mr-4 rounded-full',
-                                                    ]"
-                                                ></span>
-                                                <div
-                                                    class="font-medium text-left"
-                                                >
-                                                    {{ prospect.firstName }}
-                                                    {{ prospect.familyName }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Numéro de téléphone -->
-                                            <div class="flex w-full sm:w-1/6">
-                                                <div
-                                                    class="font-medium text-left ml-6 md:ml-0"
-                                                >
-                                                    {{ prospect.phone }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Pays -->
-                                            <div class="flex w-full sm:w-1/6">
-                                                <div
-                                                    class="text-sm font-normal text-left ml-6 md:ml-0"
-                                                >
-                                                    {{ prospect.country }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Date de modification et utilisateur ayant modifié -->
-                                            <div
-                                                class="text-xs w-full sm:w-1/6"
-                                            >
-                                                Modifié par : <br />
-                                                <span
-                                                    class="font-bold text-xs mr-2"
-                                                >
-                                                    {{
-                                                        prospect.updated_by
-                                                            ? prospect
-                                                                  .updated_by
-                                                                  .name
-                                                            : "Inconnu"
-                                                    }}
-                                                </span>
-                                                <span class="font-bold text-xs">
-                                                    {{
-                                                        formatDate(
-                                                            prospect.updated_at
-                                                        )
-                                                    }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Détails du prospect sélectionné -->
                             <UserDetails
                                 v-if="selectedProspect"
@@ -530,6 +290,59 @@ const formatDate = (date) => {
                                 @prospect-updated="updateProspectInList"
                                 @closeUserDetails="closeProspectDetails"
                             />
+
+                            <!-- Autres composants uniquement si aucun prospect n'est sélectionné -->
+                            <div v-else>
+                                <!-- Affichage de la liste des prospects filtrés -->
+                                <FilteredUserList
+                                    v-if="searchTerm && filteredProspects.length > 0"
+                                    :filteredProspects="filteredProspects"
+                                    :selectProspect="selectProspect"
+                                    :newProspectId="newProspectId"
+                                />
+
+                                <!-- Historique des modifications des prospects -->
+                                <div v-if="!searchTerm" class="client-manage-panel">
+                                    <!-- Affichage des derniers prospects consultés -->
+                                    <RecentUser
+                                        v-if="recentProspects.length > 0"
+                                        :recentProspects="recentProspects"
+                                        :selectProspect="selectProspect"
+                                    />
+
+                                    <!-- PANEL ADMIN -->
+                                    <div
+                                        v-if="
+                                            recentAddedProspects.length > 0 &&
+                                            page.props.auth.roles &&
+                                            (page.props.auth.roles.includes('Admin') ||
+                                                page.props.auth.roles.includes('Informatique'))
+                                        "
+                                        class="admin-panel-clients"
+                                    >
+                                        <h2
+                                            class="mt-20 text-xl p-2 font-bold w-full bg-[rgb(0,86,146)] text-white"
+                                        >
+                                            <i class="fa-solid fa-lock pl-2 pr-1"></i>
+                                            Administration
+                                        </h2>
+
+                                        <!-- Affiche les 20 derniers prospects ajoutés -->
+                                        <RecentAddedUser
+                                            :recentAddedProspects="recentAddedProspects"
+                                            :selectProspect="selectProspect"
+                                            :formatDate="formatDate"
+                                        />
+
+                                        <!-- Affiche les 10 derniers prospects modifiés -->
+                                        <RecentModifiedUser
+                                            :recentModifiedProspects="recentModifiedProspects"
+                                            :selectProspect="selectProspect"
+                                            :formatDate="formatDate"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Modal d'ajout de prospect -->
                             <AddUserModal

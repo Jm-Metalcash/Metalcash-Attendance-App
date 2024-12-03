@@ -30,5 +30,11 @@ class Client extends Model
         'regdate',
         'blacklist',
     ];
+
+
+    public function notes()
+    {
+        return $this->hasMany(NoteClient::class);
+    }
     
 }
