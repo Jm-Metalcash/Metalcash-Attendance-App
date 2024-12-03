@@ -35,8 +35,9 @@ class Prospect extends Model
     // Relation avec la table notes
     public function notes()
     {
-        return $this->hasMany(Note::class);
+        return $this->hasMany(NoteProspect::class);
     }
+    
 
     public function recentViews()
     {

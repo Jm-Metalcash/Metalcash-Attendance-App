@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Note extends Model
+class NoteProspect extends Model
 {
     use HasFactory;
+
+    protected $table = 'notes_prospect';
 
     protected $fillable = ['content', 'note_date', 'prospect_id', 'type'];
 

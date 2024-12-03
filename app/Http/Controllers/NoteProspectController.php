@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Note;
+use App\Models\NoteProspect;
 use App\Models\Prospect;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class NoteController extends Controller
+class NoteProspectController extends Controller
 {
     // Mise à jour d'une note
-    public function update(Request $request, Prospect $prospect, Note $note)
+    public function update(Request $request, Prospect $prospect, NoteProspect $note)
     {
         // Vérifier que la note appartient bien au prospect
         if ($note->prospect_id !== $prospect->id) {
@@ -59,7 +59,7 @@ class NoteController extends Controller
     }
 
     // Suppression d'une note
-    public function destroy(Prospect $prospect, Note $note)
+    public function destroy(Prospect $prospect, NoteProspect $note)
     {
         // Vérifier que la note appartient bien au prospect
         if ($note->prospect_id !== $prospect->id) {

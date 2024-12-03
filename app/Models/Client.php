@@ -10,12 +10,25 @@ class Client extends Model
     use HasFactory;
 
     protected $fillable = [
-        'firstName',
+        'entity',
+        'docType',
+        'docNumber',
+        'docExp',
+        'fullName',
         'familyName',
-        'phone',
+        'firstName',
+        'birthDate',
+        'address',
         'locality',
         'country',
+        'email',
+        'phone',
         'company',
+        'companyvat',
+        'interest',
+        'referer',
+        'regdate',
         'blacklist',
     ];
+    
 }

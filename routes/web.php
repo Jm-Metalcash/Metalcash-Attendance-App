@@ -7,7 +7,7 @@ use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\HistoricalController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\ProspectController;
-use App\Http\Controllers\NoteController;
+use App\Http\Controllers\NoteProspectController;
 use App\Http\Controllers\BordereauHistoriqueController;
 use App\Http\Controllers\BordereauInformationController;
 use Illuminate\Support\Facades\Auth;
@@ -80,10 +80,10 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
 
 
     //Gestion des notes pour les prospects
-    Route::put('/prospects/{prospect}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
-    Route::post('/prospects/{prospect}/notes', [NoteController::class, 'store'])->name('notes.store');
+    Route::put('/prospects/{prospect}/notes/{note}', [NoteProspectController::class, 'update'])->name('notes.update');
+    Route::post('/prospects/{prospect}/notes', [NoteProspectController::class, 'store'])->name('notes.store');
     Route::get('/prospects/{id}', [ProspectController::class, 'show'])->name('prospects.show');
-    Route::delete('/prospects/{prospect}/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
+    Route::delete('/prospects/{prospect}/notes/{note}', [NoteProspectController::class, 'destroy'])->name('notes.destroy');
 
     // Routes pour les bordereaux historiques
     Route::post('prospects/{prospect}/bordereau_historique', [BordereauHistoriqueController::class, 'store']);
