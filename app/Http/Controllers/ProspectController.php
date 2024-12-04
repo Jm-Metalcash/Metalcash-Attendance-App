@@ -82,20 +82,16 @@ class ProspectController extends Controller
 
 
     // Affiche les détails d'un prospect spécifique
-    public function show($id)
+    public function showProspect($id)
     {
         if (!$id) {
             return response()->json(['error' => 'Prospect ID is missing'], 400);
         }
 
-        $prospect = Prospect::with([
-            'notes',
-            'bordereauHistoriques.informations',
-            'createdBy',
-            'updatedBy'
-        ])->findOrFail($id);
+        $prospect = Prospect::with(['notes', 'bordereauHistoriques.informations', 'createdBy', 'updatedBy'])
+            ->findOrFail($id);
 
-        // Enregistrer la consultation
+        // Log the prospect view
         try {
             RecentView::updateOrCreate(
                 ['user_id' => Auth::id(), 'prospect_id' => $id],
@@ -105,14 +101,16 @@ class ProspectController extends Controller
             return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
         }
 
-        if (request()->ajax()) {
-            return response()->json(['prospect' => $prospect]);
-        }
+        // Ajouter le champ 'type' au prospect
+        $prospect = array_merge($prospect->toArray(), ['type' => 'prospect']);
 
         return Inertia::render('ManagementCall', [
-            'prospect' => $prospect,
+            'selectedProspect' => $prospect,
+            'prospects' => Prospect::all(),
+            'clients' => Client::all(),
         ]);
     }
+
 
 
     // Modifie les données d'un prospect
@@ -232,33 +230,4 @@ class ProspectController extends Controller
         );
     }
 
-
-
-    public function showClient($id)
-    {
-        if (!$id) {
-            return response()->json(['error' => 'Client ID is missing'], 400);
-        }
-
-        $client = Client::with([
-            'notes',
-        ])->findOrFail($id);
-
-        // Log the client view
-        try {
-            RecentView::updateOrCreate(
-                ['user_id' => Auth::id(), 'client_id' => $id],
-                ['created_at' => now(), 'prospect_id' => null]
-            );
-        } catch (\Exception $e) {
-            // Return an Inertia response with an error
-            return Inertia::render('Error', ['message' => 'Failed to log view: ' . $e->getMessage()]);
-        }
-
-        return Inertia::render('ManagementCall', [
-            'selectedClient' => $client,
-            'prospects' => Prospect::all(),
-            'clients' => Client::all(),
-        ]);
-    }
 }

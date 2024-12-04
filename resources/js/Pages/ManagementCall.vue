@@ -4,6 +4,7 @@ import { router as Inertia } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import ProspectDetails from "./ManagementCall/Partials/ProspectDetails.vue";
+import ClientDetails from "./ManagementCall/Partials/ClientDetails.vue";
 import RecentUser from "./ManagementCall/Partials/RecentUser.vue";
 import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
 import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
@@ -129,6 +130,7 @@ watch(
         selectedProspect.value = newSelectedProspect;
     }
 );
+
 
 // Fonction pour sélectionner un prospect
 const selectItem = (item) => {
@@ -271,19 +273,6 @@ const formatDate = (date) => {
     });
 };
 
-const updateClientInList = (updatedClient) => {
-    const index = clients.value.findIndex(
-        (client) => client.id === updatedClient.id
-    );
-
-    if (index !== -1) {
-        clients.value[index] = { ...updatedClient };
-    }
-
-    if (selectedItem.value && selectedItem.value.id === updatedClient.id) {
-        selectedItem.value = clients.value[index];
-    }
-};
 </script>
 
 <template>

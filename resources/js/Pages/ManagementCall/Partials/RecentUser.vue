@@ -7,7 +7,7 @@ defineProps(["recentProspects", "selectProspect"]);
 <template>
     <div v-if="recentProspects.length > 0" class="mt-8 border p-4 bg-zinc-0">
         <h3 class="text-lg font-semibold text-gray-700">
-            Derniers fournisseurs consultés
+            Liste des dernières consultations
         </h3>
         <UserList
             :filteredProspects="
