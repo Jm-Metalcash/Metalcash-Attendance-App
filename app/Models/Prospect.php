@@ -32,6 +32,14 @@ class Prospect extends Model
         });
     }
 
+    protected $appends = ['has_warning'];
+
+    // Retourne true si le prospect a des notes de type avertissement
+    public function getHasWarningAttribute()
+    {
+        return $this->notes()->where('type', 'avertissement')->exists();
+    }
+
     // Relation avec la table notes
     public function notes()
     {
@@ -58,4 +66,5 @@ class Prospect extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+    
 }

@@ -10,25 +10,11 @@ class Client extends Model
     use HasFactory;
 
     protected $fillable = [
-        'entity',
-        'docType',
-        'docNumber',
-        'docExp',
-        'fullName',
-        'familyName',
         'firstName',
-        'birthDate',
-        'address',
+        'familyName',
+        'phone',
         'locality',
         'country',
-        'email',
-        'phone',
-        'company',
-        'companyvat',
-        'interest',
-        'referer',
-        'regdate',
-        'blacklist',
     ];
 
 
@@ -36,5 +22,16 @@ class Client extends Model
     {
         return $this->hasMany(NoteClient::class);
     }
-    
+
+
+    // Déterminer si un client a une note d'avertissement
+    public function getHasWarningAttribute()
+{
+    // Vérifie si le client a au moins une note avec un des types spécifiés
+    return $this->notes()
+        ->whereIn('type', ['avertissement', 'premium', 'attention'])
+        ->exists();
+}
+
+
 }

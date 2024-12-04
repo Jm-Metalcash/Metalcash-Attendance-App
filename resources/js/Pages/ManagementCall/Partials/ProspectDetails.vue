@@ -1,7 +1,7 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
         <!-- Section blacklist -->
-        <div v-if="prospect.blacklist === 1" class="warning-blacklist mb-4">
+        <div v-if="hasWarning" class="warning-blacklist mb-4">
             <div
                 class="bg-red-100 text-red-700 px-4 py-2 relative"
                 role="alert"
@@ -199,12 +199,12 @@
         <!-- Section Informations Générales -->
         <div class="px-4 py-5 sm:px-6 bg-gray-200">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                Informations générales
+                Informations générales du prospect
             </p>
         </div>
         <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
             <div class="sm:divide-y sm:divide-gray-200">
-                <!-- Première ligne : Prénom & Nom -->
+                <!-- Première ligne : Prénom & Nom & Téléphone -->
                 <div
                     class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
                 >
@@ -295,15 +295,13 @@
                             </p>
                         </dd>
                     </div>
-
-                    
                 </div>
 
                 <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
                 <div
                     class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
                 >
-                <div
+                    <div
                         class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
                     >
                         <dt class="text-sm font-bold text-gray-500">Ville</dt>
@@ -363,11 +361,9 @@
                             </p>
                         </dd>
                     </div>
-                   
                 </div>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -382,6 +378,13 @@ const props = defineProps({
         required: true,
     },
 });
+
+//const pour vérifier l'état 'avertissement' d'une note
+const hasWarning = ref(props.prospect.has_warning);
+// Fonction pour mettre à jour dynamiquement `hasWarning`
+const updateHasWarning = () => {
+    hasWarning.value = editableProspect.notes.some((note) => note.type === "avertissement");
+};
 
 // Émission d'événements
 const emit = defineEmits(["prospect-updated"]);
@@ -506,6 +509,9 @@ const deleteNote = async (noteId) => {
         editableProspect.notes = editableProspect.notes.filter(
             (note) => note.id !== noteId
         );
+        // Vérifier si l'avertissement existe encore
+        hasWarning.value = editableProspect.notes.some((note) => note.type === "avertissement");
+
     } catch (error) {
         console.error("Erreur lors de la suppression de la note :", error);
     }
@@ -577,6 +583,9 @@ const saveNewNote = () => {
             })
             .then(() => {
                 editableProspect.blacklist = blacklistValue;
+
+                // Vérifier si l'avertissement existe encore
+                updateHasWarning();
 
                 // Émettre un événement pour informer le parent que le blacklist a été mis à jour
                 emit(

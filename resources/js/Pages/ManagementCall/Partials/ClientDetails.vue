@@ -1,8 +1,23 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
+        <!-- Section type de notes -->
+        <div v-if="lastNoteType" class="warning-blacklist mb-4">
+            <div
+                :class="getClassForType(lastNoteType)"
+                class="px-4 py-2 relative"
+                role="alert"
+            >
+                <span class="font-bold text-sm">Note :</span>
+                <span class="block sm:inline text-sm md:ml-1">
+                    {{ getTextForType(lastNoteType) }}
+                </span>
+            </div>
+        </div>
+
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
             <div v-if="editableClient.notes && editableClient.notes.length > 0">
+                <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white">
                         <thead>
@@ -13,29 +28,41 @@
                                     Date
                                 </th>
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-4/5"
+                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-3/5"
                                 >
                                     Note
                                 </th>
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600"
+                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/5"
                                 ></th>
                             </tr>
                         </thead>
                         <transition-group name="slide" tag="tbody">
                             <tr
-                                v-for="note in reversedNotes.slice(0, visibleNotesCount)"
+                                v-for="note in reversedNotes.slice(
+                                    0,
+                                    visibleNotesCount
+                                )"
                                 :key="note.id"
                                 :class="
                                     note.type === 'avertissement'
+                                        ? 'bg-orange-100 text-orange-700'
+                                        : note.type === 'premium'
+                                        ? 'bg-green-100 text-green-700'
+                                        : note.type === 'attention'
                                         ? 'bg-red-100 text-red-700'
-                                        : 'text-gray-500'
+                                        : 'bg-gray-50 text-gray-700'
                                 "
                             >
-                                <td class="py-2 px-4 border-b text-sm text-left w-1/6">
+                                <td
+                                    class="py-2 px-4 border-b text-sm text-left w-1/6"
+                                >
                                     {{ formatDateTime(note.note_date) }}
                                 </td>
-                                <td class="py-2 px-4 border-b text-sm text-left w-5/6">
+                                <td
+                                    class="py-2 px-4 border-b text-sm text-left w-5/6"
+                                >
+                                    <!-- Affichage de la note -->
                                     <span
                                         v-if="!isEditingNotes[note.id]"
                                         @click="editNote(note.id)"
@@ -43,6 +70,8 @@
                                     >
                                         {{ note.content }}
                                     </span>
+
+                                    <!-- Champ d'édition -->
                                     <textarea
                                         v-else
                                         v-model="note.content"
@@ -50,8 +79,18 @@
                                         @keydown.enter.prevent="saveNote(note)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
+
+                                    <!-- Message de succès -->
+                                    <p
+                                        v-if="successMessages.notes[note.id]"
+                                        class="text-green-500 text-xs relative mt-1 success-message"
+                                    >
+                                        Enregistré avec succès
+                                    </p>
                                 </td>
-                                <td class="py-2 px-4 border-b text-sm text-left">
+                                <td
+                                    class="py-2 px-4 border-b text-sm text-left w-1/5"
+                                >
                                     <button
                                         @click="deleteNote(note.id)"
                                         class="text-red-600 hover:text-red-800 font-semibold"
@@ -63,20 +102,35 @@
                         </transition-group>
                     </table>
                     <div class="text-center">
+                        <!-- voir plus de notes -->
                         <button
-                            v-if="visibleNotesCount < editableClient.notes.length"
+                            v-if="
+                                visibleNotesCount < editableClient.notes.length
+                            "
                             @click="showMoreNotes"
                             class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
                         >
                             Voir plus <i class="fa-solid fa-angle-down"></i>
                         </button>
+
+                        <!-- voir moins de notes -->
                         <button
-                            v-if="visibleNotesCount >= editableClient.notes.length && editableClient.notes.length > 5"
+                            v-if="
+                                visibleNotesCount >=
+                                    editableClient.notes.length &&
+                                editableClient.notes.length > 5
+                            "
                             @click="showLessNotes"
                             class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
                         >
                             Voir moins <i class="fa-solid fa-angle-up"></i>
                         </button>
+                        <p
+                            v-if="showAddNoteSuccess"
+                            class="text-green-500 text-sm md:ml-52 mx-auto success-message"
+                        >
+                            La note a été ajoutée avec succès !
+                        </p>
                     </div>
                 </div>
             </div>
@@ -87,24 +141,28 @@
             </div>
 
             <!-- Bouton Ajouter une note -->
-            <div class="flex items-center justify-start md:justify-start mt-4 ml-2">
+            <div
+                class="flex items-center justify-start md:justify-start mt-4 ml-2"
+            >
                 <button
                     v-if="!showAddNote"
-                    @click="showAddNote = true"
                     class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                    @click="showAddNote = true"
                 >
-                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i> Ajouter une note
+                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
+                    Ajouter une note
                 </button>
                 <button
                     v-if="showAddNote"
-                    @click="showAddNote = false"
                     class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                    @click="showAddNote = false"
                 >
-                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i> Réduire
+                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
+                    Réduire le formulaire
                 </button>
             </div>
 
-            <!-- Formulaire d'ajout de note -->
+            <!-- Formulaire pour ajouter une nouvelle note -->
             <div v-if="showAddNote" class="mt-4">
                 <div class="bg-gray-50 p-4 rounded-md shadow-md">
                     <h4 class="text-gray-700 text-sm font-semibold mb-2">
@@ -112,21 +170,24 @@
                     </h4>
                     <select
                         v-model="newNote.type"
-                        class="mt-1 mb-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 rounded-md"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                     >
-                        <option value="information">Information</option>
-                        <option value="avertissement">Avertissement</option>
+                        <option value="information">Client classique</option>
+                        <option value="premium">Client premium</option>
+                        <option value="avertissement">Client suspicieux</option>
+                        <option value="attention">Client à éviter</option>
                     </select>
                     <textarea
                         v-model="newNote.content"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        @keydown.enter="saveNewNote"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Saisir la note..."
                     ></textarea>
                     <button
                         @click="saveNewNote"
                         class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
                     >
-                        Enregistrer
+                        Enregistrer la note
                     </button>
                 </div>
             </div>
@@ -135,28 +196,165 @@
         <!-- Section Informations Générales -->
         <div class="px-4 py-5 sm:px-6 bg-gray-200">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                Informations générales
+                Informations générales sur le Client
             </p>
         </div>
-        <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
             <div class="sm:divide-y sm:divide-gray-200">
-                <div class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <div>
+                <!-- Première ligne : Prénom & Nom & Téléphone -->
+                <div
+                    class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+                >
+                    <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">Prénom</dt>
-                        <dd class="mt-1 text-sm text-gray-400">
-                            {{ editableClient.firstName || "Non spécifié" }}
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.firstName"
+                                @click="editField('firstName')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableClient.firstName ||
+                                    "Ajouter un prénom"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableClient.firstName"
+                                @blur="saveField('firstName')"
+                                @keydown.enter="saveField('firstName')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.firstName"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
                         </dd>
                     </div>
-                    <div>
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
                         <dt class="text-sm font-bold text-gray-500">Nom</dt>
-                        <dd class="mt-1 text-sm text-gray-400">
-                            {{ editableClient.familyName || "Non spécifié" }}
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.familyName"
+                                @click="editField('familyName')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableClient.familyName ||
+                                    "Ajouter un nom"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableClient.familyName"
+                                @blur="saveField('familyName')"
+                                @keydown.enter="saveField('familyName')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.familyName"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
                         </dd>
                     </div>
-                    <div>
-                        <dt class="text-sm font-bold text-gray-500">Téléphone</dt>
-                        <dd class="mt-1 text-sm text-gray-400">
-                            {{ editableClient.phone || "Non spécifié" }}
+
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
+                        <dt class="text-sm font-bold text-gray-500">
+                            Numéro de téléphone
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.phone"
+                                @click="editField('phone')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableClient.phone ||
+                                    "Ajouter un numéro de téléphone"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableClient.phone"
+                                @blur="saveField('phone')"
+                                @keydown.enter="saveField('phone')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.phone"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
+                </div>
+
+                <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
+                <div
+                    class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+                >
+                    <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
+                        <dt class="text-sm font-bold text-gray-500">Ville</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.locality"
+                                @click="editField('locality')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableClient.locality ||
+                                    "Ajouter une ville"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableClient.locality"
+                                @blur="saveField('locality')"
+                                @keydown.enter="saveField('locality')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.locality"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
+                        </dd>
+                    </div>
+                    <div
+                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
+                    >
+                        <dt class="text-sm font-bold text-gray-500">Pays</dt>
+                        <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
+                            <span
+                                v-if="!isEditing.country"
+                                @click="editField('country')"
+                                class="editable-text cursor-pointer hover:text-gray-500"
+                            >
+                                {{
+                                    editableClient.country || "Ajouter un pays"
+                                }}
+                            </span>
+                            <input
+                                v-else
+                                v-model="editableClient.country"
+                                @blur="saveField('country')"
+                                @keydown.enter="saveField('country')"
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
+                            />
+                            <p
+                                v-if="successMessages.country"
+                                class="text-green-500 text-xs mt-1 success-message"
+                            >
+                                Enregistré avec succès
+                            </p>
                         </dd>
                     </div>
                 </div>
@@ -166,9 +364,10 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from "vue";
+import { ref, reactive, computed } from "vue";
 import axios from "axios";
 
+//Props
 const props = defineProps({
     client: {
         type: Object,
@@ -176,62 +375,246 @@ const props = defineProps({
     },
 });
 
+// Détermine le type de la dernière note
+const lastNoteType = computed(() => {
+    if (!editableClient.notes.length) return null;
+
+    // Trier les notes par date décroissante et prendre le type de la dernière
+    const lastNote = [...editableClient.notes].sort((a, b) => {
+        return new Date(b.note_date) - new Date(a.note_date);
+    })[0];
+
+    return lastNote.type;
+});
+
+// Récupère les classes CSS en fonction du type
+const getClassForType = (type) => {
+    return {
+        avertissement: 'bg-orange-100 text-orange-700',
+        premium: 'bg-green-100 text-green-700',
+        attention: 'bg-red-100 text-red-700',
+    }[type] || 'bg-gray-50 text-gray-700';
+};
+
+// Récupère le texte en fonction du type
+const getTextForType = (type) => {
+    return {
+        avertissement: 'Ce client possède un avertissement important.',
+        premium: 'Ce client est marqué comme premium.',
+        attention: 'Ce client nécessite une attention particulière.',
+    }[type] || '';
+};
+
+// Émission d'événements
+const emit = defineEmits(["client-updated"]);
+
+//constante pour éditer les notes
 const editableClient = reactive({
     ...props.client,
     notes: props.client.notes || [],
 });
 
+// Suivi des champs en cours d'édition
+const isEditing = reactive({
+    firstName: false,
+    familyName: false,
+    locality: false,
+    phone: false,
+    country: false,
+});
+
 const isEditingNotes = reactive({});
+// Nombre réactif d'affichage des notes
 const visibleNotesCount = ref(5);
-const showAddNote = ref(false);
-const newNote = reactive({ type: "information", content: "" });
 
-const saveNewNote = async () => {
-    if (!newNote.content) return;
-    try {
-        const response = await axios.post(`/clients/${editableClient.id}/notes`, newNote);
-        editableClient.notes.push(response.data);
-        newNote.content = "";
-        showAddNote.value = false;
-    } catch (error) {
-        console.error("Erreur lors de l'ajout de la note :", error);
-    }
+//Reactive sur le successMessage
+const successMessages = reactive({
+    firstName: false,
+    familyName: false,
+    phone: false,
+    locality: false,
+    country: false,
+    notes: [],
+});
+
+// Fonction pour activer le mode édition
+const editField = (field) => {
+    isEditing[field] = true;
 };
 
-const deleteNote = async (noteId) => {
-    try {
-        await axios.delete(`/clients/${editableClient.id}/notes/${noteId}`);
-        editableClient.notes = editableClient.notes.filter(
-            (note) => note.id !== noteId
-        );
-    } catch (error) {
-        console.error("Erreur lors de la suppression de la note :", error);
-    }
-};
+// Fonction pour enregistrer une modification
+const saveField = (field) => {
+    isEditing[field] = false;
 
-const saveNote = async (note) => {
-    try {
-        await axios.put(`/clients/${editableClient.id}/notes/${note.id}`, {
-            content: note.content,
+    axios
+        .put(`/clients/${editableClient.id}`, {
+            [field]: editableClient[field],
+        })
+        .then((response) => {
+            // Mise à jour locale des données
+            Object.assign(editableClient, response.data);
+
+            // Notification de mise à jour
+            emit("client-updated", JSON.parse(JSON.stringify(editableClient)));
+
+            // Affichage du message de succès
+            displaySuccessMessage(field);
+        })
+        .catch((error) => {
+            console.error(`Erreur lors de la mise à jour de ${field} :`, error);
         });
-    } catch (error) {
-        console.error("Erreur lors de la mise à jour de la note :", error);
-    }
 };
 
-const reversedNotes = computed(() => [...editableClient.notes].reverse());
+// Affichage temporaire des messages de succès
+const displaySuccessMessage = (field) => {
+    successMessages[field] = true;
+    setTimeout(() => {
+        successMessages[field] = false;
+    }, 3000);
+};
 
-const showMoreNotes = () => (visibleNotesCount.value = editableClient.notes.length);
-const showLessNotes = () => (visibleNotesCount.value = 5);
+const showAddNote = ref(false);
+const showAddNoteSuccess = ref(false);
+
+const newNote = ref({ content: "", type: "information" });
+
+// Computed pour inverser l'ordre des notes
+const reversedNotes = computed(() => {
+    return [...editableClient.notes].reverse();
+});
+
+const editNote = (noteId) => {
+    isEditingNotes[noteId] = true;
+};
+
+const saveNote = (note) => {
+    isEditingNotes[note.id] = false;
+    axios
+        .put(`/clients/${editableClient.id}/notes/${note.id}`, {
+            content: note.content,
+            type: note.type,
+        })
+        .then(() => {
+            successMessages.notes[note.id] = true;
+            setTimeout(() => {
+                successMessages.notes[note.id] = false;
+            }, 3000);
+        })
+        .catch((error) => console.error(error));
+};
+
+const deleteNote = (noteId) => {
+    axios
+        .delete(`/clients/${editableClient.id}/notes/${noteId}`)
+        .then(() => {
+            editableClient.notes = editableClient.notes.filter(
+                (note) => note.id !== noteId
+            );
+            updateHasWarning(); // Met à jour has_warning après suppression
+        })
+        .catch((error) => {
+            console.error("Erreur lors de la suppression de la note :", error);
+        });
+};
+
+const saveNewNote = () => {
+    if (newNote.value.content) {
+        axios
+            .post(`/clients/${editableClient.id}/notes`, {
+                content: newNote.value.content,
+                type: newNote.value.type,
+            })
+            .then((response) => {
+                // Ajouter la nouvelle note à la liste
+                editableClient.notes.push(response.data);
+
+                // Réinitialiser le formulaire
+                newNote.value = { content: "", type: "information" };
+                showAddNote.value = false;
+
+                // Afficher le message de succès
+                showAddNoteSuccess.value = true;
+                setTimeout(() => {
+                    showAddNoteSuccess.value = false;
+                }, 3000);
+
+                updateHasWarning(); // Met à jour has_warning après ajout
+            })
+            .catch((error) => {
+                console.error("Erreur lors de l'ajout de la note :", error);
+            });
+    }
+};
 
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("fr-FR", {
+    return date.toLocaleString("fr-FR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-    }).format(date);
+    });
+};
+
+// Fonction pour afficher plus de notes
+const showMoreNotes = () => {
+    visibleNotesCount.value = editableClient.notes.length;
+};
+
+// Fonction pour revenir aux 5 premières notes
+const showLessNotes = () => {
+    visibleNotesCount.value = 5;
 };
 </script>
+
+<style scoped>
+/* Transition pour les notes */
+.slide-enter-active,
+.slide-leave-active {
+    transition: all 0.5s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.slide-leave-from,
+.slide-enter-to {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.success-message {
+    animation: fade-in-out 3s forwards;
+    position: absolute;
+}
+
+@keyframes fade-in-out {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+.editable-input {
+    border: 1px solid #ccc;
+    padding: 8px;
+    width: 100%;
+    border-radius: 4px;
+}
+</style>

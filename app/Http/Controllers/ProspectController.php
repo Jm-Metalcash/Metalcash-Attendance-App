@@ -8,6 +8,7 @@ use App\Models\Client;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProspectController extends Controller
 {
@@ -100,9 +101,6 @@ class ProspectController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
         }
-
-        // Ajouter le champ 'type' au prospect
-        $prospect = array_merge($prospect->toArray(), ['type' => 'prospect']);
 
         return Inertia::render('ManagementCall', [
             'selectedProspect' => $prospect,
@@ -229,5 +227,4 @@ class ProspectController extends Controller
             })
         );
     }
-
 }

@@ -72,7 +72,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');
 
 
-    // Gestion des appels téléphoniques et prospects
+    // Gestion des appels téléphoniques pour les prospects
     Route::get('/gestion-appels-telephoniques', [ProspectController::class, 'index'])->name('managementCall');
     Route::put('/prospects/{id}', [ProspectController::class, 'update'])->name('prospects.update');
     Route::post('/prospects', [ProspectController::class, 'store']);
@@ -89,6 +89,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
 
     // Gestion des appels téléphoniques pour les clients
     Route::get('/gestion-appels-telephoniques/client/{id?}', [ClientController::class, 'showClient'])->name('management-call.client');
+    Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
 
     //Gestion des notes pour les clients
     Route::post('/clients/{id}/notes', [NoteClientController::class, 'storeNote']);
