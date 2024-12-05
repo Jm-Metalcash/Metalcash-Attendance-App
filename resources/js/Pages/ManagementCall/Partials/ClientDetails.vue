@@ -1,15 +1,24 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
         <!-- Section type de notes -->
-        <div v-if="lastNoteType" class="warning-blacklist mb-4">
+        <div
+            v-if="
+                editableClient.notes.some((note) =>
+                    ['avertissement', 'premium', 'attention'].includes(
+                        note.type
+                    )
+                )
+            "
+            class="warning-blacklist mb-4"
+        >
             <div
-                :class="getClassForType(lastNoteType)"
+                :class="getWarningClass(latestWarningType)"
                 class="px-4 py-2 relative"
                 role="alert"
             >
                 <span class="font-bold text-sm">Note :</span>
                 <span class="block sm:inline text-sm md:ml-1">
-                    {{ getTextForType(lastNoteType) }}
+                    {{ getWarningText(latestWarningType) }}
                 </span>
             </div>
         </div>
@@ -172,7 +181,7 @@
                         v-model="newNote.type"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                     >
-                        <option value="information">Client classique</option>
+                        <option value="information">Informatif</option>
                         <option value="premium">Client premium</option>
                         <option value="avertissement">Client suspicieux</option>
                         <option value="attention">Client à éviter</option>
@@ -375,33 +384,31 @@ const props = defineProps({
     },
 });
 
-// Détermine le type de la dernière note
-const lastNoteType = computed(() => {
-    if (!editableClient.notes.length) return null;
-
-    // Trier les notes par date décroissante et prendre le type de la dernière
-    const lastNote = [...editableClient.notes].sort((a, b) => {
-        return new Date(b.note_date) - new Date(a.note_date);
-    })[0];
-
-    return lastNote.type;
+// Calcul du type de la dernière note importante
+const latestWarningType = computed(() => {
+    const importantNotes = editableClient.notes.filter((note) =>
+        ['avertissement', 'premium', 'attention'].includes(note.type)
+    );
+    return importantNotes.length > 0
+        ? importantNotes[importantNotes.length - 1].type
+        : null;
 });
 
-// Récupère les classes CSS en fonction du type
-const getClassForType = (type) => {
+// Fonction pour obtenir les classes CSS en fonction du type
+const getWarningClass = (type) => {
     return {
         avertissement: 'bg-orange-100 text-orange-700',
         premium: 'bg-green-100 text-green-700',
         attention: 'bg-red-100 text-red-700',
-    }[type] || 'bg-gray-50 text-gray-700';
+    }[type] || 'bg-gray-100 text-gray-700';
 };
 
-// Récupère le texte en fonction du type
-const getTextForType = (type) => {
+// Fonction pour obtenir le texte en fonction du type
+const getWarningText = (type) => {
     return {
-        avertissement: 'Ce client possède un avertissement important.',
-        premium: 'Ce client est marqué comme premium.',
-        attention: 'Ce client nécessite une attention particulière.',
+        avertissement: 'Ce client est identifié comme suspicieux (voir notes).',
+        premium: 'Ce client est identifié comme premium (voir notes).',
+        attention: 'Ce client est à éviter (voir notes).',
     }[type] || '';
 };
 

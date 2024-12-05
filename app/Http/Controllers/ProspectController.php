@@ -102,6 +102,18 @@ class ProspectController extends Controller
             return response()->json(['error' => 'Failed to log view: ' . $e->getMessage()], 500);
         }
 
+
+
+        // Déterminer la dernière note importante
+        $latestWarning = $prospect->notes()
+            ->whereIn('type', ['avertissement', 'premium', 'attention'])
+            ->latest('note_date')
+            ->first();
+
+        // Ajoute les attributs has_warning et latest_warning_type
+        $prospect->has_warning = !is_null($latestWarning);
+        $prospect->latest_warning_type = $latestWarning->type ?? null;
+
         return Inertia::render('ManagementCall', [
             'selectedProspect' => $prospect,
             'prospects' => Prospect::all(),

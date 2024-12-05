@@ -19,6 +19,7 @@ class NoteProspectController extends Controller
 
         $validatedData = $request->validate([
             'content' => 'nullable|string|max:1000',
+            'type' => 'required|string|in:information,avertissement,premium,attention',
         ]);
 
         $note->update($validatedData);
@@ -32,7 +33,7 @@ class NoteProspectController extends Controller
         $validatedData = $request->validate([
             'content' => 'nullable|string|max:1000',
             'note_date' => 'nullable|date',
-            'type' => 'required|string|in:information,avertissement'
+            'type' => 'required|string|in:information,avertissement,premium,attention',
         ]);
 
         // Convertir la date si nécessaire

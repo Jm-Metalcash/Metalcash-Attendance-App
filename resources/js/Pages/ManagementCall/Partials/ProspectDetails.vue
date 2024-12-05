@@ -1,17 +1,28 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
-        <!-- Section blacklist -->
-        <div v-if="hasWarning" class="warning-blacklist mb-4">
+        <!-- Section status des notes -->
+        <div
+            v-if="
+                editableProspect.notes.some((note) =>
+                    ['avertissement', 'premium', 'attention'].includes(
+                        note.type
+                    )
+                )
+            "
+            class="warning-blacklist mb-4"
+        >
             <div
-                class="bg-red-100 text-red-700 px-4 py-2 relative"
+                :class="getWarningClass(latestWarningType)"
+                class="px-4 py-2 relative"
                 role="alert"
             >
                 <span class="font-bold text-sm">Note :</span>
-                <span class="block sm:inline text-sm md:ml-1"
-                    >Ce prospect possède un avertissement (voir notes)</span
-                >
+                <span class="block sm:inline text-sm md:ml-1">
+                    {{ getWarningText(latestWarningType) }}
+                </span>
             </div>
         </div>
+
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
             <div
@@ -46,11 +57,7 @@
                                     visibleNotesCount
                                 )"
                                 :key="note.id"
-                                :class="
-                                    note.type === 'avertissement'
-                                        ? 'bg-red-100 text-red-700'
-                                        : 'text-gray-500'
-                                "
+                                :class="getNoteClass(note.type)"
                             >
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-1/6"
@@ -60,7 +67,6 @@
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-5/6"
                                 >
-                                    <!-- Affichage de la note -->
                                     <span
                                         v-if="!isEditingNotes[note.id]"
                                         @click="editNote(note.id)"
@@ -68,8 +74,6 @@
                                     >
                                         {{ note.content }}
                                     </span>
-
-                                    <!-- Champ d'édition -->
                                     <textarea
                                         v-else
                                         v-model="note.content"
@@ -77,14 +81,6 @@
                                         @keydown.enter.prevent="saveNote(note)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
-
-                                    <!-- Message de succès -->
-                                    <p
-                                        v-if="successMessages.notes[note.id]"
-                                        class="text-green-500 text-xs relative mt-1 success-message"
-                                    >
-                                        Enregistré avec succès
-                                    </p>
                                 </td>
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-1/5"
@@ -170,22 +166,23 @@
                     <h4 class="text-gray-700 text-sm font-semibold mb-2">
                         Nouvelle note
                     </h4>
-
                     <select
-                        id="noteType"
                         v-model="newNote.type"
-                        class="mt-1 mb-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                     >
-                        <option value="information">Information</option>
-                        <option value="avertissement">Avertissement</option>
+                        <option value="information">Informatif</option>
+                        <option value="premium">Prospect premium</option>
+                        <option value="avertissement">
+                            Prospect suspicieux
+                        </option>
+                        <option value="attention">Prospect à éviter</option>
                     </select>
-                    <input
-                        type="text"
+                    <textarea
                         v-model="newNote.content"
                         @keydown.enter="saveNewNote"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Saisir la note..."
-                    />
+                    ></textarea>
                     <button
                         @click="saveNewNote"
                         class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
@@ -383,7 +380,9 @@ const props = defineProps({
 const hasWarning = ref(props.prospect.has_warning);
 // Fonction pour mettre à jour dynamiquement `hasWarning`
 const updateHasWarning = () => {
-    hasWarning.value = editableProspect.notes.some((note) => note.type === "avertissement");
+    hasWarning.value = editableProspect.notes.some(
+        (note) => note.type === "avertissement"
+    );
 };
 
 // Émission d'événements
@@ -421,6 +420,51 @@ const successMessages = reactive({
     country: false,
     notes: [],
 });
+
+// Fonction pour obtenir les classes CSS basées sur le type de la note
+const getNoteClass = (type) => {
+    return (
+        {
+            avertissement: "bg-orange-100 text-orange-700",
+            premium: "bg-green-100 text-green-700",
+            attention: "bg-red-100 text-red-700",
+            information: "bg-gray-50 text-gray-700",
+        }[type] || "bg-gray-50 text-gray-700"
+    );
+};
+
+// Calcul du type de la dernière note importante
+const latestWarningType = computed(() => {
+    const importantNotes = editableProspect.notes.filter((note) =>
+        ["avertissement", "premium", "attention"].includes(note.type)
+    );
+    return importantNotes.length > 0
+        ? importantNotes[importantNotes.length - 1].type
+        : null;
+});
+
+// Mapping des classes CSS
+const getWarningClass = (type) => {
+    return (
+        {
+            avertissement: "bg-orange-100 text-orange-700",
+            premium: "bg-green-100 text-green-700",
+            attention: "bg-red-100 text-red-700",
+        }[type] || "bg-gray-100 text-gray-700"
+    );
+};
+
+// Mapping des textes
+const getWarningText = (type) => {
+    return (
+        {
+            avertissement:
+                "Ce prospect est identifié comme suspicieux (voir notes).",
+            premium: "Ce prospect est identifié comme premium (voir notes).",
+            attention: "Ce prospect est à éviter (voir notes).",
+        }[type] || ""
+    );
+};
 
 // Initialiser isEditingNotes et successMessages.notes
 const initializeNotesState = () => {
@@ -510,8 +554,9 @@ const deleteNote = async (noteId) => {
             (note) => note.id !== noteId
         );
         // Vérifier si l'avertissement existe encore
-        hasWarning.value = editableProspect.notes.some((note) => note.type === "avertissement");
-
+        hasWarning.value = editableProspect.notes.some(
+            (note) => note.type === "avertissement"
+        );
     } catch (error) {
         console.error("Erreur lors de la suppression de la note :", error);
     }
