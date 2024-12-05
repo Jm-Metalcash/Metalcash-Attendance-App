@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RecentView;
-use App\Models\NoteClient;
 use App\Models\Client;
 use App\Models\Prospect;
 use Illuminate\Support\Facades\Auth;
@@ -21,15 +19,7 @@ class ClientController extends Controller
 
     $client = Client::with(['notes'])->findOrFail($id);
 
-    // Log the client view
-    try {
-        RecentView::updateOrCreate(
-            ['user_id' => Auth::id(), 'client_id' => $id],
-            ['created_at' => now(), 'prospect_id' => null]
-        );
-    } catch (\Exception $e) {
-        return Inertia::render('Error', ['message' => 'Failed to log view: ' . $e->getMessage()]);
-    }
+   
 
     // Ajoute l'attribut has_warning
     $client->append('has_warning');

@@ -7,14 +7,14 @@ defineProps(["recentAddedProspects", "selectProspect", "formatDate"]);
         v-if="recentAddedProspects.length > 0"
         class="mt-0 border p-4 bg-zinc-50"
     >
-        <h3 class="text-lg font-semibold text-gray-700">
-            Nouveaux prospects et clients ajoutés
+    <h3 class="text-base font-semibold py-3 px-5 bg-[#005691] text-zinc-50">
+            Liste des derniers ajouts
         </h3>
         <div
             v-for="(prospect, index) in recentAddedProspects"
             :key="prospect.id || index"
             @click="selectProspect(prospect)"
-            class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full bg-orange-50 text-gray-700 hover:bg-orange-100 hover:text-orange-900"
+            class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full text-gray-700 hover:bg-blue-50 hover:text-blue-700"
         >
             <!-- Nom complet -->
             <div class="flex w-full sm:w-1/6 items-center">

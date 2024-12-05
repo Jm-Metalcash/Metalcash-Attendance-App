@@ -33,5 +33,16 @@ class Client extends Model
         ->exists();
 }
 
+// Dans le modèle Prospect.php et Client.php
+public function getLastImportantNoteAttribute()
+{
+    $importantNotes = $this->notes()
+        ->whereIn('type', ['premium', 'avertissement', 'attention'])
+        ->orderBy('note_date', 'desc')
+        ->first();
+
+    return $importantNotes ? $importantNotes->type : null;
+}
+
 
 }

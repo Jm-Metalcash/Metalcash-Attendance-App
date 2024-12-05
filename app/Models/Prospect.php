@@ -32,12 +32,15 @@ class Prospect extends Model
         });
     }
 
-    protected $appends = ['has_warning'];
-
-    // Retourne true si le prospect a des notes de type avertissement
-    public function getHasWarningAttribute()
+    // Dans le modèle Prospect.php et Client.php
+    public function getLastImportantNoteAttribute()
     {
-        return $this->notes()->where('type', 'avertissement')->exists();
+        $importantNotes = $this->notes()
+            ->whereIn('type', ['premium', 'avertissement', 'attention'])
+            ->orderBy('note_date', 'desc')
+            ->first();
+
+        return $importantNotes ? $importantNotes->type : null;
     }
 
     // Relation avec la table notes
@@ -45,7 +48,7 @@ class Prospect extends Model
     {
         return $this->hasMany(NoteProspect::class);
     }
-    
+
 
     public function recentViews()
     {
@@ -66,5 +69,4 @@ class Prospect extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-    
 }

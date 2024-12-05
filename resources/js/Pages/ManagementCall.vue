@@ -5,7 +5,6 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import ProspectDetails from "./ManagementCall/Partials/ProspectDetails.vue";
 import ClientDetails from "./ManagementCall/Partials/ClientDetails.vue";
-import RecentUser from "./ManagementCall/Partials/RecentUser.vue";
 import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
 import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
@@ -102,20 +101,9 @@ const filteredResults = computed(() => {
     return [...prospectsResults, ...clientsResults].slice(0, 5); // Limite à 5 résultats
 });
 
-// Liste pour stocker les 5 derniers prospects consultés
-const recentProspects = ref([]);
 
 // Charger les derniers prospects consultés lors du montage
 onMounted(() => {
-    axios.get("/recent-views").then((response) => {
-        recentProspects.value = response.data.map((view) => ({
-            ...view.prospect,
-            type: view.prospect_type || "prospect",
-            viewedBy: view.viewedBy || "Inconnu",
-            viewedAt: view.viewedAt || "Date inconnue",
-        }));
-    });
-
     if (props.selectedProspect) {
         selectedItem.value = props.selectedProspect;
     } else if (props.selectedClient) {
@@ -130,7 +118,6 @@ watch(
         selectedProspect.value = newSelectedProspect;
     }
 );
-
 
 // Fonction pour sélectionner un prospect
 const selectItem = (item) => {
@@ -230,34 +217,26 @@ const recentAddedProspects = computed(() => {
 
 // Les 10 derniers prospects modifiés
 const recentModifiedProspects = computed(() => {
-    const mappedProspects = prospects.value
-        .filter(
-            (prospect) =>
-                prospect.updated_at &&
-                prospect.created_at &&
-                new Date(prospect.updated_at) > new Date(prospect.created_at)
-        )
-        .map((prospect) => ({
-            ...prospect,
-            type: "prospect", // Ajouter le type prospect
-        }));
+    const mapWithLastNote = (list, type) =>
+        list
+            .filter(
+                (item) =>
+                    item.updated_at &&
+                    item.created_at &&
+                    new Date(item.updated_at) > new Date(item.created_at)
+            )
+            .map((item) => ({
+                ...item,
+                type,
+                lastImportantNote: item.last_important_note, // Ajout du dernier statut important
+            }));
 
-    const mappedClients = clients.value
-        .filter(
-            (client) =>
-                client.updated_at &&
-                client.created_at &&
-                new Date(client.updated_at) > new Date(client.created_at)
-        )
-        .map((client) => ({
-            ...client,
-            type: "client", // Ajouter le type client
-        }));
-
-    // Fusionner les deux listes et trier par date de modification
-    return [...mappedProspects, ...mappedClients]
+    return [
+        ...mapWithLastNote(prospects.value, "prospect"),
+        ...mapWithLastNote(clients.value, "client"),
+    ]
         .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-        .slice(0, 10); // Limiter à 10 résultats
+        .slice(0, 10);
 });
 
 // Fonction pour formater les dates
@@ -272,7 +251,6 @@ const formatDate = (date) => {
         minute: "2-digit",
     });
 };
-
 </script>
 
 <template>
@@ -377,12 +355,7 @@ const formatDate = (date) => {
                                     v-if="!searchTerm"
                                     class="client-manage-panel"
                                 >
-                                    <!-- Affichage des derniers prospects consultés -->
-                                    <!-- <RecentUser
-                                        v-if="recentProspects.length > 0"
-                                        :recentProspects="recentProspects"
-                                        :selectProspect="selectItem"
-                                    /> -->
+                                
 
                                     <!-- PANEL ADMIN -->
                                     <div
@@ -398,15 +371,6 @@ const formatDate = (date) => {
                                         "
                                         class="admin-panel-clients"
                                     >
-                                        <h2
-                                            class="mt-20 text-xl p-2 font-bold w-full bg-[rgb(0,86,146)] text-white"
-                                        >
-                                            <i
-                                                class="fa-solid fa-lock pl-2 pr-1"
-                                            ></i>
-                                            Administration
-                                        </h2>
-
                                         <!-- Affiche les 10 derniers prospects modifiés -->
                                         <RecentModifiedUser
                                             :recentModifiedProspects="
@@ -417,6 +381,7 @@ const formatDate = (date) => {
                                         />
                                         <!-- Affiche les 20 derniers prospects ajoutés -->
                                         <RecentAddedUser
+                                            class="mt-12"
                                             :recentAddedProspects="
                                                 recentAddedProspects
                                             "
