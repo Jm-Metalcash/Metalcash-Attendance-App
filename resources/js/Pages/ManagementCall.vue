@@ -378,11 +378,11 @@ const formatDate = (date) => {
                                     class="client-manage-panel"
                                 >
                                     <!-- Affichage des derniers prospects consultés -->
-                                    <RecentUser
+                                    <!-- <RecentUser
                                         v-if="recentProspects.length > 0"
                                         :recentProspects="recentProspects"
                                         :selectProspect="selectItem"
-                                    />
+                                    /> -->
 
                                     <!-- PANEL ADMIN -->
                                     <div
@@ -407,19 +407,18 @@ const formatDate = (date) => {
                                             Administration
                                         </h2>
 
-                                        <!-- Affiche les 20 derniers prospects ajoutés -->
-                                        <RecentAddedUser
-                                            :recentAddedProspects="
-                                                recentAddedProspects
-                                            "
-                                            :selectProspect="selectItem"
-                                            :formatDate="formatDate"
-                                        />
-
                                         <!-- Affiche les 10 derniers prospects modifiés -->
                                         <RecentModifiedUser
                                             :recentModifiedProspects="
                                                 recentModifiedProspects
+                                            "
+                                            :selectProspect="selectItem"
+                                            :formatDate="formatDate"
+                                        />
+                                        <!-- Affiche les 20 derniers prospects ajoutés -->
+                                        <RecentAddedUser
+                                            :recentAddedProspects="
+                                                recentAddedProspects
                                             "
                                             :selectProspect="selectItem"
                                             :formatDate="formatDate"

@@ -25,6 +25,7 @@
 
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
+            <h1 class="font-bold text-sm text-gray-600 py-3 px-3">Notes relatives à {{ editableClient.firstName  }} {{ editableClient.familyName  }}</h1>
             <div v-if="editableClient.notes && editableClient.notes.length > 0">
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">

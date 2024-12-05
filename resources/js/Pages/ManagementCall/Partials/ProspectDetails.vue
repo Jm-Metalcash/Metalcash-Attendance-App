@@ -25,6 +25,7 @@
 
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
+            <h1 class="font-bold text-sm text-gray-600 py-3 px-3">Notes relatives à {{ editableProspect.firstName  }} {{ editableProspect.familyName  }}</h1>
             <div
                 v-if="
                     editableProspect.notes && editableProspect.notes.length > 0
