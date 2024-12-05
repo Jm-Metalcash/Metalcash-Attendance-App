@@ -92,7 +92,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
 
     //Gestion des notes pour les clients
-    Route::post('/clients/{id}/notes', [NoteClientController::class, 'storeNote']);
+    Route::post('/clients/{client}/notes', [NoteClientController::class, 'store'])->name('clients.notes.store');
     Route::put('/clients/{clientId}/notes/{noteId}', [NoteClientController::class, 'updateNote']);
     Route::delete('/clients/{clientId}/notes/{noteId}', [NoteClientController::class, 'deleteNote']);
 

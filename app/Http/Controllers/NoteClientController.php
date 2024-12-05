@@ -7,35 +7,58 @@ use Illuminate\Http\Request;
 use App\Models\ClientsProspectsUpdate;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Client;
+use Carbon\Carbon;
+
 
 class NoteClientController extends Controller
 {
     // Ajouter une note à un client
-    public function storeNote(Request $request, $clientId)
+    public function store(Request $request, Client $client)
     {
-        $client = Client::findOrFail($clientId);
-    
         $validatedData = $request->validate([
-            'type' => 'required|string|max:255',
-            'content' => 'nullable|string',
+            'content' => 'nullable|string|max:1000',
             'note_date' => 'nullable|date',
+            'type' => 'required|string|in:information,avertissement,premium,attention',
         ]);
-    
-        $validatedData['client_id'] = $client->id;
-        $validatedData['user_id'] = Auth::id();
-    
-        $note = NoteClient::create($validatedData);
-    
-        // Enregistrer la mise à jour dans clients_prospects_update
+
+        // Convertir la date si nécessaire
+        if (!empty($validatedData['note_date'])) {
+            $validatedData['note_date'] = Carbon::parse($validatedData['note_date'])->setTimezone('Europe/Paris');
+        } else {
+            $validatedData['note_date'] = Carbon::now()->setTimezone('Europe/Paris');
+        }
+
+        // Créer une note uniquement si `content` est renseigné
+        if (!empty($validatedData['content'])) {
+            $note = $client->notes()->create($validatedData);
+
+            // Enregistrer la mise à jour dans clients_prospects_update
+            ClientsProspectsUpdate::create([
+                'updatable_type' => Client::class,
+                'updatable_id' => $client->id,
+                'user_id' => Auth::id(),
+                'action' => 'note_added',
+            ]);
+
+            return response()->json([
+                'id' => $note->id,
+                'content' => $note->content,
+                'note_date' => $note->note_date->format('Y-m-d\TH:i:s'),
+                'type' => $note->type,
+            ]);
+        }
+
+        // Si le contenu est vide, enregistrer quand même la mise à jour
         ClientsProspectsUpdate::create([
             'updatable_type' => Client::class,
             'updatable_id' => $client->id,
             'user_id' => Auth::id(),
             'action' => 'note_added',
         ]);
-    
-        return response()->json($note);
+
+        return response()->json(['message' => 'Note non créée car le contenu est vide'], 200);
     }
+
 
     // Modifier une note d'un client
     public function updateNote(Request $request, $clientId, $noteId)
