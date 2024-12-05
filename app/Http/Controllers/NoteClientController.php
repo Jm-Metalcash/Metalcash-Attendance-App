@@ -4,29 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\NoteClient;
 use Illuminate\Http\Request;
+use App\Models\ClientsProspectsUpdate;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Client;
 
 class NoteClientController extends Controller
 {
     // Ajouter une note à un client
-    public function storeNote(Request $request, $id)
+    public function storeNote(Request $request, $clientId)
     {
-        $validated = $request->validate([
-            'content' => 'required|string|max:500', // Limite la longueur du contenu
-            'type' => 'required|string|in:information,avertissement,premium,attention',
+        $client = Client::findOrFail($clientId);
+    
+        $validatedData = $request->validate([
+            'type' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'note_date' => 'nullable|date',
         ]);
-
-        try {
-            $note = NoteClient::create([
-                'client_id' => $id,
-                'content' => $validated['content'],
-                'type' => $validated['type'],
-                'note_date' => now(),
-            ]);
-
-            return response()->json($note, 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create note: ' . $e->getMessage()], 500);
-        }
+    
+        $validatedData['client_id'] = $client->id;
+        $validatedData['user_id'] = Auth::id();
+    
+        $note = NoteClient::create($validatedData);
+    
+        // Enregistrer la mise à jour dans clients_prospects_update
+        ClientsProspectsUpdate::create([
+            'updatable_type' => Client::class,
+            'updatable_id' => $client->id,
+            'user_id' => Auth::id(),
+            'action' => 'note_added',
+        ]);
+    
+        return response()->json($note);
     }
 
     // Modifier une note d'un client

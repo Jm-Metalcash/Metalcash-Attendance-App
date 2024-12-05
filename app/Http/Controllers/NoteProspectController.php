@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\NoteProspect;
 use App\Models\Prospect;
 use Illuminate\Http\Request;
+use App\Models\ClientsProspectsUpdate;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class NoteProspectController extends Controller
@@ -43,10 +45,6 @@ class NoteProspectController extends Controller
         if (!empty($validatedData['content'])) {
             $note = $prospect->notes()->create($validatedData);
 
-            // Si la note est un avertissement, mettre à jour le blacklist
-            if ($validatedData['type'] === 'avertissement') {
-                $prospect->update(['blacklist' => 1]);
-            }
 
             return response()->json([
                 'id' => $note->id,
@@ -55,6 +53,14 @@ class NoteProspectController extends Controller
                 'type' => $note->type
             ]);
         }
+
+        // Enregistrer la mise à jour dans clients_prospects_update
+        ClientsProspectsUpdate::create([
+            'updatable_type' => Prospect::class,
+            'updatable_id' => $prospect->id,
+            'user_id' => Auth::id(),
+            'action' => 'note_added',
+        ]);
 
         return response()->json(['message' => 'Note not created as content is empty'], 200);
     }
