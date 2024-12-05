@@ -88,7 +88,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
 
 
     // Gestion des appels téléphoniques pour les clients
-    Route::get('/gestion-appels-telephoniques/client/{id?}', [ClientController::class, 'showClient'])->name('management-call.client');
+    Route::get('/gestion-appels-telephoniques/client/{id?}', [ClientController::class, 'show'])->name('management-call.client');
     Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
 
     //Gestion des notes pour les clients

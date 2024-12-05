@@ -6,13 +6,14 @@ const getNoteClass = (noteType) => {
         avertissement: "bg-orange-100 text-orange-700",
         premium: "bg-green-100 text-green-700",
         attention: "bg-red-100 text-red-700",
+        information: "bg-blue-100 text-blue-700",
     }[noteType] || "bg-gray-50 text-gray-700";
 };
 </script>
 
 <template>
     <div
-        v-if="recentModifiedProspects.length > 0"
+        v-if="recentModifiedProspects && recentModifiedProspects.length > 0"
         class="mt-8 border p-4 bg-zinc-50"
     >
         <h3 class="text-base font-semibold py-3 px-5 bg-[#005691] text-zinc-50">
@@ -20,7 +21,7 @@ const getNoteClass = (noteType) => {
         </h3>
         <div
             v-for="(prospect, index) in recentModifiedProspects"
-            :key="prospect.id || index"
+            :key="prospect.id + '-' + prospect.type"
             @click="selectProspect(prospect)"
             :class="[
                 'text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full',
@@ -63,10 +64,10 @@ const getNoteClass = (noteType) => {
             <div class="text-xs w-full sm:w-1/6">
                 Modifié par : <br />
                 <span class="font-bold text-xs mr-2">
-                    {{ prospect.updated_by?.name || "Inconnu" }}
+                    {{ prospect.last_modifier || "Inconnu" }}
                 </span>
                 <span class="font-bold text-xs">
-                    {{ formatDate(prospect.updated_at) }}
+                    {{ formatDate(prospect.modified_at) }}
                 </span>
             </div>
         </div>

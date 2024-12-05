@@ -6,32 +6,129 @@ use App\Models\Prospect;
 use App\Models\Client;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\ClientsProspectsUpdate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ProspectController extends Controller
 {
     // Affiche la liste des prospects avec leurs transactions et notes
     public function index($prospectId = null)
     {
-        // Charger les prospects avec les relations nécessaires
-        $prospects = Prospect::with([
-            'createdBy:id,name',
-            'updatedBy:id,name',
-            'notes' => function ($query) {
-                $query->select('id', 'prospect_id', 'type', 'note_date')
-                    ->whereIn('type', ['premium', 'avertissement', 'attention'])
-                    ->orderBy('note_date', 'desc');
+        // Récupérer les dernières modifications depuis clients_prospects_update
+        $recentUpdates = ClientsProspectsUpdate::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(10) // Limiter à 10 modifications
+            ->get();
+
+        // Collecter les IDs des prospects et clients modifiés récemment
+        $prospectIds = [];
+        $clientIds = [];
+        foreach ($recentUpdates as $update) {
+            if ($update->updatable_type == Prospect::class) {
+                $prospectIds[] = $update->updatable_id;
+            } elseif ($update->updatable_type == Client::class) {
+                $clientIds[] = $update->updatable_id;
             }
+        }
+        $prospectIds = array_unique($prospectIds);
+        $clientIds = array_unique($clientIds);
+
+        // Charger les prospects modifiés récemment
+        $recentProspects = Prospect::with([
+            'lastImportantNote:id,prospect_id,type',
         ])
-            ->select('id', 'firstName', 'familyName', 'phone', 'country', 'created_at', 'updated_at')
+            ->select('id', 'firstName', 'familyName', 'phone', 'country')
+            ->whereIn('id', $prospectIds)
             ->get();
 
         // Ajouter last_important_note à chaque prospect
-        $prospects->each(function ($prospect) {
-            $prospect->last_important_note = $prospect->notes->first()?->type;
+        $recentProspects->each(function ($prospect) {
+            $prospect->last_important_note = $prospect->lastImportantNote?->type;
         });
 
+        // Charger les clients modifiés récemment
+        $recentClients = Client::with([
+            'lastImportantNote:id,client_id,type',
+        ])
+            ->select('id', 'firstName', 'familyName', 'phone', 'country')
+            ->whereIn('id', $clientIds)
+            ->get();
+
+        // Ajouter last_important_note à chaque client
+        $recentClients->each(function ($client) {
+            $client->last_important_note = $client->lastImportantNote?->type;
+        });
+
+        // Créer des mappings pour un accès rapide
+        $prospectMap = $recentProspects->keyBy('id');
+        $clientMap = $recentClients->keyBy('id');
+
+        // Construire la liste des éléments modifiés récemment
+        $recentModifiedItems = [];
+
+        foreach ($recentUpdates as $update) {
+            if ($update->updatable_type == Prospect::class) {
+                $prospect = $prospectMap->get($update->updatable_id);
+
+                if ($prospect) {
+                    $recentModifiedItems[] = [
+                        'id' => $prospect->id,
+                        'firstName' => $prospect->firstName,
+                        'familyName' => $prospect->familyName,
+                        'phone' => $prospect->phone,
+                        'country' => $prospect->country,
+                        'type' => 'prospect',
+                        'last_modifier' => $update->user->name ?? 'Inconnu',
+                        'modified_at' => $update->created_at,
+                        'lastImportantNote' => $prospect->last_important_note,
+                    ];
+                }
+            } elseif ($update->updatable_type == Client::class) {
+                $client = $clientMap->get($update->updatable_id);
+
+                if ($client) {
+                    $recentModifiedItems[] = [
+                        'id' => $client->id,
+                        'firstName' => $client->firstName,
+                        'familyName' => $client->familyName,
+                        'phone' => $client->phone,
+                        'country' => $client->country,
+                        'type' => 'client',
+                        'last_modifier' => $update->user->name ?? 'Inconnu',
+                        'modified_at' => $update->created_at,
+                        'lastImportantNote' => $client->last_important_note,
+                    ];
+                }
+            }
+        }
+
+        // Supprimer les doublons
+        $recentModifiedItems = collect($recentModifiedItems)->unique(function ($item) {
+            return $item['id'] . '-' . $item['type'];
+        })->values();
+
+        // Charger tous les prospects (limiter ou paginer si nécessaire)
+        $prospects = Prospect::with([
+            'lastImportantNote:id,prospect_id,type',
+            'createdBy:id,name',
+        ])
+            ->select('id', 'firstName', 'familyName', 'phone', 'country', 'created_by', 'created_at')
+            ->get();
+
+        $prospects->each(function ($prospect) {
+            $prospect->last_important_note = $prospect->lastImportantNote?->type;
+        });
+
+        // Charger tous les clients (limiter ou paginer si nécessaire)
+        $clients = Client::with([
+            'lastImportantNote:id,client_id,type',
+        ])
+            ->select('id', 'firstName', 'familyName', 'phone', 'country')
+            ->get();
+
+        $clients->each(function ($client) {
+            $client->last_important_note = $client->lastImportantNote?->type;
+        });
 
         // Charger le prospect sélectionné si un ID est fourni
         $selectedProspect = null;
@@ -39,12 +136,10 @@ class ProspectController extends Controller
             $selectedProspect = Prospect::with([
                 'notes' => function ($query) {
                     $query->select('id', 'prospect_id', 'type', 'content', 'note_date')
-                        ->whereIn('type', ['premium', 'avertissement', 'attention'])
+                        ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
                         ->latest('note_date');
                 },
                 'bordereauHistoriques.informations',
-                'createdBy:id,name',
-                'updatedBy:id,name',
             ])
                 ->select('id', 'firstName', 'familyName', 'phone', 'country', 'locality', 'created_at', 'updated_at')
                 ->find($prospectId);
@@ -52,16 +147,17 @@ class ProspectController extends Controller
             if (!$selectedProspect) {
                 return redirect()->route('management-call')->withErrors('Prospect introuvable.');
             }
-
         }
 
         return Inertia::render('ManagementCall', [
             'prospects' => $prospects,
-            'clients' => Client::all(),
+            'clients' => $clients,
             'currentUser' => Auth::user(),
             'selectedProspect' => $selectedProspect,
+            'recentModifiedItems' => $recentModifiedItems,
         ]);
     }
+
 
 
 
@@ -75,7 +171,7 @@ class ProspectController extends Controller
         $prospect = Prospect::with([
             'notes' => function ($query) {
                 $query->select('id', 'prospect_id', 'type', 'content', 'note_date')
-                    ->whereIn('type', ['avertissement', 'premium', 'attention'])
+                    ->whereIn('type', ['information', 'avertissement', 'premium', 'attention'])
                     ->latest('note_date');
             },
             'bordereauHistoriques.informations',
@@ -123,6 +219,14 @@ class ProspectController extends Controller
         $prospect = Prospect::findOrFail($id);
         $prospect->update($validatedData);
 
+        // Enregistrer la mise à jour dans la table clients_prospects_update
+        ClientsProspectsUpdate::create([
+            'updatable_type' => Prospect::class,
+            'updatable_id' => $prospect->id,
+            'user_id' => Auth::id(),
+            'action' => 'updated',
+        ]);
+
         return response()->json($prospect);
     }
 
@@ -160,5 +264,16 @@ class ProspectController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Erreur lors de la création du prospect: ' . $e->getMessage()], 500);
         }
+
+        // Après la création du prospect
+        $prospect = Prospect::create($validatedData);
+
+        // Enregistrer la création dans la table clients_prospects_update
+        ClientsProspectsUpdate::create([
+            'updatable_type' => Prospect::class,
+            'updatable_id' => $prospect->id,
+            'user_id' => Auth::id(),
+            'action' => 'created',
+        ]);
     }
 }

@@ -32,29 +32,29 @@ class Prospect extends Model
         });
     }
 
-    // Dans le modèle Prospect.php et Client.php
-    public function getLastImportantNoteAttribute()
-    {
-        $importantNotes = $this->notes()
-            ->whereIn('type', ['premium', 'avertissement', 'attention'])
-            ->orderBy('note_date', 'desc')
-            ->first();
-
-        return $importantNotes ? $importantNotes->type : null;
-    }
-
-    // Relation avec la table notes
+    // Relation avec les notes du prospect
     public function notes()
     {
         return $this->hasMany(NoteProspect::class);
     }
 
-
-    public function recentViews()
+    // Relation pour la dernière note importante
+    public function lastImportantNote()
     {
-        return $this->hasMany(RecentView::class);
+        return $this->hasOne(NoteProspect::class, 'prospect_id')
+            ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
+            ->latest('note_date');
     }
 
+    // Accesseur pour l'attribut has_warning
+    public function getHasWarningAttribute()
+    {
+        return $this->notes()
+            ->whereIn('type', ['avertissement', 'premium', 'attention'])
+            ->exists();
+    }
+
+    // Relations supplémentaires
     public function bordereauHistoriques()
     {
         return $this->hasMany(BordereauHistorique::class);
@@ -68,5 +68,11 @@ class Prospect extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    // Relation avec les mises à jour
+    public function updates()
+    {
+        return $this->morphMany(ClientsProspectsUpdate::class, 'updatable');
     }
 }

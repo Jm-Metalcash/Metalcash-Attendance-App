@@ -17,32 +17,33 @@ class Client extends Model
         'country',
     ];
 
+    public $timestamps = true;
 
+    // Relation avec les notes du client
     public function notes()
     {
         return $this->hasMany(NoteClient::class);
     }
 
+    // Relation pour la dernière note importante
+    public function lastImportantNote()
+    {
+        return $this->hasOne(NoteClient::class, 'client_id')
+            ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
+            ->latest('note_date');
+    }
 
-    // Déterminer si un client a une note d'avertissement
+    // Accesseur pour l'attribut has_warning
     public function getHasWarningAttribute()
-{
-    // Vérifie si le client a au moins une note avec un des types spécifiés
-    return $this->notes()
-        ->whereIn('type', ['avertissement', 'premium', 'attention'])
-        ->exists();
-}
+    {
+        return $this->notes()
+            ->whereIn('type', ['avertissement', 'premium', 'attention'])
+            ->exists();
+    }
 
-// Dans le modèle Prospect.php et Client.php
-public function getLastImportantNoteAttribute()
-{
-    $importantNotes = $this->notes()
-        ->whereIn('type', ['premium', 'avertissement', 'attention'])
-        ->orderBy('note_date', 'desc')
-        ->first();
-
-    return $importantNotes ? $importantNotes->type : null;
-}
-
-
+    // Relation avec les mises à jour
+    public function updates()
+    {
+        return $this->morphMany(ClientsProspectsUpdate::class, 'updatable');
+    }
 }

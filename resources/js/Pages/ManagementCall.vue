@@ -20,6 +20,7 @@ const props = defineProps([
     "currentUser",
     "selectedProspect",
     "selectedClient",
+    "recentModifiedItems",
 ]);
 
 // Les données des prospects à partir des props
@@ -27,6 +28,9 @@ const prospects = ref(props.prospects);
 
 // Données des clients à partir des props
 const clients = ref(props.clients);
+
+// Liste des dernières modifications
+const recentModifiedProspects = ref(props.recentModifiedItems);
 
 // Terme de recherche
 const searchTerm = ref("");
@@ -100,7 +104,6 @@ const filteredResults = computed(() => {
 
     return [...prospectsResults, ...clientsResults].slice(0, 5); // Limite à 5 résultats
 });
-
 
 // Charger les derniers prospects consultés lors du montage
 onMounted(() => {
@@ -195,48 +198,17 @@ const updateProspectInList = (updatedProspect) => {
 
 // Les 10 derniers prospects ajoutés
 const recentAddedProspects = computed(() => {
-    const mappedProspects = prospects.value
+    return prospects.value
         .filter((prospect) => prospect.created_at)
         .map((prospect) => ({
             ...prospect,
             type: "prospect", // Ajouter le type prospect
-        }));
-
-    const mappedClients = clients.value
-        .filter((client) => client.created_at)
-        .map((client) => ({
-            ...client,
-            type: "client", // Ajouter le type client
-        }));
-
-    // Fusionner les deux listes et trier par date de création
-    return [...mappedProspects, ...mappedClients]
+            created_by_name: prospect.created_by
+                ? prospect.created_by.name
+                : null,
+        }))
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 10); // Limiter à 20 résultats
-});
-
-// Les 10 derniers prospects modifiés
-const recentModifiedProspects = computed(() => {
-    const mapWithLastNote = (list, type) =>
-        list
-            .filter(
-                (item) =>
-                    item.updated_at &&
-                    item.created_at &&
-                    new Date(item.updated_at) > new Date(item.created_at)
-            )
-            .map((item) => ({
-                ...item,
-                type,
-                lastImportantNote: item.last_important_note, // Ajout du dernier statut important
-            }));
-
-    return [
-        ...mapWithLastNote(prospects.value, "prospect"),
-        ...mapWithLastNote(clients.value, "client"),
-    ]
-        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-        .slice(0, 10);
+        .slice(0, 10); // Limiter à 10 résultats
 });
 
 // Fonction pour formater les dates
@@ -355,22 +327,8 @@ const formatDate = (date) => {
                                     v-if="!searchTerm"
                                     class="client-manage-panel"
                                 >
-                                
-
                                     <!-- PANEL ADMIN -->
-                                    <div
-                                        v-if="
-                                            recentAddedProspects.length > 0 &&
-                                            page.props.auth.roles &&
-                                            (page.props.auth.roles.includes(
-                                                'Admin'
-                                            ) ||
-                                                page.props.auth.roles.includes(
-                                                    'Informatique'
-                                                ))
-                                        "
-                                        class="admin-panel-clients"
-                                    >
+                                    <div class="admin-panel-clients">
                                         <!-- Affiche les 10 derniers prospects modifiés -->
                                         <RecentModifiedUser
                                             :recentModifiedProspects="
