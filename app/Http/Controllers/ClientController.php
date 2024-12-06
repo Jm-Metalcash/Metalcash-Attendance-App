@@ -18,10 +18,8 @@ class ClientController extends Controller
             return response()->json(['error' => 'Client ID is missing'], 400);
         }
 
-        $client = Client::with(['notes'])->findOrFail($id);
-
-
-
+        $client = Client::with(['notes','notes.creator', 'notes.updater'])->findOrFail($id);
+        
         // Ajoute l'attribut has_warning
         $client->append('has_warning');
 

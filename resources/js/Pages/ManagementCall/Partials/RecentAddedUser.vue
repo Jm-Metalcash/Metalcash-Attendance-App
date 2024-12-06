@@ -35,15 +35,21 @@ const getUserName = (item) => {
 
             <!-- Numéro de téléphone -->
             <div class="flex w-full sm:w-1/6">
-                <div class="font-medium text-left ml-6 md:ml-0">
-                    {{ prospect.phone || "Non disponible" }}
+                <div v-if="prospect.phone != null" class="text-sm font-medium text-left ml-6 md:ml-0">
+                    {{ prospect.phone }}
+                </div>
+                <div v-else class="font-medium text-left ml-6 md:ml-0 opacity-60">
+                    Aucun numéro de téléphone
                 </div>
             </div>
 
             <!-- Pays -->
             <div class="flex w-full sm:w-1/6">
-                <div class="text-sm font-normal text-left ml-6 md:ml-0">
-                    {{ prospect.country || "Non disponible" }}
+                <div v-if="prospect.country != null" class="text-sm font-normal text-left ml-6 md:ml-0">
+                    {{ prospect.country }}
+                </div>
+                <div v-else class="text-sm font-normal text-left ml-6 md:ml-0 opacity-60">
+                    Aucun pays enregistré
                 </div>
             </div>
 

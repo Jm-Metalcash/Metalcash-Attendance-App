@@ -1,3 +1,4 @@
+Enregistre comme ceci :
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
         <!-- Section type de notes -->
@@ -32,21 +33,42 @@
             <div v-if="editableClient.notes && editableClient.notes.length > 0">
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
+                    <table
+                        class="min-w-full bg-white border-collapse border border-gray-300 rounded-lg shadow-md"
+                    >
                         <thead>
-                            <tr class="bg-gray-200">
+                            <tr class="bg-gray-100">
+                                <!-- Date -->
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/5"
+                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-2/12"
                                 >
                                     Date
                                 </th>
+
+                                <!-- Contenu de la note -->
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-3/5"
+                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-6/12"
                                 >
                                     Note
                                 </th>
+
+                                <!-- Créateur -->
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/5"
+                                    class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12"
+                                >
+                                    Ajouté par
+                                </th>
+
+                                <!-- Modificateur -->
+                                <th
+                                    class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12"
+                                >
+                                    Modifié par
+                                </th>
+
+                                <!-- Action -->
+                                <th
+                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-1/12"
                                 ></th>
                             </tr>
                         </thead>
@@ -59,26 +81,31 @@
                                 :key="note.id"
                                 :class="
                                     note.type === 'avertissement'
-                                        ? 'bg-orange-100 text-orange-700'
+                                        ? 'bg-orange-50 text-orange-800'
                                         : note.type === 'premium'
-                                        ? 'bg-green-100 text-green-700'
+                                        ? 'bg-green-50 text-green-800'
                                         : note.type === 'attention'
-                                        ? 'bg-red-100 text-red-700'
-                                        : 'bg-gray-50 text-gray-700'
+                                        ? 'bg-red-50 text-red-800'
+                                        : 'bg-gray-50 text-gray-800'
                                 "
                             >
+                                <!-- Date -->
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left w-1/6"
+                                    class="py-3 px-5 border text-sm text-left align-top w-1/12"
                                 >
-                                    {{ formatDateTime(note.note_date) }}
+                                    <span class="block font-medium">
+                                        {{ formatDateTime(note.note_date) }}
+                                    </span>
                                 </td>
+
+                                <!-- Contenu de la note -->
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left w-5/6"
+                                    class="py-3 px-5 border-b text-sm text-left align-top w-6/12"
                                 >
                                     <span
                                         v-if="!isEditingNotes[note.id]"
                                         @click="editNote(note.id)"
-                                        class="editable-text cursor-pointer"
+                                        class="editable-text cursor-pointer hover:text-gray-600"
                                     >
                                         {{ note.content }}
                                     </span>
@@ -91,19 +118,42 @@
                                     ></textarea>
                                     <p
                                         v-if="successMessages.notes[note.id]"
-                                        class="text-green-500 text-xs relative mt-1 success-message"
+                                        class="text-green-500 text-xs mt-1 success-message"
                                     >
                                         Enregistré avec succès
                                     </p>
                                 </td>
 
+                                <!-- Créateur -->
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left w-1/5"
+                                    class="py-3 px-5 border text-sm text-center align-center w-2/12"
+                                >
+                                    <div>
+                                        <span class="block">{{
+                                            note.creator?.name || ""
+                                        }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Modificateur -->
+                                <td
+                                    class="py-3 px-5 border text-sm text-left align-top w-2/12"
+                                >
+                                    <div>
+                                        <span class="block text-center">{{
+                                            note.updater?.name || ""
+                                        }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Action -->
+                                <td
+                                    class="py-3 px-5 border text-sm text-left align-top w-1/12"
                                 >
                                     <button
                                         v-if="isNoteEditable(note.note_date)"
                                         @click="deleteNote(note.id)"
-                                        class="text-red-600 hover:text-red-800 font-semibold"
+                                        class="text-xs bg-red-100 text-red-700 hover:text-red-800 hover:bg-red-200 px-3 py-1 rounded-md font-semibold transition duration-200"
                                     >
                                         Supprimer
                                     </button>
@@ -111,6 +161,7 @@
                             </tr>
                         </transition-group>
                     </table>
+
                     <div class="text-center">
                         <!-- voir plus de notes -->
                         <button
@@ -592,19 +643,32 @@ const editNote = (noteId) => {
 
 const saveNote = (note) => {
     isEditingNotes[note.id] = false;
+
     axios
         .put(`/clients/${editableClient.id}/notes/${note.id}`, {
             content: note.content,
             type: note.type,
         })
-        .then(() => {
+        .then((response) => {
+            const updatedNote = response.data;
+
+            // Mettre à jour la note dans la liste
+            const index = editableClient.notes.findIndex((n) => n.id === note.id);
+            if (index !== -1) {
+                editableClient.notes[index] = updatedNote;
+            }
+
+            // Afficher un message de succès
             successMessages.notes[note.id] = true;
             setTimeout(() => {
                 successMessages.notes[note.id] = false;
             }, 3000);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error("Erreur lors de la mise à jour de la note :", error);
+        });
 };
+
 
 const deleteNote = (noteId) => {
     axios
@@ -628,8 +692,9 @@ const saveNewNote = () => {
                 type: newNote.value.type,
             })
             .then((response) => {
-                // Ajouter la nouvelle note à la liste
-                editableClient.notes.push(response.data);
+                // Ajouter la nouvelle note avec les données du créateur
+                const createdNote = response.data;
+                editableClient.notes.unshift(createdNote); // Ajoute la note au début de la liste
 
                 // Réinitialiser le formulaire
                 newNote.value = { content: "", type: "information" };

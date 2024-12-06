@@ -16,14 +16,26 @@ class NoteClient extends Model
         'content',
         'note_date',
         'status',
-        'type'
+        'type',
+        'created_by',
+        'updated_by',
     ];
 
     protected $dates = ['note_date'];
 
-    // Relation inverse avec la table clients
     public function client()
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }
+
