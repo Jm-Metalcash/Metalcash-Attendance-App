@@ -24,7 +24,14 @@ class NoteProspectController extends Controller
             'type' => 'required|string|in:information,avertissement,premium,attention',
         ]);
 
+        // Ajouter l'utilisateur qui modifie la note
+        $validatedData['updated_by'] = Auth::id();
+
+        // Mettre à jour la note
         $note->update($validatedData);
+
+        // Recharger les relations pour retourner des données complètes
+        $note->load(['creator:id,name', 'updater:id,name']);
 
         return response()->json($note);
     }
@@ -39,30 +46,28 @@ class NoteProspectController extends Controller
         ]);
 
         // Convertir la date si nécessaire
-        $validatedData['note_date'] = Carbon::parse($validatedData['note_date'])->setTimezone('Europe/Paris');
+        $validatedData['note_date'] = Carbon::parse($validatedData['note_date'] ?? now())->setTimezone('Europe/Paris');
+
+        // Ajouter l'utilisateur qui crée la note
+        $validatedData['created_by'] = Auth::id();
 
         // Créer une note uniquement si `content` est renseigné
         if (!empty($validatedData['content'])) {
             $note = $prospect->notes()->create($validatedData);
 
-
-            return response()->json([
-                'id' => $note->id,
-                'content' => $note->content,
-                'note_date' => $note->note_date->format('Y-m-d\TH:i:s'),
-                'type' => $note->type
+            // Enregistrer la mise à jour dans clients_prospects_update
+            ClientsProspectsUpdate::create([
+                'updatable_type' => Prospect::class,
+                'updatable_id' => $prospect->id,
+                'user_id' => Auth::id(),
+                'action' => 'note_added',
             ]);
+
+            // Charger les relations pour la réponse
+            $note->load(['creator:id,name', 'updater:id,name']);
+            return response()->json($note);
+          
         }
-
-        // Enregistrer la mise à jour dans clients_prospects_update
-        ClientsProspectsUpdate::create([
-            'updatable_type' => Prospect::class,
-            'updatable_id' => $prospect->id,
-            'user_id' => Auth::id(),
-            'action' => 'note_added',
-        ]);
-
-        return response()->json(['message' => 'Note not created as content is empty'], 200);
     }
 
     // Suppression d'une note

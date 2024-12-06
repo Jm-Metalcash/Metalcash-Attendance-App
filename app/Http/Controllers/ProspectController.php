@@ -111,6 +111,8 @@ class ProspectController extends Controller
         $prospects = Prospect::with([
             'lastImportantNote:id,prospect_id,type',
             'createdBy:id,name',
+            'notes.creator:id,name',
+            'notes.updater:id,name',
         ])
             ->select('id', 'firstName', 'familyName', 'phone', 'country', 'created_by', 'created_at')
             ->get();
@@ -135,7 +137,8 @@ class ProspectController extends Controller
         if ($prospectId) {
             $selectedProspect = Prospect::with([
                 'notes' => function ($query) {
-                    $query->select('id', 'prospect_id', 'type', 'content', 'note_date')
+                    $query->select('id', 'prospect_id', 'type', 'content', 'note_date', 'created_by', 'updated_by')
+                        ->with(['creator:id,name', 'updater:id,name'])
                         ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
                         ->latest('note_date');
                 },
@@ -170,7 +173,8 @@ class ProspectController extends Controller
 
         $prospect = Prospect::with([
             'notes' => function ($query) {
-                $query->select('id', 'prospect_id', 'type', 'content', 'note_date')
+                $query->select('id', 'prospect_id', 'type', 'content', 'note_date', 'created_by', 'updated_by')
+                    ->with(['creator:id,name', 'updater:id,name'])
                     ->whereIn('type', ['information', 'avertissement', 'premium', 'attention'])
                     ->latest('note_date');
             },
@@ -180,6 +184,8 @@ class ProspectController extends Controller
         ])
             ->select('id', 'firstName', 'familyName', 'phone', 'country', 'locality', 'created_at', 'updated_at')
             ->findOrFail($id);
+
+            return response()->json($prospect->notes);
 
         $latestWarning = $prospect->notes->first();
         $prospect->has_warning = !is_null($latestWarning);

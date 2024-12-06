@@ -36,21 +36,42 @@
             >
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
+                    <table
+                        class="min-w-full bg-white border-collapse border border-gray-300 rounded-lg shadow-md"
+                    >
                         <thead>
-                            <tr class="bg-gray-200">
+                            <tr class="bg-gray-100">
+                                <!-- Date -->
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-1/5"
+                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-2/12"
                                 >
                                     Date
                                 </th>
+
+                                <!-- Contenu de la note -->
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-4/5"
+                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-6/12"
                                 >
                                     Note
                                 </th>
+
+                                <!-- Créateur -->
                                 <th
-                                    class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600 w-4/5"
+                                    class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12"
+                                >
+                                    Ajouté par
+                                </th>
+
+                                <!-- Modificateur -->
+                                <th
+                                    class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12"
+                                >
+                                    Modifié par
+                                </th>
+
+                                <!-- Action -->
+                                <th
+                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-1/12"
                                 ></th>
                             </tr>
                         </thead>
@@ -61,20 +82,33 @@
                                     visibleNotesCount
                                 )"
                                 :key="note.id"
-                                :class="getNoteClass(note.type)"
+                                :class="
+                                    note.type === 'avertissement'
+                                        ? 'bg-orange-50 text-orange-800'
+                                        : note.type === 'premium'
+                                        ? 'bg-green-50 text-green-800'
+                                        : note.type === 'attention'
+                                        ? 'bg-red-50 text-red-800'
+                                        : 'bg-gray-50 text-gray-800'
+                                "
                             >
+                                <!-- Date -->
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left w-1/6"
+                                    class="py-3 px-5 border text-sm text-left align-top w-1/12"
                                 >
-                                    {{ formatDateTime(note.note_date) }}
+                                    <span class="block font-medium">
+                                        {{ formatDateTime(note.note_date) }}
+                                    </span>
                                 </td>
+
+                                <!-- Contenu de la note -->
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left w-5/6"
+                                    class="py-3 px-5 border-b text-sm text-left align-top w-6/12"
                                 >
                                     <span
                                         v-if="!isEditingNotes[note.id]"
                                         @click="editNote(note.id)"
-                                        class="editable-text cursor-pointer"
+                                        class="editable-text cursor-pointer hover:text-gray-600"
                                     >
                                         {{ note.content }}
                                     </span>
@@ -87,18 +121,38 @@
                                     ></textarea>
                                     <p
                                         v-if="successMessages.notes[note.id]"
-                                        class="text-green-500 text-xs relative mt-1 success-message"
+                                        class="text-green-500 text-xs mt-1 success-message"
                                     >
                                         Enregistré avec succès
                                     </p>
                                 </td>
+
+                                <!-- Créateur -->
                                 <td
-                                    class="py-2 px-4 border-b text-sm text-left w-1/5"
+                                    class="py-3 px-5 border text-sm text-center align-center w-2/12"
+                                >
+                                    <div>
+                                        <span class="block">{{ note.creator?.name || 'Non défini' }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Modificateur -->
+                                <td
+                                    class="py-3 px-5 border text-sm text-left align-top w-2/12"
+                                >
+                                    <div>
+                                        <span class="block text-center">{{ note.updater?.name || 'Non défini' }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Action -->
+                                <td
+                                    class="py-3 px-5 border text-sm text-left align-top w-1/12"
                                 >
                                     <button
                                         v-if="isNoteEditable(note.note_date)"
                                         @click="deleteNote(note.id)"
-                                        class="text-red-600 hover:text-red-800 font-semibold"
+                                        class="text-xs bg-red-100 text-red-700 hover:text-red-800 hover:bg-red-200 px-3 py-1 rounded-md font-semibold transition duration-200"
                                     >
                                         Supprimer
                                     </button>
@@ -436,17 +490,19 @@ const successMessages = reactive({
     notes: [],
 });
 
-// Fonction pour obtenir les classes CSS basées sur le type de la note
-const getNoteClass = (type) => {
-    return (
-        {
-            avertissement: "bg-orange-100 text-orange-700",
-            premium: "bg-green-100 text-green-700",
-            attention: "bg-red-100 text-red-700",
-            information: "bg-gray-50 text-gray-700",
-        }[type] || "bg-gray-50 text-gray-700"
+
+const updateLatestWarningType = () => {
+    const importantNotes = editableProspect.notes.filter((note) =>
+        ["avertissement", "premium", "attention"].includes(note.type)
     );
+
+    // Met à jour `latestWarningType`
+    latestWarningType.value =
+        importantNotes.length > 0
+            ? importantNotes[importantNotes.length - 1].type
+            : null;
 };
+
 
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
@@ -593,14 +649,21 @@ const saveNote = (note) => {
             type: note.type,
         })
         .then((response) => {
+            const updatedNote = response.data;
+
+            // Trouver l'index de la note mise à jour
             const index = editableProspect.notes.findIndex(
                 (n) => n.id === note.id
             );
+
             if (index !== -1) {
-                editableProspect.notes[index] = response.data;
+                // Mettre à jour la note avec toutes ses relations (creator, updater)
+                editableProspect.notes[index] = updatedNote;
             }
 
-            // Afficher le message de succès pour cette note
+            updateLatestWarningType();
+
+            // Afficher un message de succès pour cette note
             successMessages.notes[note.id] = true;
             setTimeout(() => {
                 successMessages.notes[note.id] = false;
@@ -610,6 +673,7 @@ const saveNote = (note) => {
             console.error("Erreur lors de la mise à jour de la note :", error);
         });
 };
+
 
 // Ajout de nouvelles notes
 const showAddNoteSuccess = ref(false);
@@ -633,13 +697,12 @@ const saveNewNote = () => {
                 type: newNote.value.type, // Envoie le type de la note
             })
             .then((response) => {
-                editableProspect.notes.push({
-                    id: response.data.id,
-                    content: newNote.value.content,
-                    note_date: now,
-                    type: newNote.value.type, // Ajoute le type de la note
-                });
+                const newSavedNote = response.data; // La note renvoyée par le backend
 
+                // Ajouter la nouvelle note à la liste avec toutes ses relations
+                editableProspect.notes.unshift(newSavedNote);
+
+                // Mise à jour de la blacklist si nécessaire
                 return axios.put(`/prospects/${editableProspect.id}`, {
                     blacklist: blacklistValue,
                 });
@@ -647,8 +710,8 @@ const saveNewNote = () => {
             .then(() => {
                 editableProspect.blacklist = blacklistValue;
 
-                // Vérifier si l'avertissement existe encore
                 updateHasWarning();
+
 
                 // Émettre un événement pour informer le parent que le blacklist a été mis à jour
                 emit(
@@ -656,10 +719,12 @@ const saveNewNote = () => {
                     JSON.parse(JSON.stringify(editableProspect))
                 );
 
+                // Réinitialiser le formulaire
                 newNote.value.content = "";
                 newNote.value.type = "information"; // Réinitialiser à la valeur par défaut
                 showAddNote.value = false;
 
+                // Afficher un message de succès
                 showAddNoteSuccess.value = true;
                 setTimeout(() => {
                     showAddNoteSuccess.value = false;
@@ -673,6 +738,7 @@ const saveNewNote = () => {
             });
     }
 };
+
 
 // Fonction pour vérifier si une note est modifiable/supprimable
 const isNoteEditable = (noteDate) => {

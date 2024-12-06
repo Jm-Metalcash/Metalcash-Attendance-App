@@ -11,13 +11,34 @@ class NoteProspect extends Model
 
     protected $table = 'notes_prospect';
 
-    protected $fillable = ['content', 'note_date', 'prospect_id', 'type'];
+    protected $fillable = [
+        'content',
+        'note_date',
+        'prospect_id',
+        'type',
+        'created_by',
+        'updated_by',
+    ];
 
     protected $dates = ['note_date'];
 
-    // Relation inverse avec la table prospects
+    /**
+     * Relation inverse avec la table prospects.
+     */
     public function prospect()
     {
         return $this->belongsTo(Prospect::class);
     }
+
+    
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+    
 }
