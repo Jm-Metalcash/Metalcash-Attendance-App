@@ -19,7 +19,7 @@ const getNoteClass = (noteType) => {
             Liste des dernières modifications
         </h3>
         <div
-            v-for="(prospect, index) in recentModifiedProspects"
+            v-for="prospect in recentModifiedProspects"
             :key="prospect.id + '-' + prospect.type"
             @click="selectProspect(prospect)"
             :class="[

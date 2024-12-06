@@ -25,7 +25,10 @@
 
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
-            <h1 class="font-bold text-sm text-gray-600 py-3 px-3">Notes relatives à {{ editableProspect.firstName  }} {{ editableProspect.familyName  }}</h1>
+            <h1 class="font-bold text-sm text-gray-600 py-3 px-3">
+                Notes relatives à {{ editableProspect.firstName }}
+                {{ editableProspect.familyName }}
+            </h1>
             <div
                 v-if="
                     editableProspect.notes && editableProspect.notes.length > 0
@@ -171,12 +174,16 @@
                         v-model="newNote.type"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                     >
-                        <option value="information">Informatif</option>
-                        <option value="premium">Prospect premium</option>
-                        <option value="avertissement">
-                            Prospect suspicieux
+                        <option value="information">Note informative</option>
+                        <option value="premium">
+                            Note pour prospect premium
                         </option>
-                        <option value="attention">Prospect à éviter</option>
+                        <option value="avertissement">
+                            Note d'avertissement
+                        </option>
+                        <option value="attention">
+                            Note pour prospect à éviter
+                        </option>
                     </select>
                     <textarea
                         v-model="newNote.content"
@@ -460,7 +467,7 @@ const getWarningText = (type) => {
     return (
         {
             avertissement:
-                "Ce prospect est identifié comme suspicieux (voir notes).",
+                "Ce prospect possède un avertissement (voir notes).",
             premium: "Ce prospect est identifié comme premium (voir notes).",
             attention: "Ce prospect est à éviter (voir notes).",
         }[type] || ""
@@ -543,7 +550,9 @@ const editNote = (noteId) => {
 };
 
 const reversedNotes = computed(() => {
-    return [...editableProspect.notes].reverse();
+    return [...editableProspect.notes].sort(
+        (a, b) => new Date(b.note_date) - new Date(a.note_date)
+    );
 });
 
 // Fonction pour supprimer une note

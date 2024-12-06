@@ -29,7 +29,7 @@ class Client extends Model
     public function lastImportantNote()
     {
         return $this->hasOne(NoteClient::class, 'client_id')
-            ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
+            ->whereIn('type', ['premium', 'avertissement', 'attention'])
             ->latest('note_date');
     }
 

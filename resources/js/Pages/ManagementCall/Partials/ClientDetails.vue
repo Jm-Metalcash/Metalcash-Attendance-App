@@ -25,7 +25,10 @@
 
         <!-- Section Notes -->
         <div class="pb-12 px-0 md:px-0">
-            <h1 class="font-bold text-sm text-gray-600 py-3 px-3">Notes relatives à {{ editableClient.firstName  }} {{ editableClient.familyName  }}</h1>
+            <h1 class="font-bold text-sm text-gray-600 py-3 px-3">
+                Notes relatives à {{ editableClient.firstName }}
+                {{ editableClient.familyName }}
+            </h1>
             <div v-if="editableClient.notes && editableClient.notes.length > 0">
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
@@ -72,7 +75,6 @@
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-5/6"
                                 >
-                                    <!-- Affichage de la note -->
                                     <span
                                         v-if="!isEditingNotes[note.id]"
                                         @click="editNote(note.id)"
@@ -80,8 +82,6 @@
                                     >
                                         {{ note.content }}
                                     </span>
-
-                                    <!-- Champ d'édition -->
                                     <textarea
                                         v-else
                                         v-model="note.content"
@@ -89,8 +89,6 @@
                                         @keydown.enter.prevent="saveNote(note)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
-
-                                    <!-- Message de succès -->
                                     <p
                                         v-if="successMessages.notes[note.id]"
                                         class="text-green-500 text-xs relative mt-1 success-message"
@@ -182,10 +180,16 @@
                         v-model="newNote.type"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                     >
-                        <option value="information">Informatif</option>
-                        <option value="premium">Client premium</option>
-                        <option value="avertissement">Client suspicieux</option>
-                        <option value="attention">Client à éviter</option>
+                        <option value="information">Note informative</option>
+                        <option value="premium">
+                            Note pour client premium
+                        </option>
+                        <option value="avertissement">
+                            Note d'avertissement
+                        </option>
+                        <option value="attention">
+                            Note pour client à éviter
+                        </option>
                     </select>
                     <textarea
                         v-model="newNote.content"
@@ -388,7 +392,7 @@ const props = defineProps({
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
     const importantNotes = editableClient.notes.filter((note) =>
-        ['avertissement', 'premium', 'attention'].includes(note.type)
+        ["avertissement", "premium", "attention"].includes(note.type)
     );
     return importantNotes.length > 0
         ? importantNotes[importantNotes.length - 1].type
@@ -397,20 +401,25 @@ const latestWarningType = computed(() => {
 
 // Fonction pour obtenir les classes CSS en fonction du type
 const getWarningClass = (type) => {
-    return {
-        avertissement: 'bg-orange-100 text-orange-700',
-        premium: 'bg-green-100 text-green-700',
-        attention: 'bg-red-100 text-red-700',
-    }[type] || 'bg-gray-100 text-gray-700';
+    return (
+        {
+            avertissement: "bg-orange-100 text-orange-700",
+            premium: "bg-green-100 text-green-700",
+            attention: "bg-red-100 text-red-700",
+        }[type] || "bg-gray-100 text-gray-700"
+    );
 };
 
 // Fonction pour obtenir le texte en fonction du type
 const getWarningText = (type) => {
-    return {
-        avertissement: 'Ce client est identifié comme suspicieux (voir notes).',
-        premium: 'Ce client est identifié comme premium (voir notes).',
-        attention: 'Ce client est à éviter (voir notes).',
-    }[type] || '';
+    return (
+        {
+            avertissement:
+                "Ce client possède un avertissement (voir notes).",
+            premium: "Ce client est identifié comme premium (voir notes).",
+            attention: "Ce client est à éviter (voir notes).",
+        }[type] || ""
+    );
 };
 
 // Émission d'événements
@@ -488,7 +497,9 @@ const newNote = ref({ content: "", type: "information" });
 
 // Computed pour inverser l'ordre des notes
 const reversedNotes = computed(() => {
-    return [...editableClient.notes].reverse();
+    return [...editableClient.notes].sort(
+        (a, b) => new Date(b.note_date) - new Date(a.note_date)
+    );
 });
 
 const editNote = (noteId) => {

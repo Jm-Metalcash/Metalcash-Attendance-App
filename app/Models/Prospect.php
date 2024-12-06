@@ -42,7 +42,7 @@ class Prospect extends Model
     public function lastImportantNote()
     {
         return $this->hasOne(NoteProspect::class, 'prospect_id')
-            ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
+            ->whereIn('type', ['premium', 'avertissement', 'attention'])
             ->latest('note_date');
     }
 
