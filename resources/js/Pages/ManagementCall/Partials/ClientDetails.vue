@@ -227,13 +227,27 @@
                             <span
                                 v-if="!isEditing.firstName"
                                 @click="editField('firstName')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
+                                :class="{
+                                    'editable-text cursor-pointer hover:text-gray-500':
+                                        userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                    'text-gray-500 cursor-not-allowed':
+                                        !userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                }"
                             >
                                 {{
                                     editableClient.firstName ||
                                     "Ajouter un prénom"
                                 }}
                             </span>
+
                             <input
                                 v-else
                                 v-model="editableClient.firstName"
@@ -255,7 +269,20 @@
                             <span
                                 v-if="!isEditing.familyName"
                                 @click="editField('familyName')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
+                                :class="{
+                                    'editable-text cursor-pointer hover:text-gray-500':
+                                        userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                    'text-gray-500 cursor-not-allowed':
+                                        !userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                }"
                             >
                                 {{
                                     editableClient.familyName ||
@@ -286,7 +313,20 @@
                             <span
                                 v-if="!isEditing.phone"
                                 @click="editField('phone')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
+                                :class="{
+                                    'editable-text cursor-pointer hover:text-gray-500':
+                                        userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                    'text-gray-500 cursor-not-allowed':
+                                        !userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                }"
                             >
                                 {{
                                     editableClient.phone ||
@@ -322,7 +362,20 @@
                             <span
                                 v-if="!isEditing.locality"
                                 @click="editField('locality')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
+                                :class="{
+                                    'editable-text cursor-pointer hover:text-gray-500':
+                                        userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                    'text-gray-500 cursor-not-allowed':
+                                        !userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                }"
                             >
                                 {{
                                     editableClient.locality ||
@@ -352,7 +405,20 @@
                             <span
                                 v-if="!isEditing.country"
                                 @click="editField('country')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
+                                :class="{
+                                    'editable-text cursor-pointer hover:text-gray-500':
+                                        userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                    'text-gray-500 cursor-not-allowed':
+                                        !userRoles.some((role) =>
+                                            ['Admin', 'Informatique'].includes(
+                                                role
+                                            )
+                                        ),
+                                }"
                             >
                                 {{
                                     editableClient.country || "Ajouter un pays"
@@ -382,6 +448,11 @@
 <script setup>
 import { ref, reactive, computed } from "vue";
 import axios from "axios";
+import { usePage } from "@inertiajs/vue3";
+
+const page = usePage();
+
+const userRoles = page.props.auth.roles || [];
 
 //Props
 const props = defineProps({
@@ -457,7 +528,16 @@ const successMessages = reactive({
 
 // Fonction pour activer le mode édition
 const editField = (field) => {
-    isEditing[field] = true;
+    const authorizedRoles = ["Admin", "Informatique"]; // Rôles autorisés
+
+    // Vérifier si l'utilisateur possède au moins un rôle autorisé
+    if (userRoles.some((role) => authorizedRoles.includes(role))) {
+        isEditing[field] = true; // Activer le mode édition
+    } else {
+        console.warn(
+            "Vous n'avez pas les permissions nécessaires pour modifier ce champ."
+        );
+    }
 };
 
 // Fonction pour enregistrer une modification
