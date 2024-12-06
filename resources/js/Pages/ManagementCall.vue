@@ -96,7 +96,11 @@ const filteredResults = computed(() => {
                         : false)
                 );
             })
-            .map((item) => ({ ...item, type })); // Ajouter le type (client ou prospect)
+            .map((item) => ({
+                ...item,
+                type,
+                last_important_note: item.last_important_note,
+            }));
 
     // Mélanger les résultats des deux tables
     const prospectsResults = filterFunction(prospects.value, "prospect");
