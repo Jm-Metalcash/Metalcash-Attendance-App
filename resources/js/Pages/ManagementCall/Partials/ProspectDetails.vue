@@ -85,11 +85,18 @@
                                         @keydown.enter.prevent="saveNote(note)"
                                         class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
                                     ></textarea>
+                                    <p
+                                        v-if="successMessages.notes[note.id]"
+                                        class="text-green-500 text-xs relative mt-1 success-message"
+                                    >
+                                        Enregistré avec succès
+                                    </p>
                                 </td>
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-1/5"
                                 >
                                     <button
+                                        v-if="isNoteEditable(note.note_date)"
                                         @click="deleteNote(note.id)"
                                         class="text-red-600 hover:text-red-800 font-semibold"
                                     >
@@ -466,8 +473,7 @@ const getWarningClass = (type) => {
 const getWarningText = (type) => {
     return (
         {
-            avertissement:
-                "Ce prospect possède un avertissement (voir notes).",
+            avertissement: "Ce prospect possède un avertissement (voir notes).",
             premium: "Ce prospect est identifié comme premium (voir notes).",
             attention: "Ce prospect est à éviter (voir notes).",
         }[type] || ""
@@ -546,7 +552,10 @@ const displaySuccessMessage = (field) => {
 
 // Fonctions pour gérer les notes
 const editNote = (noteId) => {
-    isEditingNotes[noteId] = true;
+    const note = editableProspect.notes.find((n) => n.id === noteId);
+    if (note && isNoteEditable(note.note_date)) {
+        isEditingNotes[noteId] = true;
+    }
 };
 
 const reversedNotes = computed(() => {
@@ -574,14 +583,16 @@ const deleteNote = async (noteId) => {
 
 // Enregistre une note avec Axios vers la DB
 const saveNote = (note) => {
+    // Désactiver le mode édition pour cette note
     isEditingNotes[note.id] = false;
 
+    // Envoyer la mise à jour de la note au backend via Axios
     axios
         .put(`/prospects/${editableProspect.id}/notes/${note.id}`, {
             content: note.content,
+            type: note.type,
         })
         .then((response) => {
-            // Mettre à jour la note dans editableProspect.notes
             const index = editableProspect.notes.findIndex(
                 (n) => n.id === note.id
             );
@@ -589,18 +600,15 @@ const saveNote = (note) => {
                 editableProspect.notes[index] = response.data;
             }
 
-            displayNoteSuccessMessage(note.id);
+            // Afficher le message de succès pour cette note
+            successMessages.notes[note.id] = true;
+            setTimeout(() => {
+                successMessages.notes[note.id] = false;
+            }, 3000);
         })
         .catch((error) => {
             console.error("Erreur lors de la mise à jour de la note :", error);
         });
-};
-
-const displayNoteSuccessMessage = (noteId) => {
-    successMessages.notes[noteId] = true;
-    setTimeout(() => {
-        successMessages.notes[noteId] = false;
-    }, 3000);
 };
 
 // Ajout de nouvelles notes
@@ -666,6 +674,14 @@ const saveNewNote = () => {
     }
 };
 
+// Fonction pour vérifier si une note est modifiable/supprimable
+const isNoteEditable = (noteDate) => {
+    const now = new Date();
+    const noteTime = new Date(noteDate);
+    const diffInHours = (now - noteTime) / (1000 * 60 * 60);
+    return diffInHours <= 24; // Modifiable si la note a été créée il y a moins de 24h
+};
+
 // Fonction de formatage de la date
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -686,20 +702,6 @@ const formatDateTime = (dateString) => {
     };
 
     return new Intl.DateTimeFormat("fr-FR", options).format(date);
-};
-
-// Fonction pour formater le statut
-const formatStatus = (status) => {
-    switch (status) {
-        case 0:
-            return "En cours";
-        case 1:
-            return "Clôturé";
-        case 2:
-            return "Annulation";
-        default:
-            return "Inconnu";
-    }
 };
 
 watch(

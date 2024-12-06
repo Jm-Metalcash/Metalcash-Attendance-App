@@ -96,10 +96,12 @@
                                         Enregistré avec succès
                                     </p>
                                 </td>
+
                                 <td
                                     class="py-2 px-4 border-b text-sm text-left w-1/5"
                                 >
                                     <button
+                                        v-if="isNoteEditable(note.note_date)"
                                         @click="deleteNote(note.id)"
                                         class="text-red-600 hover:text-red-800 font-semibold"
                                     >
@@ -210,7 +212,7 @@
         <!-- Section Informations Générales -->
         <div class="px-4 py-5 sm:px-6 bg-gray-200">
             <p class="mt-1 max-w-2xl text-sm text-gray-500 font-bold">
-                Informations générales sur le Client
+                Informations générales sur le client
             </p>
         </div>
         <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
@@ -414,8 +416,7 @@ const getWarningClass = (type) => {
 const getWarningText = (type) => {
     return (
         {
-            avertissement:
-                "Ce client possède un avertissement (voir notes).",
+            avertissement: "Ce client possède un avertissement (voir notes).",
             premium: "Ce client est identifié comme premium (voir notes).",
             attention: "Ce client est à éviter (voir notes).",
         }[type] || ""
@@ -503,7 +504,10 @@ const reversedNotes = computed(() => {
 });
 
 const editNote = (noteId) => {
-    isEditingNotes[noteId] = true;
+    const note = editableClient.notes.find((n) => n.id === noteId);
+    if (note && isNoteEditable(note.note_date)) {
+        isEditingNotes[noteId] = true;
+    }
 };
 
 const saveNote = (note) => {
@@ -563,6 +567,14 @@ const saveNewNote = () => {
                 console.error("Erreur lors de l'ajout de la note :", error);
             });
     }
+};
+
+// Fonction pour vérifier si une note est modifiable/supprimable
+const isNoteEditable = (noteDate) => {
+    const now = new Date();
+    const noteTime = new Date(noteDate);
+    const diffInHours = (now - noteTime) / (1000 * 60 * 60); // Différence en heures
+    return diffInHours <= 24; // Modifiable si la note a été créée il y a moins de 24h
 };
 
 const formatDateTime = (dateString) => {
