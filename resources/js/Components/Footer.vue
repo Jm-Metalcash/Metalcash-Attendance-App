@@ -53,9 +53,6 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                                 (page.props.auth.roles.includes('Admin') ||
                                     page.props.auth.roles.includes(
                                         'Informatique'
-                                    ) ||
-                                    page.props.auth.roles.includes(
-                                        'Comptabilité'
                                     ))
                             "
                             :href="route('employes')"
