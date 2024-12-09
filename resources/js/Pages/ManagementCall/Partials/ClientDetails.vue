@@ -60,11 +60,11 @@ Enregistre comme ceci :
                                 </th>
 
                                 <!-- Modificateur -->
-                                <th
+                                <!-- <th
                                     class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12"
                                 >
                                     Modifié par
-                                </th>
+                                </th> -->
 
                                 <!-- Action -->
                                 <th
@@ -136,7 +136,7 @@ Enregistre comme ceci :
                                 </td>
 
                                 <!-- Modificateur -->
-                                <td
+                                <!-- <td
                                     class="py-3 px-5 border text-sm text-left align-top w-2/12"
                                 >
                                     <div>
@@ -144,7 +144,7 @@ Enregistre comme ceci :
                                             note.updater?.name
                                         }}</span>
                                     </div>
-                                </td>
+                                </td> -->
 
                                 <!-- Action -->
                                 <td
