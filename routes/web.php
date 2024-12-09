@@ -64,9 +64,12 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::get('/employes/{id}/profil', [EmployeController::class, 'edit'])->name('employees.profile');
     Route::patch('/employes/{id}/profil', [EmployeController::class, 'update'])->name('employees.update')->middleware('role:Admin,Informatique');
     Route::patch('/employes/{id}/password', [EmployeController::class, 'updatePassword'])->name('employees.password.update')->middleware('role:Admin,Informatique');
-    Route::delete('/employes/{id}', [EmployeController::class, 'destroy'])->name('employees.destroy')->middleware('role:Admin,Informatique');
     Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('update-day')->middleware('role:Admin,Informatique');
     Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('add-day')->middleware('role:Admin,Informatique');
+    Route::put('/employees/{id}/deactivate', [EmployeController::class, 'deactivate'])->name('employees.deactivate')->middleware('role:Admin,Informatique');
+    Route::put('/employees/{id}/reactivate', [EmployeController::class, 'reactivate'])->name('employees.reactivate');
+
+
 
     // Route pour afficher les pointages d'un employé spécifique
     Route::get('/employe/{id}/historique', [HistoricalController::class, 'show'])->name('users.pointages');

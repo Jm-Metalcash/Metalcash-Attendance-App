@@ -7,7 +7,6 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 
-
 defineProps({
     canResetPassword: {
         type: Boolean,
@@ -16,8 +15,6 @@ defineProps({
         type: String,
     },
 });
-
-
 
 const form = useForm({
     email: "",
@@ -36,9 +33,11 @@ const submit = () => {
     <GuestLayout>
         <Head title="Connexion" />
 
+        <!-- Afficher le statut si disponible -->
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
             {{ status }}
         </div>
+
 
         <form
             @submit.prevent="submit"
@@ -90,10 +89,13 @@ const submit = () => {
             <div class="flex items-center justify-between mb-4">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600">Se souvenir de moi</span>
+                    <span class="ms-2 text-sm text-gray-600"
+                        >Se souvenir de moi</span
+                    >
                 </label>
 
                 <Link
+                    v-if="canResetPassword"
                     :href="route('password.request')"
                     class="text-sm text-indigo-600 hover:text-indigo-800"
                 >
@@ -102,9 +104,7 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-center mt-8">
-                <PrimaryButton>
-                    Se connecter
-                </PrimaryButton>
+                <PrimaryButton> Se connecter </PrimaryButton>
             </div>
         </form>
     </GuestLayout>

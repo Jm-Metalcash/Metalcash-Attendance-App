@@ -54,45 +54,45 @@ class EmployeController extends Controller
 
     // Function pour modifier un employé
     public function edit($id)
-{
-    // Récupérer l'utilisateur avec ses rôles associés
-    $user = User::with('roles')->findOrFail($id);
+    {
+        // Récupérer l'utilisateur avec ses rôles associés
+        $user = User::with('roles')->findOrFail($id);
 
-    // Récupérer tous les rôles disponibles
-    $roles = Role::all();
+        // Récupérer tous les rôles disponibles
+        $roles = Role::all();
 
-    // Renvoyer l'utilisateur et la liste des rôles comme props
-    return Inertia::render('Profile-Employes/Edit', [
-        'user' => $user,  // Envoyer l'utilisateur comme prop
-        'roles' => $roles,  // Envoyer tous les rôles disponibles comme prop explicite
-    ]);
-}
+        // Renvoyer l'utilisateur et la liste des rôles comme props
+        return Inertia::render('Profile-Employes/Edit', [
+            'user' => $user,  // Envoyer l'utilisateur comme prop
+            'roles' => $roles,  // Envoyer tous les rôles disponibles comme prop explicite
+        ]);
+    }
 
-    
-    
+
+
 
 
     // Mettre à jour les informations du profil
     public function update(Request $request, $id)
-{
-    $user = User::findOrFail($id);
-    
-    // Valider les informations du formulaire, incluant le rôle
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-        'role' => 'required|exists:roles,id', // Valider que le rôle existe
-    ]);
+    {
+        $user = User::findOrFail($id);
 
-    // Mettre à jour le nom et l'email de l'utilisateur
-    $user->update($request->only('name', 'email'));
+        // Valider les informations du formulaire, incluant le rôle
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|exists:roles,id', // Valider que le rôle existe
+        ]);
 
-    // Mettre à jour le rôle dans la table pivot role_user
-    $user->roles()->sync([$request->role]); // Mettre à jour le rôle avec l'ID fourni
+        // Mettre à jour le nom et l'email de l'utilisateur
+        $user->update($request->only('name', 'email'));
 
-    // Rediriger avec un message de succès
-    return redirect()->back()->with('success', 'Profil et rôle mis à jour avec succès.');
-}
+        // Mettre à jour le rôle dans la table pivot role_user
+        $user->roles()->sync([$request->role]); // Mettre à jour le rôle avec l'ID fourni
+
+        // Rediriger avec un message de succès
+        return redirect()->back()->with('success', 'Profil et rôle mis à jour avec succès.');
+    }
 
 
     // Mettre à jour le mot de passe de l'employé
@@ -111,12 +111,27 @@ class EmployeController extends Controller
         return redirect()->back()->with('success', 'Mot de passe mis à jour avec succès.');
     }
 
-    // Supprimer un employé
-    public function destroy($id)
+
+
+    //Désactive un compte
+    public function deactivate($id)
     {
         $user = User::findOrFail($id);
-        $user->delete();
+        $user->status = 1; // Désactiver le compte
+        $user->save();
 
-        return redirect()->route('employes')->with('success', 'Employé supprimé avec succès.');
+        return back()->with('success', 'Le compte a été désactivé avec succès.');
+    }
+
+
+
+    // Réactiver un compte
+    public function reactivate($id)
+    {
+        $user = User::findOrFail($id);
+        $user->status = 0; // Réactiver le compte
+        $user->save();
+
+        return back()->with('success', 'Le compte a été réactivé avec succès.');
     }
 }

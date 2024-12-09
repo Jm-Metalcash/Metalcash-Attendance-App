@@ -127,7 +127,9 @@ const closeModal = () => {
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200 cursor-pointer">
+                        <tbody
+                            class="bg-white divide-y divide-gray-200 cursor-pointer"
+                        >
                             <tr v-for="user in users" :key="user.id">
                                 <td
                                     @click="
@@ -139,12 +141,24 @@ const closeModal = () => {
                                                 )
                                             )
                                     "
-                                    class="px-6 py-4 whitespace-nowrap hover:text-blue-700"
+                                    :class="{
+                                        'text-red-500 hover:text-red-700':
+                                            user.status === 1, // Texte rouge si désactivé
+                                        'hover:text-blue-700':
+                                            user.status !== 1, // Texte bleu au survol si actif
+                                    }"
+                                    class="px-6 py-4 whitespace-nowrap cursor-pointer"
                                 >
                                     {{ user.name }}
                                 </td>
+
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap cursor-pointer hover:text-blue-700"
+                                    :class="{
+                                        'text-red-500 hover:text-red-700':
+                                            user.status === 1, // Texte rouge si désactivé
+                                        'hover:text-blue-700':
+                                            user.status !== 1, // Texte bleu au survol si actif
+                                    }"
                                     @click="
                                         () =>
                                             $inertia.get(
@@ -157,7 +171,14 @@ const closeModal = () => {
                                 >
                                     {{ user.email }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap cursor-auto">
+                                <td
+                                    :class="{
+                                        'text-red-500 hover:text-red-700':
+                                            user.status === 1, // Texte rouge si désactivé
+                                        'hover:text-blue-700':
+                                            user.status !== 1, // Texte bleu au survol si actif
+                                    }"
+                                >
                                     <span
                                         v-for="role in user.roles"
                                         :key="role.id"
@@ -175,7 +196,9 @@ const closeModal = () => {
                                         </span>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap cursor-auto">
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap cursor-auto"
+                                >
                                     <span
                                         v-if="
                                             user.days &&
@@ -201,8 +224,10 @@ const closeModal = () => {
                                 <td
                                     class="px-6 py-4 whitespace-nowrap text-center"
                                 >
+                                    <!-- Bouton "Voir historique" pour Comptabilité -->
                                     <button
                                         v-if="
+                                            user.status !== 1 &&
                                             page.props.auth.roles.includes(
                                                 'Comptabilité'
                                             )
@@ -222,8 +247,14 @@ const closeModal = () => {
                                         Voir historique
                                     </button>
 
+                                    <!-- Bouton "Gestion des pointages" pour les autres -->
                                     <button
-                                        v-else
+                                        v-if="
+                                            user.status !== 1 &&
+                                            !page.props.auth.roles.includes(
+                                                'Comptabilité'
+                                            )
+                                        "
                                         @click="
                                             () =>
                                                 $inertia.get(
