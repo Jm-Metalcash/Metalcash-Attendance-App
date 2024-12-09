@@ -497,7 +497,7 @@ Enregistre comme ceci :
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import axios from "axios";
 import { usePage } from "@inertiajs/vue3";
 
@@ -515,12 +515,10 @@ const props = defineProps({
 
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
-    const importantNotes = editableClient.notes.filter((note) =>
-        ["avertissement", "premium", "attention"].includes(note.type)
-    );
-    return importantNotes.length > 0
-        ? importantNotes[importantNotes.length - 1].type
-        : null;
+    const importantNotes = editableClient.notes
+        .filter((note) => ["avertissement", "premium", "attention"].includes(note.type))
+        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date
+    return importantNotes.length > 0 ? importantNotes[0].type : null;
 });
 
 // Fonction pour obtenir les classes CSS en fonction du type
@@ -544,6 +542,7 @@ const getWarningText = (type) => {
         }[type] || ""
     );
 };
+
 
 // Émission d'événements
 const emit = defineEmits(["client-updated"]);
@@ -641,9 +640,8 @@ const editNote = (noteId) => {
     }
 };
 
-const saveNote = (note) => {
-    isEditingNotes[note.id] = false;
 
+const saveNote = (note) => {
     axios
         .put(`/clients/${editableClient.id}/notes/${note.id}`, {
             content: note.content,
@@ -655,8 +653,14 @@ const saveNote = (note) => {
             // Mettre à jour la note dans la liste
             const index = editableClient.notes.findIndex((n) => n.id === note.id);
             if (index !== -1) {
-                editableClient.notes[index] = updatedNote;
+                editableClient.notes.splice(index, 1, updatedNote);
             }
+
+            // Forcer Vue à détecter le changement
+            editableClient.notes = [...editableClient.notes];
+
+            // Réinitialiser le mode édition pour cette note
+            isEditingNotes[note.id] = false;
 
             // Afficher un message de succès
             successMessages.notes[note.id] = true;
@@ -670,14 +674,15 @@ const saveNote = (note) => {
 };
 
 
+
 const deleteNote = (noteId) => {
     axios
         .delete(`/clients/${editableClient.id}/notes/${noteId}`)
         .then(() => {
-            editableClient.notes = editableClient.notes.filter(
-                (note) => note.id !== noteId
-            );
-            updateHasWarning(); // Met à jour has_warning après suppression
+            editableClient.notes = editableClient.notes.filter((note) => note.id !== noteId);
+
+            // Forcer Vue à détecter le changement
+            editableClient.notes = [...editableClient.notes];
         })
         .catch((error) => {
             console.error("Erreur lors de la suppression de la note :", error);
@@ -692,21 +697,21 @@ const saveNewNote = () => {
                 type: newNote.value.type,
             })
             .then((response) => {
-                // Ajouter la nouvelle note avec les données du créateur
                 const createdNote = response.data;
-                editableClient.notes.unshift(createdNote); // Ajoute la note au début de la liste
 
-                // Réinitialiser le formulaire
+                // Ajouter la nouvelle note
+                editableClient.notes.unshift(createdNote);
+
+                // Forcer Vue à détecter le changement
+                editableClient.notes = [...editableClient.notes];
+
                 newNote.value = { content: "", type: "information" };
                 showAddNote.value = false;
 
-                // Afficher le message de succès
                 showAddNoteSuccess.value = true;
                 setTimeout(() => {
                     showAddNoteSuccess.value = false;
                 }, 3000);
-
-                updateHasWarning(); // Met à jour has_warning après ajout
             })
             .catch((error) => {
                 console.error("Erreur lors de l'ajout de la note :", error);
@@ -733,6 +738,7 @@ const formatDateTime = (dateString) => {
     });
 };
 
+
 // Fonction pour afficher plus de notes
 const showMoreNotes = () => {
     visibleNotesCount.value = editableClient.notes.length;
@@ -742,6 +748,13 @@ const showMoreNotes = () => {
 const showLessNotes = () => {
     visibleNotesCount.value = 5;
 };
+
+
+// Watch pour vérifier si `editableClient.notes` est bien mis à jour
+watch(
+    () => editableClient.notes,
+    { deep: true }
+);
 </script>
 
 <style scoped>

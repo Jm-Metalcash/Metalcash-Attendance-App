@@ -132,7 +132,9 @@
                                     class="py-3 px-5 border text-sm text-center align-center w-2/12"
                                 >
                                     <div>
-                                        <span class="block">{{ note.creator?.name || 'Non défini' }}</span>
+                                        <span class="block">{{
+                                            note.creator?.name || ""
+                                        }}</span>
                                     </div>
                                 </td>
 
@@ -141,7 +143,9 @@
                                     class="py-3 px-5 border text-sm text-left align-top w-2/12"
                                 >
                                     <div>
-                                        <span class="block text-center">{{ note.updater?.name || 'Non défini' }}</span>
+                                        <span class="block text-center">{{
+                                            note.updater?.name || ""
+                                        }}</span>
                                     </div>
                                 </td>
 
@@ -490,29 +494,27 @@ const successMessages = reactive({
     notes: [],
 });
 
-
 const updateLatestWarningType = () => {
-    const importantNotes = editableProspect.notes.filter((note) =>
-        ["avertissement", "premium", "attention"].includes(note.type)
-    );
+    const importantNotes = [...editableProspect.notes]
+        .filter((note) =>
+            ["avertissement", "premium", "attention"].includes(note.type)
+        )
+        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date décroissante
 
-    // Met à jour `latestWarningType`
+    // Prendre le type de la dernière note importante
     latestWarningType.value =
-        importantNotes.length > 0
-            ? importantNotes[importantNotes.length - 1].type
-            : null;
+        importantNotes.length > 0 ? importantNotes[0].type : null;
 };
-
 
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
-    const importantNotes = editableProspect.notes.filter((note) =>
-        ["avertissement", "premium", "attention"].includes(note.type)
-    );
-    return importantNotes.length > 0
-        ? importantNotes[importantNotes.length - 1].type
-        : null;
+    const importantNotes = [...editableProspect.notes]
+        .filter((note) => ["avertissement", "premium", "attention"].includes(note.type))
+        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date
+
+    return importantNotes.length > 0 ? importantNotes[0].type : null; // La plus récente
 });
+
 
 // Mapping des classes CSS
 const getWarningClass = (type) => {
@@ -624,14 +626,12 @@ const reversedNotes = computed(() => {
 const deleteNote = async (noteId) => {
     try {
         await axios.delete(`/prospects/${editableProspect.id}/notes/${noteId}`);
-        // Filtrer les notes pour retirer celle qui est supprimée
         editableProspect.notes = editableProspect.notes.filter(
             (note) => note.id !== noteId
         );
-        // Vérifier si l'avertissement existe encore
-        hasWarning.value = editableProspect.notes.some(
-            (note) => note.type === "avertissement"
-        );
+
+        // Recalculer latestWarningType après la suppression
+        updateLatestWarningType();
     } catch (error) {
         console.error("Erreur lors de la suppression de la note :", error);
     }
@@ -639,10 +639,8 @@ const deleteNote = async (noteId) => {
 
 // Enregistre une note avec Axios vers la DB
 const saveNote = (note) => {
-    // Désactiver le mode édition pour cette note
     isEditingNotes[note.id] = false;
 
-    // Envoyer la mise à jour de la note au backend via Axios
     axios
         .put(`/prospects/${editableProspect.id}/notes/${note.id}`, {
             content: note.content,
@@ -651,19 +649,17 @@ const saveNote = (note) => {
         .then((response) => {
             const updatedNote = response.data;
 
-            // Trouver l'index de la note mise à jour
+            // Mettre à jour la note dans la liste
             const index = editableProspect.notes.findIndex(
                 (n) => n.id === note.id
             );
-
             if (index !== -1) {
-                // Mettre à jour la note avec toutes ses relations (creator, updater)
-                editableProspect.notes[index] = updatedNote;
+                editableProspect.notes.splice(index, 1, updatedNote);
             }
 
-            updateLatestWarningType();
+            // Forcer Vue à détecter le changement
+            editableProspect.notes = [...editableProspect.notes];
 
-            // Afficher un message de succès pour cette note
             successMessages.notes[note.id] = true;
             setTimeout(() => {
                 successMessages.notes[note.id] = false;
@@ -686,55 +682,30 @@ const newNote = ref({
 
 const saveNewNote = () => {
     if (newNote.value.content) {
-        const now = new Date().toISOString();
-
-        const blacklistValue = newNote.value.type === "avertissement" ? 1 : 0;
-
         axios
             .post(`/prospects/${editableProspect.id}/notes`, {
                 content: newNote.value.content,
-                note_date: now,
-                type: newNote.value.type, // Envoie le type de la note
+                type: newNote.value.type,
             })
             .then((response) => {
-                const newSavedNote = response.data; // La note renvoyée par le backend
+                const createdNote = response.data;
 
-                // Ajouter la nouvelle note à la liste avec toutes ses relations
-                editableProspect.notes.unshift(newSavedNote);
+                // Ajouter la nouvelle note au début
+                editableProspect.notes.unshift(createdNote);
 
-                // Mise à jour de la blacklist si nécessaire
-                return axios.put(`/prospects/${editableProspect.id}`, {
-                    blacklist: blacklistValue,
-                });
-            })
-            .then(() => {
-                editableProspect.blacklist = blacklistValue;
+                // Forcer Vue à détecter le changement
+                editableProspect.notes = [...editableProspect.notes];
 
-                updateHasWarning();
-
-
-                // Émettre un événement pour informer le parent que le blacklist a été mis à jour
-                emit(
-                    "prospect-updated",
-                    JSON.parse(JSON.stringify(editableProspect))
-                );
-
-                // Réinitialiser le formulaire
-                newNote.value.content = "";
-                newNote.value.type = "information"; // Réinitialiser à la valeur par défaut
+                newNote.value = { content: "", type: "information" };
                 showAddNote.value = false;
 
-                // Afficher un message de succès
                 showAddNoteSuccess.value = true;
                 setTimeout(() => {
                     showAddNoteSuccess.value = false;
                 }, 3000);
             })
             .catch((error) => {
-                console.error(
-                    "Erreur lors de l'ajout de la note ou de la mise à jour du prospect :",
-                    error
-                );
+                console.error("Erreur lors de l'ajout de la note :", error);
             });
     }
 };
@@ -772,14 +743,7 @@ const formatDateTime = (dateString) => {
 
 watch(
     () => editableProspect.notes,
-    (newNotes) => {
-        newNotes.forEach((note) => {
-            if (!(note.id in isEditingNotes)) {
-                isEditingNotes[note.id] = false;
-            }
-        });
-    },
-    { immediate: true }
+    { deep: true }
 );
 </script>
 

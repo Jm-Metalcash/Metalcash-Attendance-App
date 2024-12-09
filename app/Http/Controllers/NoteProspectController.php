@@ -30,6 +30,13 @@ class NoteProspectController extends Controller
         // Mettre à jour la note
         $note->update($validatedData);
 
+        ClientsProspectsUpdate::create([
+            'updatable_type' => Prospect::class,
+            'updatable_id' => $prospect->id,
+            'user_id' => Auth::id(),
+            'action' => 'note_added',
+        ]);
+
         // Recharger les relations pour retourner des données complètes
         $note->load(['creator:id,name', 'updater:id,name']);
 
