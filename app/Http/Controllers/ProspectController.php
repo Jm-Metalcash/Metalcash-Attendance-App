@@ -185,7 +185,7 @@ class ProspectController extends Controller
             ->select('id', 'firstName', 'familyName', 'phone', 'country', 'locality', 'created_at', 'updated_at')
             ->findOrFail($id);
 
-            return response()->json($prospect->notes);
+        return response()->json($prospect->notes);
 
         $latestWarning = $prospect->notes->first();
         $prospect->has_warning = !is_null($latestWarning);
@@ -249,37 +249,29 @@ class ProspectController extends Controller
             'blacklist' => 'nullable|boolean',
         ]);
 
-        // Supprimer les champs avec des valeurs nulles
         $validatedData = array_filter($validatedData, fn($value) => !is_null($value));
 
-        // Définir recently_added en fonction du rôle
-        if (Auth::user() && collect(Auth::user()->roles)->contains(fn($role) => $role->name === 'Comptabilité')) {
-            $validatedData['recently_added'] = true;
-        } else {
-            $validatedData['recently_added'] = false;
-        }
+        $validatedData['recently_added'] = Auth::user() && collect(Auth::user()->roles)
+            ->contains(fn($role) => $role->name === 'Comptabilité');
 
-        // Ajouter l'ID de l'utilisateur qui crée le prospect
         $validatedData['created_by'] = Auth::id();
 
         try {
-            // Création du prospect avec les données validées
+            // Création du prospect
             $prospect = Prospect::create($validatedData);
 
-            return response()->json($prospect, 201);
+            // Enregistrer la création dans la table clients_prospects_update
+            ClientsProspectsUpdate::create([
+                'updatable_type' => Prospect::class,
+                'updatable_id' => $prospect->id,
+                'user_id' => Auth::id(),
+                'action' => 'created',
+            ]);
+
+            // Retourne les données avec Inertia pour redirection côté client
+            return response()->json(['id' => $prospect->id], 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la création du prospect: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Erreur : ' . $e->getMessage()], 500);
         }
-
-        // Après la création du prospect
-        $prospect = Prospect::create($validatedData);
-
-        // Enregistrer la création dans la table clients_prospects_update
-        ClientsProspectsUpdate::create([
-            'updatable_type' => Prospect::class,
-            'updatable_id' => $prospect->id,
-            'user_id' => Auth::id(),
-            'action' => 'created',
-        ]);
     }
 }

@@ -130,7 +130,7 @@ Enregistre comme ceci :
                                 >
                                     <div>
                                         <span class="block">{{
-                                            note.creator?.name || ""
+                                            note.creator?.name
                                         }}</span>
                                     </div>
                                 </td>
@@ -141,7 +141,7 @@ Enregistre comme ceci :
                                 >
                                     <div>
                                         <span class="block text-center">{{
-                                            note.updater?.name || ""
+                                            note.updater?.name
                                         }}</span>
                                     </div>
                                 </td>

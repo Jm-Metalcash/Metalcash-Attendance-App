@@ -82,8 +82,6 @@
                         </span>
                     </div>
 
-                   
-
                     <!-- Pays, ville -->
                     <div>
                         <label
@@ -157,6 +155,7 @@
 <script setup>
 import { ref, defineEmits, computed } from "vue";
 import axios from "axios";
+import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
     showModal: {
@@ -199,7 +198,6 @@ const validatePhone = () => {
         delete errors.value.phone;
     }
 };
-
 
 // Réinitialiser
 const resetFields = () => {
@@ -250,6 +248,8 @@ const addProspectWithNote = async () => {
             ...response.data,
             notes: noteData ? [noteData] : [],
         });
+        // Redirection
+        router.visit(`/gestion-appels-telephoniques/prospect/${prospectId}`);
     } catch (error) {
         if (error.response && error.response.status === 422) {
             errors.value = error.response.data.errors;

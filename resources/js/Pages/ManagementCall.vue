@@ -56,7 +56,6 @@ const newProspect = ref({
 // Liste pour stocker les résultats filtrés (prospects et clients)
 const filteredResults = computed(() => {
     const searchLower = searchTerm.value.toLowerCase().replace(/\s+/g, "");
-
     if (!searchLower) {
         return [];
     }
@@ -102,7 +101,6 @@ const filteredResults = computed(() => {
                 last_important_note: item.last_important_note,
             }));
 
-    // Mélanger les résultats des deux tables
     const prospectsResults = filterFunction(prospects.value, "prospect");
     const clientsResults = filterFunction(clients.value, "client");
 
@@ -227,6 +225,10 @@ const formatDate = (date) => {
         minute: "2-digit",
     });
 };
+
+watch(filteredResults, (newValue) => {
+    console.log("Résultats filtrés :", newValue);
+});
 </script>
 
 <template>
@@ -268,12 +270,12 @@ const formatDate = (date) => {
                                     existant
                                 </div>
                                 <!-- Bouton Ajouter un prospect -->
-                                <button
+                                <!-- <button
                                     @click="toggleModal"
                                     class="text-xs md:text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                                 >
                                     Ajouter un prospect
-                                </button>
+                                </button> -->
                             </div>
 
                             <!-- BARRE DE RECHERCHE -->
@@ -303,10 +305,24 @@ const formatDate = (date) => {
 
                             <!-- Affichage de la liste des prospects filtrés -->
                             <FilteredUserList
-                                v-if="searchTerm && filteredResults.length > 0"
+                                v-if="filteredResults.length > 0"
                                 :filteredProspects="filteredResults"
                                 :selectProspect="selectItem"
                             />
+
+                            <!-- Aucun résultat -->
+                            <div
+                                v-else-if="searchTerm"
+                                class="text-center mt-8 text-gray-600 text-base"
+                            >
+                                Aucun résultat trouvé pour "{{ searchTerm }}"
+                                <button
+                                    @click="toggleModal"
+                                    class="text-xs md:text-sm bg-gray-50 hover:bg-gray-200 text-gray-700 border border-gray-300 font-bold py-2 px-4 rounded block mx-auto mt-3"
+                                >
+                                <i class="fa-solid fa-plus text-xs"></i> Ajouter un prospect
+                                </button>
+                            </div>
 
                             <!-- Détails de l'élément sélectionné -->
                             <div v-if="selectedItem && !searchTerm">
