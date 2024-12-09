@@ -27,7 +27,7 @@ const form = useForm({
 });
 
 // Date du jour courant pour gestion du status
-const today = new Date().toISOString().split('T')[0];
+const today = new Date().toISOString().split("T")[0];
 
 // Fonction pour soumettre le formulaire
 const submit = () => {
@@ -127,15 +127,37 @@ const closeModal = () => {
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200 cursor-pointer">
                             <tr v-for="user in users" :key="user.id">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td
+                                    @click="
+                                        () =>
+                                            $inertia.get(
+                                                route(
+                                                    'employees.profile',
+                                                    user.id
+                                                )
+                                            )
+                                    "
+                                    class="px-6 py-4 whitespace-nowrap hover:text-blue-700"
+                                >
                                     {{ user.name }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap cursor-pointer hover:text-blue-700"
+                                    @click="
+                                        () =>
+                                            $inertia.get(
+                                                route(
+                                                    'employees.profile',
+                                                    user.id
+                                                )
+                                            )
+                                    "
+                                >
                                     {{ user.email }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap cursor-auto">
                                     <span
                                         v-for="role in user.roles"
                                         :key="role.id"
@@ -153,7 +175,7 @@ const closeModal = () => {
                                         </span>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap cursor-auto">
                                     <span
                                         v-if="
                                             user.days &&
@@ -206,15 +228,15 @@ const closeModal = () => {
                                             () =>
                                                 $inertia.get(
                                                     route(
-                                                        'employees.profile',
+                                                        'users.pointages',
                                                         user.id
                                                     )
                                                 )
                                         "
-                                        class="px-3 py-2 text-sm text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
+                                        class="px-3 py-2 text-xs text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
                                     >
                                         <i class="fa-solid fa-gear"></i>
-                                        Administration
+                                        Gestion des pointages
                                     </button>
                                 </td>
                             </tr>
