@@ -389,8 +389,10 @@ const logoUrl = computed(() => "/images/logo-HD.png");
             </header>
 
             <!-- MAIN CONTENT SLOT -->
-            <main class="flex-grow">
-                <slot />
+            <main class="flex-1 overflow-y-auto">
+                <div class="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <slot />
+                </div>
             </main>
 
             <!-- <Footer /> -->

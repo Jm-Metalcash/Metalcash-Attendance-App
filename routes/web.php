@@ -25,7 +25,7 @@ use App\Http\Middleware\RestrictIP;
 Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('index')
-        : Inertia::render('Auth/Login');
+        : redirect()->route('login'); // Redirige explicitement vers la route nommée 'login'
 })->name('home');
 
 

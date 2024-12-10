@@ -247,7 +247,7 @@ watch(filteredResults, (newValue) => {
         />
 
         <div
-            class="container max-w-[1700px] mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 md:mt-16 bg-white min-h-[800px]"
+            class="container max-w-[1700px] mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 md:mt-16 rounded-lg shadow-lg bg-white min-h-[800px]"
         >
             <div class="w-full mt-0 mx-auto px-0">
                 <div class="flex justify-center p-4 px-3 py-10">
