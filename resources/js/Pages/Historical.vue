@@ -3,11 +3,19 @@ import { ref, computed, watch, defineProps } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
+import Header from "@/Components/Header.vue";
 import axios from "axios";
 
 const props = defineProps(["days", "isShow", "user"]);
 
 const page = usePage();
+
+// Calculer dynamiquement le titre
+const pageTitle = computed(() =>
+    props.isShow
+        ? `Historique des pointages de ${props.user.name}`
+        : "Historique des pointages"
+);
 
 // Filtre sélectionné pour l'année et le mois
 const selectedYear = ref(new Date().getFullYear());
@@ -19,6 +27,7 @@ const totalMinutesWorked = ref(0); // Stocke le total des minutes
 
 // Variables pour le déploiement des détails
 const expandedDays = ref([]); // Contiendra des identifiants uniques pour chaque jour
+
 
 // Fonction pour calculer le total des minutes travaillées d'une journée
 const calculateDailyTotal = (arrivals, departures) => {
@@ -370,6 +379,7 @@ const addDepartureTimeEdit = () => {
 const removeDepartureTimeEdit = (index) => {
     selectedDay.value.departures.splice(index, 1);
 };
+
 </script>
 
 <template>
@@ -377,23 +387,14 @@ const removeDepartureTimeEdit = (index) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
-                <!-- Si isShow est vrai, afficher "Historique des pointages du user cliqué" -->
-                <span v-if="isShow"
-                    >Historique des pointages de {{ user.name }}</span
-                >
-                <!-- Sinon, garder le texte par défaut -->
-                <span v-else>Historique des pointages</span>
-            </h2>
+            <Header :pageTitle="pageTitle" />
         </template>
 
         <section
-            class="attendance-section flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-14 pb-20 rounded-lg shadow-lg min-h-[800px]"
+            class="attendance-section flex-grow w-full max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-14 pb-20 rounded-lg shadow-lg min-h-[800px]"
         >
             <!-- Statistiques et filtres -->
-            <div class="w-full max-w-6xl mx-auto mb-2">
+            <div class="w-full mx-auto mb-2">
                 <div
                     class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                 >
@@ -466,10 +467,10 @@ const removeDepartureTimeEdit = (index) => {
             </div>
 
             <!-- Table -->
-            <div class="w-full max-w-6xl mx-auto overflow-x-auto">
+            <div class="w-full mx-auto overflow-x-auto">
                 <div
                     v-if="selectedMonth === 0"
-                    class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300  text-gray-800"
+                    class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300 text-gray-800"
                 >
                     <!-- Total des heures -->
                     <div class="flex items-center space-x-2">

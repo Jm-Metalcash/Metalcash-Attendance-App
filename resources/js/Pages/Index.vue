@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
+import Header from "@/Components/Header.vue";
 
 const page = usePage();
 </script>
@@ -10,17 +11,13 @@ const page = usePage();
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
-                Accueil
-            </h2>
+            <Header :pageTitle="'Accueil'" />
         </template>
 
         <div
-            class="home-section w-full max-w-7xl mx-auto min-h-[800px] px-6 sm:px-8 py-16 bg-white rounded-lg shadow-lg"
+            class="home-section max-w-[1700px] mt-16 mx-auto px-6 sm:px-8 py-16 bg-white rounded-lg shadow-lg min-h-[800px]"
         >
-            <div class="text-center mb-8 md:mt-24">
+            <div class="text-center mb-8">
                 <h1 class="text-2xl md:text-3xl font-semibold text-gray-900">
                     Que souhaitez-vous faire ?
                 </h1>
@@ -29,7 +26,7 @@ const page = usePage();
                 </p>
             </div>
 
-            <div class="flex justify-center mt-4">
+            <div class="flex justify-center">
                 <div class="flex flex-wrap justify-center gap-6 mt-8">
                     <Link :href="route('dashboard')" class="action-button">
                         <i class="fas fa-check-circle text-2xl mb-2"></i>
@@ -77,7 +74,7 @@ const page = usePage();
 
             <!-- OTHER BUTTONS -->
             <div
-                class="other-buttons mt-12 md:mt-80 flex justify-center space-x-6 md:space-x-8 text-gray-600"
+                class="other-buttons mt-12 flex justify-center space-x-6 md:space-x-8 text-gray-600"
             >
                 <Link
                     :href="route('profile.edit')"

@@ -7,6 +7,7 @@ import ProspectDetails from "./ManagementCall/Partials/ProspectDetails.vue";
 import ClientDetails from "./ManagementCall/Partials/ClientDetails.vue";
 import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
 import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
+import Header from "@/Components/Header.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
 import FilteredUserList from "./ManagementCall/Partials/FilteredUserList.vue";
 import FlashMessage from "@/Components/FlashMessage.vue";
@@ -236,11 +237,7 @@ watch(filteredResults, (newValue) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
-                Gestion des appels téléphoniques
-            </h2>
+            <Header :pageTitle="'Gestion des appels téléphones'" />
         </template>
 
         <FlashMessage
@@ -250,9 +247,9 @@ watch(filteredResults, (newValue) => {
         />
 
         <div
-            class="container mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 max-w-7xl mt-2 md:mt-8 bg-white min-h-[800px]"
+            class="container max-w-[1700px] mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 md:mt-16 bg-white min-h-[800px]"
         >
-            <div class="w-full max-w-7xl mt-0 mx-auto px-0">
+            <div class="w-full mt-0 mx-auto px-0">
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
                         <div

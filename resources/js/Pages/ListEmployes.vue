@@ -4,6 +4,7 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
+import Header from "@/Components/Header.vue";
 import { Head, useForm, usePage } from "@inertiajs/vue3";
 import { ref, defineProps } from "vue";
 
@@ -63,15 +64,11 @@ const closeModal = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
-                Gestion des employés
-            </h2>
+            <Header :pageTitle="'Gestion des employés'" />
         </template>
 
         <div
-            class="container flex-grow mx-auto px-4 sm:px-8 max-w-7xl bg-white rounded-lg shadow-lg py-8"
+            class="container flex-grow max-w-[1700px] mt-16 mx-auto px-4 sm:px-8 bg-white rounded-lg shadow-lg py-8 min-h-[800px]"
         >
             <div class="py-8">
                 <!-- Titre de la page -->

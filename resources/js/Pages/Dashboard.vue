@@ -3,6 +3,7 @@ import { ref, watch, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
+import Header from "@/Components/Header.vue";
 import axios from "axios";
 
 const { props } = usePage();
@@ -281,15 +282,11 @@ watch(() => days.value, updateButtonStates, { deep: true });
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="font-semibold text-xl text-white bg-gray-800 leading-tight"
-            >
-                Aujourd'hui
-            </h2>
+            <Header :pageTitle="`Aujourd'hui`" />
         </template>
 
         <section
-            class="attendance-section max-w-7xl mx-auto px-4 sm:px-6 min-h-screen lg:px-8 bg-white pt-8 pb-20"
+            class="attendance-section max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-8 pb-20"
         >
             <div class="mt-8 flex flex-col items-center space-y-8">
                 <!-- Bloc de date, heure, et citation -->
