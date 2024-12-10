@@ -39,7 +39,7 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
 
 // Route de dashboard
 Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
-    Route::get('/dashboard', function () {
+    Route::get('/pointage', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
@@ -112,9 +112,9 @@ Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])-
 
 // Routes pour la gestion de profil, accessibles uniquement après authentification
 Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profil', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Inclusion des routes d'authentification
