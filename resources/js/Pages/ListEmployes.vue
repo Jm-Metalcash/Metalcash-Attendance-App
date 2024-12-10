@@ -113,7 +113,7 @@ const closeModal = () => {
                                     Rôle
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                     Statut
                                 </th>
@@ -170,9 +170,9 @@ const closeModal = () => {
                                 </td>
                                 <td
                                     :class="{
-                                        'text-red-500 hover:text-red-700':
+                                        'text-red-500 hover:text-red-700 text-left ml-4':
                                             user.status === 1, // Texte rouge si désactivé
-                                        'hover:text-blue-700':
+                                        'hover:text-blue-700 text-left pl-2':
                                             user.status !== 1, // Texte bleu au survol si actif
                                     }"
                                 >
@@ -194,7 +194,7 @@ const closeModal = () => {
                                     </span>
                                 </td>
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap cursor-auto"
+                                    class="px-6 py-4 whitespace-nowrap cursor-auto text-center"
                                 >
                                     <span
                                         v-if="

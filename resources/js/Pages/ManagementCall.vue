@@ -253,7 +253,7 @@ watch(filteredResults, (newValue) => {
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
                         <div
-                            class="bg-white shadow-md rounded-lg px-3 py-4 pb-6 mb-4"
+                            class="bg-white px-3 py-4 pb-6 mb-4"
                         >
                             <!-- Conteneur pour "Rechercher un prospect" et la barre de recherche -->
                             <div
@@ -277,7 +277,7 @@ watch(filteredResults, (newValue) => {
 
                             <!-- BARRE DE RECHERCHE -->
                             <div
-                                class="flex items-center bg-[rgb(237,242,247)] rounded-md mb-4"
+                                class="flex items-center bg-[rgb(237,242,247)] rounded-md mb-14 border-b-2 border-gray-300"
                             >
                                 <div class="pl-2">
                                     <svg
