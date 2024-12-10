@@ -382,7 +382,7 @@ const logoUrl = computed(() => "/images/logo-HD.png");
             </nav>
 
             <!-- Header Section -->
-            <header class="bg-white text-gray-800 shadow" v-if="$slots.header">
+            <header class="bg-white text-gray-800 shadow z-50" v-if="$slots.header">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
