@@ -776,7 +776,7 @@ const removeDepartureTimeEdit = (index) => {
                     </PrimaryButton>
                 </Link>
                 <!-- Sinon, afficher le bouton pour retourner au dashboard -->
-                <Link v-else :href="route('dashboard')">
+                <Link v-else :href="route('home')">
                     <PrimaryButton>
                         <i class="fas fa-arrow-left mr-2"></i> Retour à
                         l'accueil

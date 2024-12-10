@@ -2,11 +2,12 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { router as Inertia } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, usePage } from "@inertiajs/vue3";
+import { Head, usePage, Link } from "@inertiajs/vue3";
 import ProspectDetails from "./ManagementCall/Partials/ProspectDetails.vue";
 import ClientDetails from "./ManagementCall/Partials/ClientDetails.vue";
 import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
 import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 import Header from "@/Components/Header.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
 import FilteredUserList from "./ManagementCall/Partials/FilteredUserList.vue";
@@ -384,6 +385,15 @@ watch(filteredResults, (newValue) => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="mb-12 flex justify-center">
+                <Link :href="route('home')">
+                    <PrimaryButton>
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à
+                        l'accueil
+                    </PrimaryButton>
+                </Link>
             </div>
         </div>
     </AuthenticatedLayout>

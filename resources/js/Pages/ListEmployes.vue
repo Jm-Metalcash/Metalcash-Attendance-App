@@ -5,7 +5,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import Header from "@/Components/Header.vue";
-import { Head, useForm, usePage } from "@inertiajs/vue3";
+import { Head, useForm, usePage, Link } from "@inertiajs/vue3";
 import { ref, defineProps } from "vue";
 
 // Props pour recevoir les utilisateurs
@@ -70,13 +70,14 @@ const closeModal = () => {
         <div
             class="container flex-grow max-w-[1700px] mt-16 mx-auto px-4 sm:px-8 bg-white rounded-lg shadow-lg py-8 min-h-[800px]"
         >
-        <div
-                    class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
-                >
-                    <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
-                        <i class="fa-solid fa-user text-[#005692] mr-2"></i> Gestion des employés
-                    </h2>
-                </div>
+            <div
+                class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
+            >
+                <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
+                    <i class="fa-solid fa-user text-[#005692] mr-2"></i> Gestion
+                    des employés
+                </h2>
+            </div>
             <div class="py-8">
                 <!-- Titre de la page -->
                 <div>
@@ -278,6 +279,14 @@ const closeModal = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="mb-12 mt-12 flex justify-center">
+                <Link :href="route('home')">
+                    <PrimaryButton>
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à
+                        l'accueil
+                    </PrimaryButton>
+                </Link>
             </div>
         </div>
 
