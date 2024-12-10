@@ -250,6 +250,13 @@ watch(filteredResults, (newValue) => {
             class="container max-w-[1700px] mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 md:mt-16 rounded-lg shadow-lg bg-white min-h-[800px]"
         >
             <div class="w-full mt-0 mx-auto px-0">
+                <div
+                    class="p-6 rounded-lg text-center w-full bg-white"
+                >
+                    <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold shadow-md py-8">
+                        <i class="fa-solid fa-phone text-[#005692] mr-2"></i> Gestion des appels téléphoniques
+                    </h2>
+                </div>
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
                         <div

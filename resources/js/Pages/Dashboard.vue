@@ -286,15 +286,15 @@ watch(() => days.value, updateButtonStates, { deep: true });
         </template>
 
         <section
-            class="attendance-section max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 rounded-lg shadow-lg bg-white pt-8 pb-20"
+            class="attendance-section max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-8 pb-20"
         >
-            <div class="mt-8 flex flex-col items-center space-y-8">
+            <div class="flex flex-col items-center space-y-8">
                 <!-- Bloc de date, heure, et citation -->
                 <div
-                    class="p-6 rounded-lg text-center w-full bg-white shadow-md"
+                    class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
                 >
                     <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
-                        <i class="fas fa-clock text-blue-600 mr-2"></i> Suivi du
+                        <i class="fas fa-clock text-[#005692] mr-2"></i> Suivi du
                         temps de travail
                     </h2>
                 </div>

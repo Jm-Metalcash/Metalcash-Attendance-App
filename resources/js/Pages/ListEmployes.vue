@@ -70,6 +70,13 @@ const closeModal = () => {
         <div
             class="container flex-grow max-w-[1700px] mt-16 mx-auto px-4 sm:px-8 bg-white rounded-lg shadow-lg py-8 min-h-[800px]"
         >
+        <div
+                    class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
+                >
+                    <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
+                        <i class="fa-solid fa-user text-[#005692] mr-2"></i> Gestion des employés
+                    </h2>
+                </div>
             <div class="py-8">
                 <!-- Titre de la page -->
                 <div>

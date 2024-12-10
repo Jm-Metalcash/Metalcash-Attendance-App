@@ -396,6 +396,13 @@ const removeDepartureTimeEdit = (index) => {
             <!-- Statistiques et filtres -->
             <div class="w-full mx-auto mb-2">
                 <div
+                    class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
+                >
+                    <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
+                        <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Historique des pointages
+                    </h2>
+                </div>
+                <div
                     class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                 >
                     <!-- Bouton pour ajouter un jour -->
