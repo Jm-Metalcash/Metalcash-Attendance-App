@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DayController;
 use App\Http\Controllers\RoleController;
@@ -35,6 +36,11 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
         return Inertia::render('Index');
     })->name('index');
 });
+
+
+//Récupère les users pour le Menu de navigation
+Route::get('/dashboard', [AuthenticatedSessionController::class, 'index'])->name('dashboard');
+
 
 
 // Route de dashboard

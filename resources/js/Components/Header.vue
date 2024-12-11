@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from "vue";
+import { ref, defineProps } from "vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 
@@ -9,12 +9,58 @@ defineProps({
         default: "Page",
     },
 });
+
+// État réactif pour suivre si l'input est en focus
+const isFocused = ref(false);
+
+const handleFocus = () => {
+    isFocused.value = true;
+};
+
+const handleBlur = () => {
+    isFocused.value = false;
+};
 </script>
 
 <template>
-    <div class="flex items-center justify-between px-0 py-3">
-        <!-- Titre de la page -->
-        <h1 class="text-2xl font-bold">{{ pageTitle }}</h1>
+    <div class="flex items-center justify-between px-0 py-0">
+        <!-- Barre de recherche -->
+        <div
+            class="relative transition-all"
+            :class="{ 'w-[500px] bg-white': isFocused, 'w-[300px]': !isFocused }"
+        >
+            <input
+                type="text"
+                placeholder="Rechercher..."
+                class="w-full py-2 pl-10 pr-4 text-gray-700 border rounded-full outline-none transition-all"
+                :class="{
+                    'border-blue-500': isFocused,
+                    'border-gray-300': !isFocused,
+                }"
+                @focus="handleFocus"
+                @blur="handleBlur"
+            />
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 transition-all"
+                    :class="{
+                        'text-blue-500': isFocused,
+                        'text-gray-400': !isFocused,
+                    }"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                </svg>
+            </div>
+        </div>
 
         <!-- Dropdown utilisateur -->
         <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -62,3 +108,9 @@ defineProps({
         </div>
     </div>
 </template>
+
+<style scoped>
+.transition-all {
+    transition: all 0.3s ease;
+}
+</style>

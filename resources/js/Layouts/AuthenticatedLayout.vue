@@ -3,13 +3,14 @@ import { ref, computed } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
-import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import Footer from "@/Components/Footer.vue";
 
 const page = usePage();
 const showingNavigationDropdown = ref(false); // Menu mobile
 const isMenuCollapsed = ref(false); // État du menu aside sur desktop
+const showTimeManagementSubMenu = ref(false);
+const showEmployeeManagementSubMenu = ref(false);
 const logoUrl = computed(() => "/images/logo-HD.png");
 </script>
 
@@ -101,55 +102,101 @@ const logoUrl = computed(() => "/images/logo-HD.png");
             <!-- Navigation Menu -->
             <nav class="flex-grow">
                 <ul class="list-none space-y-2 p-4">
+                    <!-- Gestion du temps de travail -->
                     <li>
-                        <Link
-                            :href="route('dashboard')"
-                            :class="[
-                                'flex items-center px-4 py-3 rounded hover:bg-gray-700',
-                                route().current('dashboard')
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300',
-                            ]"
+                        <div
+                            @click="
+                                showTimeManagementSubMenu =
+                                    !showTimeManagementSubMenu
+                            "
+                            class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
                         >
-                            <i class="fa fa-tachometer mr-3"></i>
-                            <span v-if="!isMenuCollapsed">Aujourd'hui</span>
-                        </Link>
+                            <i class="fa fa-clock mr-3"></i>
+                            <span v-if="!isMenuCollapsed"
+                                >Gestion du temps de travail</span
+                            >
+                            <i
+                                :class="{
+                                    'fa-chevron-down':
+                                        !showTimeManagementSubMenu,
+                                    'fa-chevron-up': showTimeManagementSubMenu,
+                                }"
+                                class="fa ml-auto"
+                            ></i>
+                        </div>
+                        <transition name="fade">
+                            <ul
+                                v-if="showTimeManagementSubMenu"
+                                class="pl-8 space-y-2"
+                            >
+                                <li>
+                                    <Link
+                                        :href="route('dashboard')"
+                                        class="block px-4 py-2 rounded hover:bg-gray-700"
+                                    >
+                                        Pointage
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        :href="route('historique')"
+                                        class="block px-4 py-2 rounded hover:bg-gray-700"
+                                    >
+                                        Historique
+                                    </Link>
+                                </li>
+                            </ul>
+                        </transition>
                     </li>
+
+                    <!-- Gestion des employés -->
                     <li>
-                        <Link
-                            :href="route('historique')"
-                            :class="[
-                                'flex items-center px-4 py-3 rounded hover:bg-gray-700',
-                                route().current('historique')
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300',
-                            ]"
-                        >
-                            <i class="fa fa-history mr-3"></i>
-                            <span v-if="!isMenuCollapsed">Historique</span>
-                        </Link>
-                    </li>
-                    <li
-                        v-if="
-                            page.props.auth.roles.includes('Admin') ||
-                            page.props.auth.roles.includes('Informatique')
-                        "
-                    >
-                        <Link
-                            :href="route('employes')"
-                            :class="[
-                                'flex items-center px-4 py-3 rounded hover:bg-gray-700',
-                                route().current('employes')
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300',
-                            ]"
+                        <div
+                            @click="
+                                showEmployeeManagementSubMenu =
+                                    !showEmployeeManagementSubMenu
+                            "
+                            class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
                         >
                             <i class="fa fa-user mr-3"></i>
-                            <span v-if="!isMenuCollapsed"
-                                >Gestion des employés</span
+                            <span>Gestion des employés</span>
+                            <i
+                                :class="{
+                                    'fa-chevron-down':
+                                        !showEmployeeManagementSubMenu,
+                                    'fa-chevron-up':
+                                        showEmployeeManagementSubMenu,
+                                }"
+                                class="fa ml-auto"
+                            ></i>
+                        </div>
+                        <transition name="fade">
+                            <ul
+                                v-if="showEmployeeManagementSubMenu"
+                                class="pl-8 space-y-2"
                             >
-                        </Link>
+                            
+                                <li
+                                    v-for="user in page.props.users"
+                                    :key="user.id"
+                                    class="block px-4 py-2 rounded hover:bg-gray-700 text-xs"
+                                >
+                                    <i class="fa fa-user mr-3"></i>
+                                    <Link :href="`/employes/${user.id}/profil`">
+                                        {{ user.name }}
+                                        <span class="text-xs text-gray-400">
+                                            ({{
+                                                user.roles
+                                                    .map((role) => role.name)
+                                                    .join(", ")
+                                            }})
+                                        </span>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </transition>
                     </li>
+
                     <li
                         v-if="
                             page.props.auth.roles.includes('Admin') ||
@@ -315,13 +362,13 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
                         >
-                            Aujourd'hui
+                            Gestion du temps de travail
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('historique')"
                             :active="route().current('historique')"
                         >
-                            Historique
+                            Historique du temps de travail
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             v-if="
@@ -382,7 +429,10 @@ const logoUrl = computed(() => "/images/logo-HD.png");
             </nav>
 
             <!-- Header Section -->
-            <header class="bg-white text-gray-800 shadow z-50" v-if="$slots.header">
+            <header
+                class="bg-white text-gray-800 shadow z-50"
+                v-if="$slots.header"
+            >
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
@@ -399,3 +449,15 @@ const logoUrl = computed(() => "/images/logo-HD.png");
         </div>
     </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+</style>

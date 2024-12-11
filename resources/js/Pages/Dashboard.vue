@@ -294,8 +294,7 @@ watch(() => days.value, updateButtonStates, { deep: true });
                     class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
                 >
                     <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
-                        <i class="fas fa-clock text-[#005692] mr-2"></i> Suivi du
-                        temps de travail
+                        <i class="fas fa-clock text-[#005692] mr-2"></i> Gestion du temps de travail
                     </h2>
                 </div>
 
