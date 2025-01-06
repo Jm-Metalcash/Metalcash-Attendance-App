@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
@@ -12,6 +12,31 @@ const isMenuCollapsed = ref(false); // État du menu aside sur desktop
 const showTimeManagementSubMenu = ref(false);
 const showEmployeeManagementSubMenu = ref(false);
 const logoUrl = computed(() => "/images/logo-HD.png");
+
+// Sauvegarder l'état du menu dans le localStorage
+const saveMenuState = () => {
+    localStorage.setItem('menuState', JSON.stringify({
+        isCollapsed: isMenuCollapsed.value,
+        timeManagement: showTimeManagementSubMenu.value,
+        employeeManagement: showEmployeeManagementSubMenu.value
+    }));
+};
+
+// Charger l'état du menu depuis le localStorage
+onMounted(() => {
+    const savedState = localStorage.getItem('menuState');
+    if (savedState) {
+        const state = JSON.parse(savedState);
+        isMenuCollapsed.value = state.isCollapsed;
+        showTimeManagementSubMenu.value = state.timeManagement;
+        showEmployeeManagementSubMenu.value = state.employeeManagement;
+    }
+});
+
+// Mettre à jour le localStorage quand l'état change
+watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu], () => {
+    saveMenuState();
+});
 </script>
 
 <template>
@@ -20,7 +45,7 @@ const logoUrl = computed(() => "/images/logo-HD.png");
         <aside
             :class="{
                 'w-80': !isMenuCollapsed,
-                'w-24': isMenuCollapsed,
+                'w-48': isMenuCollapsed,
             }"
             class="hidden md:flex bg-gray-800 text-gray-300 flex-col transition-all duration-300"
         >
@@ -112,37 +137,49 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
                         >
                             <i class="fa fa-clock mr-3"></i>
-                            <span v-if="!isMenuCollapsed"
-                                >Gestion du temps de travail</span
-                            >
+                            <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Gestion du temps de travail</span>
                             <i
                                 :class="{
-                                    'fa-chevron-down':
-                                        !showTimeManagementSubMenu,
-                                    'fa-chevron-up': showTimeManagementSubMenu,
+                                    'fa-chevron-down text-xs': !showTimeManagementSubMenu,
+                                    'fa-chevron-up text-xs': showTimeManagementSubMenu,
+                                    'ml-auto': !isMenuCollapsed,
+                                    'hidden': isMenuCollapsed
                                 }"
-                                class="fa ml-auto"
+                                class="fa"
                             ></i>
                         </div>
                         <transition name="fade">
                             <ul
                                 v-if="showTimeManagementSubMenu"
-                                class="pl-8 space-y-2"
+                                :class="{ 'pl-2': isMenuCollapsed, 'pl-8': !isMenuCollapsed }"
+                                class="space-y-2"
                             >
-                                <li>
+                                <li class="whitespace-nowrap overflow-hidden text-ellipsis">
                                     <Link
                                         :href="route('dashboard')"
-                                        class="block px-4 py-2 rounded hover:bg-gray-700"
+                                        class="block px-2 py-2 rounded hover:bg-gray-700"
+                                        :class="{
+                                            'bg-gray-700': route().current('dashboard'),
+                                            'text-[10px]': isMenuCollapsed,
+                                            'text-sm': !isMenuCollapsed
+                                        }"
                                     >
-                                        Pointage
+                                        <i class="fa-solid fa-stopwatch" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Pointage</span>
                                     </Link>
                                 </li>
-                                <li>
+                                <li class="whitespace-nowrap overflow-hidden text-ellipsis">
                                     <Link
                                         :href="route('historique')"
-                                        class="block px-4 py-2 rounded hover:bg-gray-700"
+                                        class="block px-2 py-2 rounded hover:bg-gray-700"
+                                        :class="{
+                                            'bg-gray-700': route().current('historique'),
+                                            'text-[10px]': isMenuCollapsed,
+                                            'text-sm': !isMenuCollapsed
+                                        }"
                                     >
-                                        Historique
+                                        <i class="fa-regular fa-calendar" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Historique</span>
                                     </Link>
                                 </li>
                             </ul>
@@ -159,42 +196,71 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
                         >
                             <i class="fa fa-user mr-3"></i>
-                            <span>Gestion des employés</span>
+                            <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Gestion des employés</span>
                             <i
                                 :class="{
-                                    'fa-chevron-down':
-                                        !showEmployeeManagementSubMenu,
-                                    'fa-chevron-up':
-                                        showEmployeeManagementSubMenu,
+                                    'fa-chevron-down text-xs': !showEmployeeManagementSubMenu,
+                                    'fa-chevron-up text-xs': showEmployeeManagementSubMenu,
+                                    'ml-auto': !isMenuCollapsed,
+                                    'hidden': isMenuCollapsed
                                 }"
-                                class="fa ml-auto"
+                                class="fa"
                             ></i>
                         </div>
                         <transition name="fade">
                             <ul
                                 v-if="showEmployeeManagementSubMenu"
-                                class="pl-8 space-y-2"
+                                :class="{ 'pl-2': isMenuCollapsed, 'pl-8': !isMenuCollapsed }"
+                                class="space-y-2"
                             >
-                            
+                                <li class="border-b-2 border-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <Link
+                                        :href="route('employes')"
+                                        class="block px-2 py-2 rounded hover:bg-gray-700"
+                                        :class="{
+                                            'bg-gray-700': route().current('employes'),
+                                            'text-[10px]': isMenuCollapsed,
+                                            'text-sm': !isMenuCollapsed
+                                        }"
+                                    >
+                                        <i class="fa-solid fa-users" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Liste des employés</span>
+                                    </Link>
+                                </li>
+                                
                                 <li
                                     v-for="user in page.props.users"
                                     :key="user.id"
-                                    class="block px-4 py-2 rounded hover:bg-gray-700 text-xs"
+                                    class="whitespace-nowrap overflow-hidden text-ellipsis block px-2 py-2 rounded hover:bg-gray-700"
                                 >
-                                    <i class="fa fa-user mr-3"></i>
+                                    <i class="fa fa-user" :class="{ 'mr-1': isMenuCollapsed, 'mr-3': !isMenuCollapsed }"></i>
                                     <Link :href="`/employes/${user.id}/profil`">
-                                        {{ user.name }}
-                                        <span class="text-xs text-gray-400">
-                                            ({{
-                                                user.roles
-                                                    .map((role) => role.name)
-                                                    .join(", ")
-                                            }})
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">
+                                            {{ user.name }}
+                                            <span class="text-gray-400">
+                                                ({{ user.roles.map((role) => role.name).join(", ") }})
+                                            </span>
                                         </span>
                                     </Link>
                                 </li>
                             </ul>
                         </transition>
+                    </li>
+
+                    <!-- Gestion des appels -->
+                    <li>
+                        <Link
+                            :href="route('managementCall')"
+                            class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
+                            :class="{
+                                'bg-gray-700': route().current('managementCall'),
+                                'text-[10px]': isMenuCollapsed,
+                                'text-sm': !isMenuCollapsed
+                            }"
+                        >
+                            <i class="fa fa-phone mr-3"></i>
+                            <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Gestion des appels</span>
+                        </Link>
                     </li>
 
                     <li
@@ -204,27 +270,13 @@ const logoUrl = computed(() => "/images/logo-HD.png");
                             page.props.auth.roles.includes('Comptabilité')
                         "
                     >
-                        <Link
-                            :href="route('managementCall')"
-                            :class="[
-                                'flex items-center px-4 py-3 rounded hover:bg-gray-700',
-                                route().current('managementCall')
-                                    ? 'bg-gray-700 text-white'
-                                    : 'text-gray-300',
-                            ]"
-                        >
-                            <i class="fa fa-phone mr-3"></i>
-                            <span v-if="!isMenuCollapsed"
-                                >Gestion des appels</span
-                            >
-                        </Link>
+                        
                     </li>
                 </ul>
             </nav>
 
             <!-- Footer / Logout -->
             <footer
-                v-if="!isMenuCollapsed"
                 class="border-t border-gray-700 p-4"
             >
                 <Link
