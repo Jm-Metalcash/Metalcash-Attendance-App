@@ -1,9 +1,22 @@
 <script setup>
 import { ref, computed } from "vue";
-import { router } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
+
+// Récupération du rôle de l'utilisateur
+const user = usePage().props.auth.user;
+const userRole = computed(() => user.roles?.[0]?.name || '');
+
+// Configuration des accès par rôle
+const roleAccess = {
+    Admin: ['dashboard', 'employes', 'management-call', 'index', 'historique'],
+    Informatique: ['dashboard', 'employes', 'management-call', 'index', 'historique'],
+    Comptabilité: ['dashboard', 'management-call', 'index', 'historique'],
+    Employé: ['dashboard', 'index', 'historique'],
+    Ouvrier: ['dashboard', 'index', 'historique']
+};
 
 // Liste des routes avec leurs mots-clés associés
-const routes = [
+const allRoutes = [
     {
         path: '/pointage',
         name: 'dashboard',
@@ -36,6 +49,15 @@ const routes = [
     },
 ];
 
+// Filtrer les routes selon le rôle de l'utilisateur
+const routes = computed(() => {
+    const role = userRole.value;
+    const allowedRoutes = roleAccess[role] || [];
+    console.log('Role actuel:', role); // Pour le débogage
+    console.log('Routes autorisées:', allowedRoutes); // Pour le débogage
+    return allRoutes.filter(route => allowedRoutes.includes(route.name));
+});
+
 // État réactif pour la recherche
 const searchQuery = ref('');
 const isFocused = ref(false);
@@ -48,7 +70,7 @@ const filteredSuggestions = computed(() => {
     const query = searchQuery.value.toLowerCase();
     const words = query.split(' ').filter(word => word.length > 0);
     
-    return routes
+    return routes.value
         .map(route => {
             // Créer une chaîne de recherche qui inclut tous les mots-clés
             const searchString = [
@@ -153,3 +175,9 @@ const navigateToRoute = (routeName) => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.transition-all {
+    transition: all 0.3s ease;
+}
+</style>
