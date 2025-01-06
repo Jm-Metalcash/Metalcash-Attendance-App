@@ -55,10 +55,9 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
             >
                 <Link :href="route('index')" class="flex items-center">
                     <img
-                        v-if="!isMenuCollapsed"
                         :src="logoUrl"
                         alt="Logo"
-                        class="w-16 h-16"
+                        :class="{ 'w-16 h-16': !isMenuCollapsed, 'w-12 h-12': isMenuCollapsed }"
                     />
                     <span
                         v-if="!isMenuCollapsed"
