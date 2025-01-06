@@ -186,7 +186,13 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                     </li>
 
                     <!-- Gestion des employés -->
-                    <li>
+                    <li v-if="
+                                page.props.auth.roles &&
+                                (page.props.auth.roles.includes('Admin') ||
+                                    page.props.auth.roles.includes(
+                                        'Informatique'
+                                    ))
+                            ">
                         <div
                             @click="
                                 showEmployeeManagementSubMenu =
@@ -247,7 +253,16 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                     </li>
 
                     <!-- Gestion des appels -->
-                    <li>
+                    <li v-if="
+                                page.props.auth.roles &&
+                                (page.props.auth.roles.includes('Admin') ||
+                                    page.props.auth.roles.includes(
+                                        'Informatique'
+                                    )||
+                                    page.props.auth.roles.includes(
+                                        'Comptabilité'
+                                    ))
+                            ">
                         <Link
                             :href="route('managementCall')"
                             class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
