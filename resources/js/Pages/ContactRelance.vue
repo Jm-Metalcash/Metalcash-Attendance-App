@@ -10,6 +10,7 @@ const sortDirection = ref('desc');
 const showConfirmDialog = ref(false);
 const currentContact = ref(null);
 const showSuccessMessage = ref(false);
+const tempActionValue = ref(null);
 
 const toggleSort = () => {
     sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc';
@@ -25,29 +26,32 @@ const getActionLabel = (value) => {
     return actions[value] || '';
 };
 
-const confirmAction = (contact) => {
+const confirmAction = (contact, newValue) => {
     currentContact.value = contact;
+    tempActionValue.value = newValue;
     showConfirmDialog.value = true;
 };
 
 const handleConfirm = () => {
-    router.post('/update-action', {
-        id: currentContact.value.id,
-        type: currentContact.value.type,
-        action: currentContact.value.action_relance
-    });
+    if (currentContact.value && tempActionValue.value !== null) {
+        currentContact.value.action_relance = tempActionValue.value;
+        
+        router.post('/update-action', {
+            id: currentContact.value.id,
+            type: currentContact.value.type,
+            action: tempActionValue.value
+        });
 
-    showConfirmDialog.value = false;
-    showSuccessMessage.value = true;
-    setTimeout(() => {
-        showSuccessMessage.value = false;
-    }, 2000);
+        showConfirmDialog.value = false;
+        showSuccessMessage.value = true;
+        setTimeout(() => {
+            showSuccessMessage.value = false;
+        }, 2000);
+    }
 };
 
 const handleCancel = () => {
-    if (currentContact.value) {
-        currentContact.value.action_relance = currentContact.value.action_relance;
-    }
+    tempActionValue.value = null;
     showConfirmDialog.value = false;
 };
 
@@ -85,7 +89,7 @@ const sortedContacts = computed(() => {
                 <h3 class="text-lg font-semibold mb-4">Confirmation</h3>
                 <p class="mb-6">
                     Voulez-vous vraiment marquer <span class="font-semibold">{{ currentContact?.name }}</span> 
-                    comme <span class="font-semibold">{{ getActionLabel(currentContact?.action_relance) }}</span> ?
+                    comme <span class="font-semibold">{{ getActionLabel(tempActionValue) }}</span> ?
                 </p>
                 <div class="flex justify-end space-x-3">
                     <button 
@@ -160,8 +164,8 @@ const sortedContacts = computed(() => {
                             </td>
                             <td class="border-b border-gray-200 px-6 py-4">
                                 <select
-                                    v-model="contact.action_relance"
-                                    @change="confirmAction(contact)"
+                                    :value="contact.action_relance"
+                                    @change="confirmAction(contact, $event.target.value)"
                                     class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-[#005692] focus:border-[#005692]">
                                     <option value="0">À contacter</option>
                                     <option value="1">Clôturé</option>
