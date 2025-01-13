@@ -13,6 +13,7 @@ use App\Http\Controllers\NoteProspectController;
 use App\Http\Controllers\NoteClientController;
 use App\Http\Controllers\BordereauHistoriqueController;
 use App\Http\Controllers\BordereauInformationController;
+use App\Http\Controllers\ContactRelanceController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -111,6 +112,11 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
     Route::post('clients/{client}/bordereau_historique', [BordereauHistoriqueController::class, 'store']);
 });
 
+// Route pour la page de relance des contacts
+Route::middleware(['auth', 'role:Admin,Informatique', RestrictIP::class])->group(function () {
+    Route::get('/liste-de-rappels', [ContactRelanceController::class, 'index'])->name('contactRelance');
+    Route::post('/update-action', [ContactRelanceController::class, 'updateAction'])->name('updateAction');
+});
 
 // Routes pour le reset du mot de passe
 Route::post('/send-reset-link', [PasswordResetController::class, 'sendResetLink'])->name('password.send-link');

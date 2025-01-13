@@ -255,7 +255,7 @@ watch(filteredResults, (newValue) => {
                     class="p-6 rounded-lg text-center w-full bg-white"
                 >
                     <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold shadow-md py-8">
-                        <i class="fa-solid fa-phone text-[#005692] mr-2"></i> Gestion des appels téléphoniques
+                        <i class="fa-solid fa-phone-volume text-[#005692] mr-2"></i> Gestion des appels téléphoniques
                     </h2>
                 </div>
                 <div class="flex justify-center p-4 px-3 py-10">

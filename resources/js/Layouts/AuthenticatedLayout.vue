@@ -11,6 +11,7 @@ const showingNavigationDropdown = ref(false); // Menu mobile
 const isMenuCollapsed = ref(false); // État du menu aside sur desktop
 const showTimeManagementSubMenu = ref(false);
 const showEmployeeManagementSubMenu = ref(false);
+const showCallManagementSubMenu = ref(false);
 const logoUrl = computed(() => "/images/logo-HD.png");
 
 // Sauvegarder l'état du menu dans le localStorage
@@ -18,7 +19,8 @@ const saveMenuState = () => {
     localStorage.setItem('menuState', JSON.stringify({
         isCollapsed: isMenuCollapsed.value,
         timeManagement: showTimeManagementSubMenu.value,
-        employeeManagement: showEmployeeManagementSubMenu.value
+        employeeManagement: showEmployeeManagementSubMenu.value,
+        callManagement: showCallManagementSubMenu.value
     }));
 };
 
@@ -30,11 +32,12 @@ onMounted(() => {
         isMenuCollapsed.value = state.isCollapsed;
         showTimeManagementSubMenu.value = state.timeManagement;
         showEmployeeManagementSubMenu.value = state.employeeManagement;
+        showCallManagementSubMenu.value = state.callManagement;
     }
 });
 
 // Mettre à jour le localStorage quand l'état change
-watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu], () => {
+watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu, showCallManagementSubMenu], () => {
     saveMenuState();
 });
 </script>
@@ -263,18 +266,61 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                         'Comptabilité'
                                     ))
                             ">
-                        <Link
-                            :href="route('managementCall')"
+                        <div
+                            @click="showCallManagementSubMenu = !showCallManagementSubMenu"
                             class="flex items-center px-4 py-3 rounded cursor-pointer hover:bg-gray-700"
                             :class="{
-                                'bg-gray-700': route().current('managementCall'),
-                                'text-[10px]': isMenuCollapsed,
-                                'text-sm': !isMenuCollapsed
+                                'bg-gray-700': route().current('managementCall') || route().current('contactRelance'),
                             }"
                         >
                             <i class="fa fa-phone mr-3"></i>
                             <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Gestion des appels</span>
-                        </Link>
+                            <i
+                                :class="{
+                                    'fa-chevron-down text-xs': !showCallManagementSubMenu,
+                                    'fa-chevron-up text-xs': showCallManagementSubMenu,
+                                    'ml-auto': !isMenuCollapsed,
+                                    'hidden': isMenuCollapsed
+                                }"
+                                class="fa"
+                            ></i>
+                        </div>
+                        <transition name="fade">
+                            <ul
+                                v-if="showCallManagementSubMenu"
+                                :class="{ 'pl-2': isMenuCollapsed, 'pl-8': !isMenuCollapsed }"
+                                class="space-y-2"
+                            >
+                                <li class="whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <Link
+                                        :href="route('managementCall')"
+                                        class="block px-2 py-2 rounded hover:bg-gray-700"
+                                        :class="{
+                                            'bg-gray-700': route().current('managementCall'),
+                                            'text-[10px]': isMenuCollapsed,
+                                            'text-sm': !isMenuCollapsed
+                                        }"
+                                    >
+                                        <i class="fa-solid fa-phone-volume" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Gestion des fournisseurs</span>
+                                    </Link>
+                                </li>
+                                <li v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique'))" class="whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <Link
+                                        :href="route('contactRelance')"
+                                        class="block px-2 py-2 rounded hover:bg-gray-700"
+                                        :class="{
+                                            'bg-gray-700': route().current('contactRelance'),
+                                            'text-[10px]': isMenuCollapsed,
+                                            'text-sm': !isMenuCollapsed
+                                        }"
+                                    >
+                                        <i class="fa-solid fa-clock-rotate-left" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Liste de rappels</span>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </transition>
                     </li>
 
                     <li
