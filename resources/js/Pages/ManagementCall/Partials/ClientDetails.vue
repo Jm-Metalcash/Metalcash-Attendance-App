@@ -5,7 +5,7 @@ Enregistre comme ceci :
         <div
             v-if="
                 editableClient.notes.some((note) =>
-                    ['avertissement', 'premium', 'attention'].includes(
+                    ['avertissement', 'premium', 'attention', 'a_contacter'].includes(
                         note.type
                     )
                 )
@@ -86,6 +86,8 @@ Enregistre comme ceci :
                                         ? 'bg-green-50 text-green-800'
                                         : note.type === 'attention'
                                         ? 'bg-red-50 text-red-800'
+                                        : note.type === 'a_contacter'
+                                        ? 'bg-purple-50 text-purple-800'
                                         : 'bg-gray-50 text-gray-800'
                                 "
                             >
@@ -243,6 +245,7 @@ Enregistre comme ceci :
                         <option value="attention">
                             Note pour client à éviter
                         </option>
+                        <option value="a_contacter">Note pour contacter</option>
                     </select>
                     <textarea
                         v-model="newNote.content"
@@ -516,7 +519,7 @@ const props = defineProps({
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
     const importantNotes = editableClient.notes
-        .filter((note) => ["avertissement", "premium", "attention"].includes(note.type))
+        .filter((note) => ["avertissement", "premium", "attention", "a_contacter"].includes(note.type))
         .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date
     return importantNotes.length > 0 ? importantNotes[0].type : null;
 });
@@ -528,6 +531,7 @@ const getWarningClass = (type) => {
             avertissement: "bg-orange-100 text-orange-700",
             premium: "bg-green-100 text-green-700",
             attention: "bg-red-100 text-red-700",
+            a_contacter: "bg-purple-100 text-purple-700",
         }[type] || "bg-gray-100 text-gray-700"
     );
 };
@@ -539,6 +543,7 @@ const getWarningText = (type) => {
             avertissement: "Ce client possède un avertissement (voir notes).",
             premium: "Ce client est identifié comme premium (voir notes).",
             attention: "Ce client est à éviter (voir notes).",
+            a_contacter: "Ce client doit être contacté (voir notes).",
         }[type] || ""
     );
 };

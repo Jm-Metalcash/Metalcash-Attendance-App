@@ -139,7 +139,7 @@ class ProspectController extends Controller
                 'notes' => function ($query) {
                     $query->select('id', 'prospect_id', 'type', 'content', 'note_date', 'created_by', 'updated_by')
                         ->with(['creator:id,name', 'updater:id,name'])
-                        ->whereIn('type', ['information', 'premium', 'avertissement', 'attention'])
+                        ->whereIn('type', ['information', 'premium', 'avertissement', 'attention', 'a_contacter'])
                         ->latest('note_date');
                 },
                 'bordereauHistoriques.informations',
@@ -175,7 +175,7 @@ class ProspectController extends Controller
             'notes' => function ($query) {
                 $query->select('id', 'prospect_id', 'type', 'content', 'note_date', 'created_by', 'updated_by')
                     ->with(['creator:id,name', 'updater:id,name'])
-                    ->whereIn('type', ['information', 'avertissement', 'premium', 'attention'])
+                    ->whereIn('type', ['information', 'avertissement', 'premium', 'attention', 'a_contacter'])
                     ->latest('note_date');
             },
             'bordereauHistoriques.informations',

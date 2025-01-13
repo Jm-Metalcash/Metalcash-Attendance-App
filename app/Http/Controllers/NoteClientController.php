@@ -16,7 +16,7 @@ class NoteClientController extends Controller
         $validatedData = $request->validate([
             'content' => 'nullable|string|max:1000',
             'note_date' => 'nullable|date',
-            'type' => 'required|string|in:information,avertissement,premium,attention',
+            'type' => 'required|string|in:information,avertissement,premium,attention,a_contacter',
         ]);
 
         if (!empty($validatedData['note_date'])) {
@@ -44,7 +44,7 @@ class NoteClientController extends Controller
     {
         $validated = $request->validate([
             'content' => 'required|string|max:500',
-            'type' => 'required|string|in:information,avertissement,premium,attention',
+            'type' => 'required|string|in:information,avertissement,premium,attention,a_contacter',
         ]);
 
         try {

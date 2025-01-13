@@ -73,9 +73,10 @@ const getNoteClass = (prospect) => {
     const noteType = prospect?.last_important_note?.type || null;
 
     const classes = {
-        premium: "bg-green-100 text-green-700 hover:bg-green-200",
-        avertissement: "bg-orange-100 text-orange-700 hover:bg-orange-200",
-        attention: "bg-red-100 text-red-700 hover:bg-red-200",
+        premium: "bg-green-50 text-green-800 hover:bg-green-100",
+        avertissement: "bg-orange-50 text-orange-800 hover:bg-orange-100",
+        attention: "bg-red-50 text-red-800 hover:bg-red-100",
+        a_contacter: "bg-purple-50 text-purple-800 hover:bg-purple-100",
     };
 
     return classes[noteType] || "bg-sky-50 text-gray-700 hover:bg-blue-100";

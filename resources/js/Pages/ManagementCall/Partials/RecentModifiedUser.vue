@@ -3,10 +3,11 @@ defineProps(["recentModifiedProspects", "selectProspect", "formatDate"]);
 
 const getNoteClass = (noteType) => {
     return {
-        avertissement: "bg-orange-100 text-orange-700",
-        premium: "bg-green-100 text-green-700",
-        attention: "bg-red-100 text-red-700",
-    }[noteType] || "bg-gray-50 text-gray-700";
+        avertissement: "bg-orange-50 text-orange-800",
+        premium: "bg-green-50 text-green-800",
+        attention: "bg-red-50 text-red-800",
+        a_contacter: "bg-purple-50 text-purple-800",
+    }[noteType] || "bg-gray-50 text-gray-800";
 };
 </script>
 
@@ -30,7 +31,7 @@ const getNoteClass = (noteType) => {
             <!-- Nom complet -->
             <div class="flex w-full sm:w-1/6 items-center">
                 <span
-                    :class="[ 
+                    :class="[
                         'flex justify-center items-center mr-4 h-3 w-3 rounded-full',
                         prospect.type === 'prospect' ? 'bg-yellow-500' : 'bg-blue-500',
                     ]"

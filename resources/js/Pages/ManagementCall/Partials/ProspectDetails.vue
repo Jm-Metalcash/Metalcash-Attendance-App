@@ -4,7 +4,7 @@
         <div
             v-if="
                 editableProspect.notes.some((note) =>
-                    ['avertissement', 'premium', 'attention'].includes(
+                    ['avertissement', 'premium', 'attention', 'a_contacter'].includes(
                         note.type
                     )
                 )
@@ -89,6 +89,8 @@
                                         ? 'bg-green-50 text-green-800'
                                         : note.type === 'attention'
                                         ? 'bg-red-50 text-red-800'
+                                        : note.type === 'a_contacter'
+                                        ? 'bg-purple-50 text-purple-800'
                                         : 'bg-gray-50 text-gray-800'
                                 "
                             >
@@ -249,6 +251,7 @@
                         <option value="attention">
                             Note pour prospect à éviter
                         </option>
+                        <option value="a_contacter">Note pour contacter</option>
                     </select>
                     <textarea
                         v-model="newNote.content"
@@ -497,7 +500,9 @@ const successMessages = reactive({
 const updateLatestWarningType = () => {
     const importantNotes = [...editableProspect.notes]
         .filter((note) =>
-            ["avertissement", "premium", "attention"].includes(note.type)
+            ["avertissement", "premium", "attention", "a_contacter"].includes(
+                note.type
+            )
         )
         .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date décroissante
 
@@ -509,12 +514,15 @@ const updateLatestWarningType = () => {
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
     const importantNotes = [...editableProspect.notes]
-        .filter((note) => ["avertissement", "premium", "attention"].includes(note.type))
+        .filter((note) =>
+            ["avertissement", "premium", "attention", "a_contacter"].includes(
+                note.type
+            )
+        )
         .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date
 
     return importantNotes.length > 0 ? importantNotes[0].type : null; // La plus récente
 });
-
 
 // Mapping des classes CSS
 const getWarningClass = (type) => {
@@ -523,6 +531,7 @@ const getWarningClass = (type) => {
             avertissement: "bg-orange-100 text-orange-700",
             premium: "bg-green-100 text-green-700",
             attention: "bg-red-100 text-red-700",
+            a_contacter: "bg-purple-100 text-purple-700",
         }[type] || "bg-gray-100 text-gray-700"
     );
 };
@@ -534,6 +543,7 @@ const getWarningText = (type) => {
             avertissement: "Ce prospect possède un avertissement (voir notes).",
             premium: "Ce prospect est identifié comme premium (voir notes).",
             attention: "Ce prospect est à éviter (voir notes).",
+            a_contacter: "Ce prospect doit être contacté (voir notes).",
         }[type] || ""
     );
 };
@@ -670,7 +680,6 @@ const saveNote = (note) => {
         });
 };
 
-
 // Ajout de nouvelles notes
 const showAddNoteSuccess = ref(false);
 const showAddNote = ref(false);
@@ -709,7 +718,6 @@ const saveNewNote = () => {
             });
     }
 };
-
 
 // Fonction pour vérifier si une note est modifiable/supprimable
 const isNoteEditable = (noteDate) => {

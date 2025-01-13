@@ -42,7 +42,7 @@ class Prospect extends Model
     public function lastImportantNote()
     {
         return $this->hasOne(NoteProspect::class, 'prospect_id')
-            ->whereIn('type', ['premium', 'avertissement', 'attention'])
+            ->whereIn('type', ['premium', 'avertissement', 'attention', 'a_contacter'])
             ->latest('note_date');
     }
 
@@ -50,7 +50,7 @@ class Prospect extends Model
     public function getHasWarningAttribute()
     {
         return $this->notes()
-            ->whereIn('type', ['avertissement', 'premium', 'attention'])
+            ->whereIn('type', ['avertissement', 'premium', 'attention', 'a_contacter'])
             ->exists();
     }
 

@@ -388,10 +388,9 @@ watch(filteredResults, (newValue) => {
             </div>
 
             <div class="mb-12 flex justify-center">
-                <Link :href="route('home')">
+                <Link :href="route('managementCall')">
                     <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à
-                        l'accueil
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la gestion des appels
                     </PrimaryButton>
                 </Link>
             </div>
