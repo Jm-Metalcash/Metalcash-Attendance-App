@@ -35,7 +35,7 @@ const confirmAction = (contact, newValue) => {
 const handleConfirm = () => {
     if (currentContact.value && tempActionValue.value !== null) {
         currentContact.value.action_relance = tempActionValue.value;
-        
+
         router.post('/update-action', {
             id: currentContact.value.id,
             type: currentContact.value.type,
@@ -67,11 +67,11 @@ const sortedContacts = computed(() => {
 </script>
 
 <template>
-    <Head title="Liste des rappels" />
+    <Head title="Demande de rappels" />
 
     <AuthenticatedLayout>
         <template #header>
-            <Header :pageTitle="'Liste des rappels'" />
+            <Header :pageTitle="'Demande de rappels'" />
         </template>
 
         <!-- Message de succès -->
@@ -109,7 +109,7 @@ const sortedContacts = computed(() => {
         <div class="container flex-grow max-w-[1700px] mt-16 mx-auto px-4 sm:px-8 bg-white rounded-lg shadow-lg py-8 min-h-[800px]">
             <div class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8">
                 <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
-                    <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Liste de rappels
+                    <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Demande de rappels
                 </h2>
             </div>
 

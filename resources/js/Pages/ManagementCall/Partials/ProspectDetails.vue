@@ -251,7 +251,7 @@
                         <option value="attention">
                             Note pour prospect à éviter
                         </option>
-                        <option value="a_contacter">Note pour contacter</option>
+                        <option value="a_contacter">Ajouter aux demandes de rappels</option>
                     </select>
                     <textarea
                         v-model="newNote.content"
