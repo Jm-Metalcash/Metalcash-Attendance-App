@@ -7,6 +7,7 @@ import ProspectDetails from "./ManagementCall/Partials/ProspectDetails.vue";
 import ClientDetails from "./ManagementCall/Partials/ClientDetails.vue";
 import RecentAddedUser from "./ManagementCall/Partials/RecentAddedUser.vue";
 import RecentModifiedUser from "./ManagementCall/Partials/RecentModifiedUser.vue";
+import Legend from "@/Components/Legend.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import Header from "@/Components/Header.vue";
 import AddUserModal from "./ManagementCall/Partials/AddUserModal.vue";
@@ -85,8 +86,8 @@ const filteredResults = computed(() => {
 
                 const phoneMatches = item.phone
                     ? normalizePhone(item.phone).includes(
-                          normalizePhone(searchLower)
-                      )
+                        normalizePhone(searchLower)
+                    )
                     : false;
 
                 return (
@@ -234,6 +235,7 @@ watch(filteredResults, (newValue) => {
 </script>
 
 <template>
+
     <Head title="Gestion des appels téléphoniques" />
 
     <AuthenticatedLayout>
@@ -241,147 +243,90 @@ watch(filteredResults, (newValue) => {
             <Header :pageTitle="'Gestion des appels téléphones'" />
         </template>
 
-        <FlashMessage
-            v-if="showAddConfirmation"
-            message="Prospect ajouté avec succès."
-            @close="showAddConfirmation = false"
-        />
+        <FlashMessage v-if="showAddConfirmation" message="Prospect ajouté avec succès."
+            @close="showAddConfirmation = false" />
 
         <div
-            class="container max-w-[1700px] mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 md:mt-16 rounded-lg shadow-lg bg-white min-h-[800px]"
-        >
+            class="container max-w-[1700px] mx-auto flex flex-col flex-grow items-center px-0 md:px-4 sm:px-8 md:mt-16 rounded-lg shadow-lg bg-white min-h-[800px]">
             <div class="w-full mt-0 mx-auto px-0">
-                <div
-                    class="p-6 rounded-lg text-center w-full bg-white"
-                >
+                <div class="p-6 rounded-lg text-center w-full bg-white">
                     <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold shadow-md py-8">
                         <i class="fa-solid fa-phone-volume text-[#005692] mr-2"></i> Gestion des appels téléphoniques
                     </h2>
                 </div>
                 <div class="flex justify-center p-4 px-3 py-10">
                     <div class="w-full">
-                        <div
-                            class="bg-white px-3 py-4 pb-6 mb-4"
-                        >
+                        <div class="bg-white px-3 py-4 pb-6 mb-4">
                             <!-- Conteneur pour "Rechercher un prospect" et la barre de recherche -->
-                            <div
-                                class="flex flex-row justify-between items-center mb-1 md:mb-6"
-                            >
+                            <div class="flex flex-row justify-between items-center mb-1 md:mb-6">
                                 <!-- Rechercher un prospect -->
-                                <div
-                                    class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0"
-                                >
+                                <div class="text-gray-700 pt-4 md:pt-0 text-sm md:text-lg font-semibold mb-4 sm:mb-0">
                                     Rechercher un Prospect ou Fournisseur
                                     existant
                                 </div>
-                                <!-- Bouton Ajouter un prospect -->
-                                <!-- <button
-                                    @click="toggleModal"
-                                    class="text-xs md:text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    Ajouter un prospect
-                                </button> -->
                             </div>
 
                             <!-- BARRE DE RECHERCHE -->
                             <div
-                                class="flex items-center bg-[rgb(237,242,247)] rounded-md mb-14 border-b-2 border-gray-300"
-                            >
+                                class="flex items-center bg-[rgb(237,242,247)] rounded-md mb-14 border-b-2 border-gray-300">
                                 <div class="pl-2">
-                                    <svg
-                                        class="fill-current text-gray-400 w-6 h-6"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            class="heroicon-ui"
-                                            d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"
-                                        />
+                                    <svg class="fill-current text-gray-400 w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24">
+                                        <path class="heroicon-ui"
+                                            d="M16.32 14.9l5.39 5.4a1 1 0 0 1-1.42 1.4l-5.38-5.38a8 8 0 1 1 1.41-1.41zM10 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" />
                                     </svg>
                                 </div>
-                                <input
-                                    v-model="searchTerm"
+                                <input v-model="searchTerm"
                                     class="w-full rounded-md text-sm md:text-base bg-[rgb(237,242,247)] text-gray-500 leading-tight focus:outline-none focus:ring-0 border-none py-3 px-2 placeholder-gray-500 placeholder-opacity-60"
-                                    id="search"
-                                    type="text"
-                                    placeholder="Numéro de téléphone, Nom ou Prénom"
-                                />
+                                    id="search" type="text" placeholder="Numéro de téléphone, Nom ou Prénom" />
                             </div>
 
                             <!-- Affichage de la liste des prospects filtrés -->
-                            <FilteredUserList
-                                v-if="filteredResults.length > 0"
-                                :filteredProspects="filteredResults"
-                                :selectProspect="selectItem"
-                            />
+                            <FilteredUserList v-if="filteredResults.length > 0" :filteredProspects="filteredResults"
+                                :selectProspect="selectItem" />
 
                             <!-- Aucun résultat -->
-                            <div
-                                v-else-if="searchTerm"
-                                class="text-center mt-8 text-gray-600 text-base"
-                            >
+                            <div v-else-if="searchTerm" class="text-center mt-8 text-gray-600 text-base">
                                 Aucun résultat trouvé pour "{{ searchTerm }}"
-                                <button
-                                    @click="toggleModal"
-                                    class="text-xs md:text-sm bg-gray-50 hover:bg-gray-200 text-gray-700 border border-gray-300 font-bold py-2 px-4 rounded block mx-auto mt-3"
-                                >
-                                <i class="fa-solid fa-plus text-xs"></i> Ajouter un prospect
+                                <button @click="toggleModal"
+                                    class="text-xs md:text-sm bg-gray-50 hover:bg-gray-200 text-gray-700 border border-gray-300 font-bold py-2 px-4 rounded block mx-auto mt-3">
+                                    <i class="fa-solid fa-plus text-xs"></i> Ajouter un prospect
                                 </button>
                             </div>
 
                             <!-- Détails de l'élément sélectionné -->
                             <div v-if="selectedItem && !searchTerm">
-                                <ProspectDetails
-                                    v-if="!isSelectedClient"
-                                    :prospect="selectedItem"
-                                    @prospect-updated="updateProspectInList"
-                                    @closeUserDetails="closeProspectDetails"
-                                />
-                                <ClientDetails
-                                    v-else
-                                    :client="selectedItem"
-                                    @client-updated="updateClientInList"
-                                    @closeUserDetails="closeProspectDetails"
-                                />
+                                <ProspectDetails v-if="!isSelectedClient" :prospect="selectedItem"
+                                    @prospect-updated="updateProspectInList" @closeUserDetails="closeProspectDetails" />
+                                <ClientDetails v-else :client="selectedItem" @client-updated="updateClientInList"
+                                    @closeUserDetails="closeProspectDetails" />
                             </div>
+                            
 
                             <!-- Autres composants uniquement si aucun prospect n'est sélectionné -->
                             <div v-else>
                                 <!-- Historique des modifications des prospects -->
-                                <div
-                                    v-if="!searchTerm"
-                                    class="client-manage-panel"
-                                >
+                                <div v-if="!searchTerm" class="client-manage-panel">
                                     <!-- PANEL ADMIN -->
                                     <div class="admin-panel-clients">
                                         <!-- Affiche les 10 derniers prospects modifiés -->
-                                        <RecentModifiedUser
-                                            :recentModifiedProspects="
-                                                recentModifiedProspects
-                                            "
-                                            :selectProspect="selectItem"
-                                            :formatDate="formatDate"
-                                        />
+                                        <RecentModifiedUser :recentModifiedProspects="recentModifiedProspects
+                                            " :selectProspect="selectItem" :formatDate="formatDate" />
+
+                                        <!-- LEGENDE -->
+                                        <Legend />
+
+
                                         <!-- Affiche les 20 derniers prospects ajoutés -->
-                                        <RecentAddedUser
-                                            class="mt-12"
-                                            :recentAddedProspects="
-                                                recentAddedProspects
-                                            "
-                                            :selectProspect="selectItem"
-                                            :formatDate="formatDate"
-                                        />
+                                        <RecentAddedUser class="mt-12" :recentAddedProspects="recentAddedProspects
+                                            " :selectProspect="selectItem" :formatDate="formatDate" />
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Modal d'ajout de prospect -->
-                            <AddUserModal
-                                :showModal="showModal"
-                                :newProspect="newProspect"
-                                @toggleModal="toggleModal"
-                                @addProspect="handleAddProspect"
-                            />
+                            <AddUserModal :showModal="showModal" :newProspect="newProspect" @toggleModal="toggleModal"
+                                @addProspect="handleAddProspect" />
                         </div>
                     </div>
                 </div>
@@ -389,9 +334,9 @@ watch(filteredResults, (newValue) => {
 
             <div class="mb-12 flex justify-center">
                 <Link :href="route('managementCall')">
-                    <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à la gestion des appels
-                    </PrimaryButton>
+                <PrimaryButton>
+                    <i class="fas fa-arrow-left mr-2"></i> Retour à la gestion des appels
+                </PrimaryButton>
                 </Link>
             </div>
         </div>

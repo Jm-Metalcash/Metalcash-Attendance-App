@@ -76,7 +76,6 @@ const getNoteClass = (prospect) => {
         premium: "bg-green-50 text-green-800 hover:bg-green-100",
         avertissement: "bg-orange-50 text-orange-800 hover:bg-orange-100",
         attention: "bg-red-50 text-red-800 hover:bg-red-100",
-        a_contacter: "bg-purple-50 text-purple-800 hover:bg-purple-100",
     };
 
     return classes[noteType] || "bg-sky-50 text-gray-700 hover:bg-blue-100";

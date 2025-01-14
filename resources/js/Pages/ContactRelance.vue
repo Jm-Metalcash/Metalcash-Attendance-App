@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Header from "@/Components/Header.vue";
+import Legend from "@/Components/Legend.vue";
 import { Head, usePage, router } from "@inertiajs/vue3";
 import { ref, computed } from 'vue';
 
@@ -176,18 +177,9 @@ const sortedContacts = computed(() => {
                         </tr>
                     </tbody>
                 </table>
-                <!-- Légende -->
-                <div class="my-4 ml-6 flex items-center space-x-4 text-xs">
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 rounded-md bg-blue-100 mr-2"></span>
-                        <span class="text-blue-800">Client</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 rounded-md bg-[#f5e9c4] mr-2"></span>
-                        <span class="text-[#60501e]">Prospect</span>
-                    </div>
-                </div>
             </div>
+            <!-- Légende -->
+            <Legend />
         </div>
     </AuthenticatedLayout>
 </template>

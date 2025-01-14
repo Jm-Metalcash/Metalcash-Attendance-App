@@ -6,7 +6,6 @@ const getNoteClass = (noteType) => {
         avertissement: "bg-orange-50 text-orange-800",
         premium: "bg-green-50 text-green-800",
         attention: "bg-red-50 text-red-800",
-        a_contacter: "bg-purple-50 text-purple-800",
     }[noteType] || "bg-gray-50 text-gray-800";
 };
 </script>
@@ -14,7 +13,7 @@ const getNoteClass = (noteType) => {
 <template>
     <div
         v-if="recentModifiedProspects && recentModifiedProspects.length > 0"
-        class="mt-8 border p-4 bg-zinc-50"
+        class="mt-2 border p-4 bg-zinc-50"
     >
         <h3 class="text-base font-semibold py-3 px-5 bg-[#005691] text-zinc-50">
             Liste des dernières modifications
@@ -77,5 +76,6 @@ const getNoteClass = (noteType) => {
                 </span>
             </div>
         </div>
+        
     </div>
 </template>

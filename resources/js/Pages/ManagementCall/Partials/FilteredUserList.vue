@@ -1,5 +1,6 @@
 <script setup>
 import UserList from "./UserList.vue";
+import Legend from "@/Components/Legend.vue";
 
 defineProps(["filteredProspects", "selectProspect", "newProspectId"]);
 </script>
@@ -15,4 +16,5 @@ defineProps(["filteredProspects", "selectProspect", "newProspectId"]);
             :newProspectId="newProspectId"
         />
     </div>
+    <Legend />
 </template>
