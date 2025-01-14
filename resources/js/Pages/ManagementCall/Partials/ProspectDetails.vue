@@ -387,15 +387,24 @@ const updateLatestWarningType = () => {
 
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
-    const importantNotes = [...editableProspect.notes]
-        .filter((note) =>
-            ["avertissement", "premium", "attention", "a_contacter"].includes(
-                note.type
-            )
-        )
-        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date
+    const notes = editableProspect.notes;
+    
+    // Récupérer la note la plus récente parmi les types importants
+    const importantNotes = notes
+        .filter(note => ['avertissement', 'attention', 'premium'].includes(note.type))
+        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date));
 
-    return importantNotes.length > 0 ? importantNotes[0].type : null; // La plus récente
+    // Si on trouve une note importante, on la retourne
+    if (importantNotes.length > 0) {
+        return importantNotes[0].type;
+    }
+    
+    // Sinon, on vérifie s'il y a une note "a_contacter"
+    if (notes.some(note => note.type === 'a_contacter')) {
+        return 'a_contacter';
+    }
+    
+    return null;
 });
 
 // Mapping des classes CSS

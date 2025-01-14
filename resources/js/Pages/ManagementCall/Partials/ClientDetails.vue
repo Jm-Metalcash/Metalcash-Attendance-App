@@ -33,15 +33,15 @@ Enregistre comme ceci :
                         v-model="newNote.type"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                     >
-                        <option value="information">Note informative</option>
+                        <option value="information">Ajouter une note informative</option>
                         <option value="premium">
-                            Note pour client premium
+                            Ajouter une note pour client premium
                         </option>
                         <option value="avertissement">
-                            Note d'avertissement
+                            Ajouter une note d'avertissement
                         </option>
                         <option value="attention">
-                            Note pour client à éviter
+                            Ajouter une note pour client à éviter
                         </option>
                         <option value="a_contacter">Ajouter aux demandes de rappels</option>
                     </select>
@@ -515,12 +515,26 @@ const props = defineProps({
     },
 });
 
-// Calcul du type de la dernière note importante
+// Computed property pour déterminer le type de warning prioritaire
 const latestWarningType = computed(() => {
-    const importantNotes = editableClient.notes
-        .filter((note) => ["avertissement", "premium", "attention", "a_contacter"].includes(note.type))
-        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date)); // Trier par date
-    return importantNotes.length > 0 ? importantNotes[0].type : null;
+    const notes = editableClient.notes;
+    
+    // Récupérer la note la plus récente parmi les types importants
+    const importantNotes = notes
+        .filter(note => ['avertissement', 'attention', 'premium'].includes(note.type))
+        .sort((a, b) => new Date(b.note_date) - new Date(a.note_date));
+
+    // Si on trouve une note importante, on la retourne
+    if (importantNotes.length > 0) {
+        return importantNotes[0].type;
+    }
+    
+    // Sinon, on vérifie s'il y a une note "a_contacter"
+    if (notes.some(note => note.type === 'a_contacter')) {
+        return 'a_contacter';
+    }
+    
+    return null;
 });
 
 // Fonction pour obtenir les classes CSS en fonction du type
@@ -539,10 +553,10 @@ const getWarningClass = (type) => {
 const getWarningText = (type) => {
     return (
         {
-            avertissement: "Ce client possède un avertissement (voir notes).",
-            premium: "Ce client est identifié comme premium (voir notes).",
-            attention: "Ce client est à éviter (voir notes).",
-            a_contacter: "Ce client doit être contacté (voir notes).",
+            avertissement: "Ce client possède un avertissement.",
+            premium: "Ce client doit être considéré comme premium.",
+            attention: "Ce client est à éviter.",
+            a_contacter: "Le client doit être contacté (Demande de rappels).",
         }[type] || ""
     );
 };
