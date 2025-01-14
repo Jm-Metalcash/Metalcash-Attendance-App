@@ -1,21 +1,60 @@
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
+        <!-- Bouton d'ajout de note stylisé -->
+        <div class="flex items-center justify-start md:justify-start mt-4 mb-4 ml-2">
+            <button v-if="!showAddNote"
+                class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                @click="showAddNote = true">
+                <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
+                Ajouter une note
+            </button>
+
+            <!-- Bouton pour réduire le formulaire si showAddNote est true -->
+            <button v-if="showAddNote"
+                class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                @click="showAddNote = false">
+                <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
+                Réduire le formulaire
+            </button>
+        </div>
+
+        <!-- Zone d'ajout de nouvelle note -->
+        <div v-if="showAddNote" class="mt-4">
+            <div class="bg-gray-50 p-4 rounded-md shadow-md">
+                <h4 class="text-gray-700 text-sm font-semibold mb-2">
+                    Nouvelle note
+                </h4>
+                <select v-model="newNote.type" class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2">
+                    <option value="information">Note informative</option>
+                    <option value="premium">
+                        Note pour prospect premium
+                    </option>
+                    <option value="avertissement">
+                        Note d'avertissement
+                    </option>
+                    <option value="attention">
+                        Note pour prospect à éviter
+                    </option>
+                    <option value="a_contacter">Ajouter aux demandes de rappels</option>
+                </select>
+                <textarea v-model="newNote.content" @keydown.enter="saveNewNote"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Saisir la note..."></textarea>
+                <button @click="saveNewNote"
+                    class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200">
+                    Enregistrer la note
+                </button>
+            </div>
+        </div>
         <!-- Section status des notes -->
-        <div
-            v-if="
-                editableProspect.notes.some((note) =>
-                    ['avertissement', 'premium', 'attention', 'a_contacter'].includes(
-                        note.type
-                    )
+        <div v-if="
+            editableProspect.notes.some((note) =>
+                ['avertissement', 'premium', 'attention', 'a_contacter'].includes(
+                    note.type
                 )
-            "
-            class="warning-blacklist mb-4"
-        >
-            <div
-                :class="getWarningClass(latestWarningType)"
-                class="px-4 py-2 relative"
-                role="alert"
-            >
+            )
+        " class="warning-blacklist mb-4">
+            <div :class="getWarningClass(latestWarningType)" class="px-4 py-2 relative" role="alert">
                 <span class="font-bold text-sm">Note :</span>
                 <span class="block sm:inline text-sm md:ml-1">
                     {{ getWarningText(latestWarningType) }}
@@ -29,36 +68,26 @@
                 Notes relatives à {{ editableProspect.firstName }}
                 {{ editableProspect.familyName }}
             </h1>
-            <div
-                v-if="
-                    editableProspect.notes && editableProspect.notes.length > 0
-                "
-            >
+            <div v-if="
+                editableProspect.notes && editableProspect.notes.length > 0
+            ">
                 <!-- Tableau des notes -->
                 <div class="overflow-x-auto">
-                    <table
-                        class="min-w-full bg-white border-collapse border border-gray-300 rounded-lg shadow-md"
-                    >
+                    <table class="min-w-full bg-white border-collapse border border-gray-300 rounded-lg shadow-md">
                         <thead>
                             <tr class="bg-gray-100">
                                 <!-- Date -->
-                                <th
-                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-2/12"
-                                >
+                                <th class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-2/12">
                                     Date
                                 </th>
 
                                 <!-- Contenu de la note -->
-                                <th
-                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-6/12"
-                                >
+                                <th class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-6/12">
                                     Note
                                 </th>
 
                                 <!-- Créateur -->
-                                <th
-                                    class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12"
-                                >
+                                <th class="py-3 px-5 border text-center text-sm font-semibold text-gray-600 w-2/12">
                                     Ajouté par
                                 </th>
 
@@ -70,73 +99,51 @@
                                 </th> -->
 
                                 <!-- Action -->
-                                <th
-                                    class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-1/12"
-                                ></th>
+                                <th class="py-3 px-5 border text-left text-sm font-semibold text-gray-600 w-1/12"></th>
                             </tr>
                         </thead>
                         <transition-group name="slide" tag="tbody">
-                            <tr
-                                v-for="note in reversedNotes.slice(
-                                    0,
-                                    visibleNotesCount
-                                )"
-                                :key="note.id"
-                                :class="
-                                    note.type === 'avertissement'
+                            <tr v-for="note in reversedNotes.slice(
+                                0,
+                                visibleNotesCount
+                            )" :key="note.id" :class="note.type === 'avertissement'
                                         ? 'bg-orange-50 text-orange-800'
                                         : note.type === 'premium'
-                                        ? 'bg-green-50 text-green-800'
-                                        : note.type === 'attention'
-                                        ? 'bg-red-50 text-red-800'
-                                        : note.type === 'a_contacter'
-                                        ? 'bg-purple-50 text-purple-800'
-                                        : 'bg-gray-50 text-gray-800'
-                                "
-                            >
+                                            ? 'bg-green-50 text-green-800'
+                                            : note.type === 'attention'
+                                                ? 'bg-red-50 text-red-800'
+                                                : note.type === 'a_contacter'
+                                                    ? 'bg-purple-50 text-purple-800'
+                                                    : 'bg-gray-50 text-gray-800'
+                                    ">
                                 <!-- Date -->
-                                <td
-                                    class="py-3 px-5 border text-sm text-left align-top w-1/12"
-                                >
+                                <td class="py-3 px-5 border text-sm text-left align-top w-1/12">
                                     <span class="block font-medium">
                                         {{ formatDateTime(note.note_date) }}
                                     </span>
                                 </td>
 
                                 <!-- Contenu de la note -->
-                                <td
-                                    class="py-3 px-5 border-b text-sm text-left align-top w-6/12"
-                                >
-                                    <span
-                                        v-if="!isEditingNotes[note.id]"
-                                        @click="editNote(note.id)"
-                                        class="editable-text cursor-pointer hover:text-gray-600"
-                                    >
+                                <td class="py-3 px-5 border-b text-sm text-left align-top w-6/12">
+                                    <span v-if="!isEditingNotes[note.id]" @click="editNote(note.id)"
+                                        class="editable-text cursor-pointer hover:text-gray-600">
                                         {{ note.content }}
                                     </span>
-                                    <textarea
-                                        v-else
-                                        v-model="note.content"
-                                        @blur="saveNote(note)"
+                                    <textarea v-else v-model="note.content" @blur="saveNote(note)"
                                         @keydown.enter.prevent="saveNote(note)"
-                                        class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                                    ></textarea>
-                                    <p
-                                        v-if="successMessages.notes[note.id]"
-                                        class="text-green-500 text-xs mt-1 success-message"
-                                    >
+                                        class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"></textarea>
+                                    <p v-if="successMessages.notes[note.id]"
+                                        class="text-green-500 text-xs mt-1 success-message">
                                         Enregistré avec succès
                                     </p>
                                 </td>
 
                                 <!-- Créateur -->
-                                <td
-                                    class="py-3 px-5 border text-sm text-center align-center w-2/12"
-                                >
+                                <td class="py-3 px-5 border text-sm text-center align-center w-2/12">
                                     <div>
                                         <span class="block">{{
                                             note.creator?.name || ""
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </td>
 
@@ -152,14 +159,9 @@
                                 </td> -->
 
                                 <!-- Action -->
-                                <td
-                                    class="py-3 px-5 border text-sm text-left align-top w-1/12"
-                                >
-                                    <button
-                                        v-if="isNoteEditable(note.note_date)"
-                                        @click="deleteNote(note.id)"
-                                        class="text-xs bg-red-100 text-red-700 hover:text-red-800 hover:bg-red-200 px-3 py-1 rounded-md font-semibold transition duration-200"
-                                    >
+                                <td class="py-3 px-5 border text-sm text-left align-top w-1/12">
+                                    <button v-if="isNoteEditable(note.note_date)" @click="deleteNote(note.id)"
+                                        class="text-xs bg-red-100 text-red-700 hover:text-red-800 hover:bg-red-200 px-3 py-1 rounded-md font-semibold transition duration-200">
                                         Supprimer
                                     </button>
                                 </td>
@@ -167,27 +169,21 @@
                         </transition-group>
                     </table>
                     <div class="text-center">
-                        <button
-                            v-if="
-                                visibleNotesCount <
-                                editableProspect.notes.length
-                            "
-                            @click="showMoreNotes"
-                            class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
-                        >
+                        <button v-if="
+                            visibleNotesCount <
+                            editableProspect.notes.length
+                        " @click="showMoreNotes"
+                            class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200">
                             Voir plus <i class="fa-solid fa-angle-down"></i>
                         </button>
 
                         <!-- Bouton Voir moins -->
-                        <button
-                            v-if="
-                                visibleNotesCount >=
-                                    editableProspect.notes.length &&
-                                editableProspect.notes.length > 5
-                            "
-                            @click="showLessNotes"
-                            class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200"
-                        >
+                        <button v-if="
+                            visibleNotesCount >=
+                            editableProspect.notes.length &&
+                            editableProspect.notes.length > 5
+                        " @click="showLessNotes"
+                            class="mt-3 bg-white text-gray-600 rounded-md px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200">
                             Voir moins <i class="fa-solid fa-angle-up"></i>
                         </button>
                     </div>
@@ -200,73 +196,9 @@
             </div>
 
             <!-- Message de succès lors de l'ajout d'une note -->
-            <p
-                v-if="showAddNoteSuccess"
-                class="text-green-500 text-sm md:ml-52 mx-auto success-message"
-            >
+            <p v-if="showAddNoteSuccess" class="text-green-500 text-sm md:ml-52 mx-auto success-message">
                 La note a été ajoutée avec succès !
             </p>
-
-            <!-- Bouton d'ajout de note stylisé -->
-            <div
-                class="flex items-center justify-start md:justify-start mt-4 ml-2"
-            >
-                <button
-                    v-if="!showAddNote"
-                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="showAddNote = true"
-                >
-                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
-                    Ajouter une note
-                </button>
-
-                <!-- Bouton pour réduire le formulaire si showAddNote est true -->
-                <button
-                    v-if="showAddNote"
-                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="showAddNote = false"
-                >
-                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
-                    Réduire le formulaire
-                </button>
-            </div>
-
-            <!-- Zone d'ajout de nouvelle note -->
-            <div v-if="showAddNote" class="mt-4">
-                <div class="bg-gray-50 p-4 rounded-md shadow-md">
-                    <h4 class="text-gray-700 text-sm font-semibold mb-2">
-                        Nouvelle note
-                    </h4>
-                    <select
-                        v-model="newNote.type"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
-                    >
-                        <option value="information">Note informative</option>
-                        <option value="premium">
-                            Note pour prospect premium
-                        </option>
-                        <option value="avertissement">
-                            Note d'avertissement
-                        </option>
-                        <option value="attention">
-                            Note pour prospect à éviter
-                        </option>
-                        <option value="a_contacter">Ajouter aux demandes de rappels</option>
-                    </select>
-                    <textarea
-                        v-model="newNote.content"
-                        @keydown.enter="saveNewNote"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Saisir la note..."
-                    ></textarea>
-                    <button
-                        @click="saveNewNote"
-                        class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
-                    >
-                        Enregistrer la note
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- Section Informations Générales -->
@@ -278,33 +210,21 @@
         <div class="border-t border-gray-200 px-0 py-5 sm:p-0">
             <div class="sm:divide-y sm:divide-gray-200">
                 <!-- Première ligne : Prénom & Nom & Téléphone -->
-                <div
-                    class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
-                >
+                <div class="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <div class="sm:col-span-1 px-4 md:px-0">
                         <dt class="text-sm font-bold text-gray-500">Prénom</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.firstName"
-                                @click="editField('firstName')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
+                            <span v-if="!isEditing.firstName" @click="editField('firstName')"
+                                class="editable-text cursor-pointer hover:text-gray-500">
                                 {{
                                     editableProspect.firstName ||
                                     "Ajouter un prénom"
                                 }}
                             </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.firstName"
-                                @blur="saveField('firstName')"
+                            <input v-else v-model="editableProspect.firstName" @blur="saveField('firstName')"
                                 @keydown.enter="saveField('firstName')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.firstName"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md" />
+                            <p v-if="successMessages.firstName" class="text-green-500 text-xs mt-1 success-message">
                                 Enregistré avec succès
                             </p>
                         </dd>
@@ -312,27 +232,17 @@
                     <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0">
                         <dt class="text-sm font-bold text-gray-500">Nom</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.familyName"
-                                @click="editField('familyName')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
+                            <span v-if="!isEditing.familyName" @click="editField('familyName')"
+                                class="editable-text cursor-pointer hover:text-gray-500">
                                 {{
                                     editableProspect.familyName ||
                                     "Ajouter un nom"
                                 }}
                             </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.familyName"
-                                @blur="saveField('familyName')"
+                            <input v-else v-model="editableProspect.familyName" @blur="saveField('familyName')"
                                 @keydown.enter="saveField('familyName')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.familyName"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md" />
+                            <p v-if="successMessages.familyName" class="text-green-500 text-xs mt-1 success-message">
                                 Enregistré avec succès
                             </p>
                         </dd>
@@ -343,27 +253,17 @@
                             Numéro de téléphone
                         </dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.phone"
-                                @click="editField('phone')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
+                            <span v-if="!isEditing.phone" @click="editField('phone')"
+                                class="editable-text cursor-pointer hover:text-gray-500">
                                 {{
                                     editableProspect.phone ||
                                     "Ajouter un numéro de téléphone"
                                 }}
                             </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.phone"
-                                @blur="saveField('phone')"
+                            <input v-else v-model="editableProspect.phone" @blur="saveField('phone')"
                                 @keydown.enter="saveField('phone')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.phone"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md" />
+                            <p v-if="successMessages.phone" class="text-green-500 text-xs mt-1 success-message">
                                 Enregistré avec succès
                             </p>
                         </dd>
@@ -371,65 +271,39 @@
                 </div>
 
                 <!-- Deuxième ligne : E-mail & Numéro de téléphone -->
-                <div
-                    class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
-                >
-                    <div
-                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
-                    >
+                <div class="py-0 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0">
                         <dt class="text-sm font-bold text-gray-500">Ville</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.locality"
-                                @click="editField('locality')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
+                            <span v-if="!isEditing.locality" @click="editField('locality')"
+                                class="editable-text cursor-pointer hover:text-gray-500">
                                 {{
                                     editableProspect.locality ||
                                     "Ajouter une ville"
                                 }}
                             </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.locality"
-                                @blur="saveField('locality')"
+                            <input v-else v-model="editableProspect.locality" @blur="saveField('locality')"
                                 @keydown.enter="saveField('locality')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.locality"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md" />
+                            <p v-if="successMessages.locality" class="text-green-500 text-xs mt-1 success-message">
                                 Enregistré avec succès
                             </p>
                         </dd>
                     </div>
-                    <div
-                        class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0"
-                    >
+                    <div class="sm:col-span-1 px-4 md:px-0 mt-3 md:mt-0 mb-4 md:mb-0">
                         <dt class="text-sm font-bold text-gray-500">Pays</dt>
                         <dd class="mt-1 text-sm text-gray-400 sm:mt-0">
-                            <span
-                                v-if="!isEditing.country"
-                                @click="editField('country')"
-                                class="editable-text cursor-pointer hover:text-gray-500"
-                            >
+                            <span v-if="!isEditing.country" @click="editField('country')"
+                                class="editable-text cursor-pointer hover:text-gray-500">
                                 {{
                                     editableProspect.country ||
                                     "Ajouter un pays"
                                 }}
                             </span>
-                            <input
-                                v-else
-                                v-model="editableProspect.country"
-                                @blur="saveField('country')"
+                            <input v-else v-model="editableProspect.country" @blur="saveField('country')"
                                 @keydown.enter="saveField('country')"
-                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"
-                            />
-                            <p
-                                v-if="successMessages.country"
-                                class="text-green-500 text-xs mt-1 success-message"
-                            >
+                                class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md" />
+                            <p v-if="successMessages.country" class="text-green-500 text-xs mt-1 success-message">
                                 Enregistré avec succès
                             </p>
                         </dd>
@@ -784,14 +658,17 @@ watch(
         transform: translateY(20px);
         opacity: 0;
     }
+
     20% {
         transform: translateY(0);
         opacity: 1;
     }
+
     80% {
         transform: translateY(0);
         opacity: 1;
     }
+
     100% {
         transform: translateY(20px);
         opacity: 0;

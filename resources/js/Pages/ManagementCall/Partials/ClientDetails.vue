@@ -1,6 +1,64 @@
 Enregistre comme ceci :
 <template>
     <div class="bg-white overflow-hidden shadow rounded-lg border mt-8">
+        <!-- Bouton Ajouter une note -->
+        <div
+                class="flex items-center justify-start md:justify-start mt-4 mb-4 ml-2"
+            >
+                <button
+                    v-if="!showAddNote"
+                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                    @click="showAddNote = true"
+                >
+                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
+                    Ajouter une note
+                </button>
+                <button
+                    v-if="showAddNote"
+                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
+                    @click="showAddNote = false"
+                >
+                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
+                    Réduire le formulaire
+                </button>
+            </div>
+
+            <!-- Formulaire pour ajouter une nouvelle note -->
+            <div v-if="showAddNote" class="mt-4">
+                <div class="bg-gray-50 p-4 rounded-md shadow-md">
+                    <h4 class="text-gray-700 text-sm font-semibold mb-2">
+                        Nouvelle note
+                    </h4>
+                    <select
+                        v-model="newNote.type"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                    >
+                        <option value="information">Note informative</option>
+                        <option value="premium">
+                            Note pour client premium
+                        </option>
+                        <option value="avertissement">
+                            Note d'avertissement
+                        </option>
+                        <option value="attention">
+                            Note pour client à éviter
+                        </option>
+                        <option value="a_contacter">Ajouter aux demandes de rappels</option>
+                    </select>
+                    <textarea
+                        v-model="newNote.content"
+                        @keydown.enter="saveNewNote"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Saisir la note..."
+                    ></textarea>
+                    <button
+                        @click="saveNewNote"
+                        class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
+                    >
+                        Enregistrer la note
+                    </button>
+                </div>
+            </div>
         <!-- Section type de notes -->
         <div
             v-if="
@@ -201,65 +259,6 @@ Enregistre comme ceci :
                 <p class="text-sm text-gray-400 px-2 pt-4">
                     Aucune note actuellement pour ce client.
                 </p>
-            </div>
-
-            <!-- Bouton Ajouter une note -->
-            <div
-                class="flex items-center justify-start md:justify-start mt-4 ml-2"
-            >
-                <button
-                    v-if="!showAddNote"
-                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="showAddNote = true"
-                >
-                    <i class="fa-solid fa-plus text-gray-500 mr-2"></i>
-                    Ajouter une note
-                </button>
-                <button
-                    v-if="showAddNote"
-                    class="flex items-center text-sm text-gray-600 bg-white border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 hover:border-gray-400 transition-colors duration-200"
-                    @click="showAddNote = false"
-                >
-                    <i class="fa-solid fa-minus text-gray-500 mr-2"></i>
-                    Réduire le formulaire
-                </button>
-            </div>
-
-            <!-- Formulaire pour ajouter une nouvelle note -->
-            <div v-if="showAddNote" class="mt-4">
-                <div class="bg-gray-50 p-4 rounded-md shadow-md">
-                    <h4 class="text-gray-700 text-sm font-semibold mb-2">
-                        Nouvelle note
-                    </h4>
-                    <select
-                        v-model="newNote.type"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
-                    >
-                        <option value="information">Note informative</option>
-                        <option value="premium">
-                            Note pour client premium
-                        </option>
-                        <option value="avertissement">
-                            Note d'avertissement
-                        </option>
-                        <option value="attention">
-                            Note pour client à éviter
-                        </option>
-                        <option value="a_contacter">Ajouter aux demandes de rappels</option>
-                    </select>
-                    <textarea
-                        v-model="newNote.content"
-                        @keydown.enter="saveNewNote"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Saisir la note..."
-                    ></textarea>
-                    <button
-                        @click="saveNewNote"
-                        class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200"
-                    >
-                        Enregistrer la note
-                    </button>
-                </div>
             </div>
         </div>
 
