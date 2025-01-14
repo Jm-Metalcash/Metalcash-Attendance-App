@@ -305,7 +305,7 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                         <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Gestion des fournisseurs</span>
                                     </Link>
                                 </li>
-                                <li v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique'))" class="whitespace-nowrap overflow-hidden text-ellipsis">
+                                <li v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') ||  page.props.auth.roles.includes('Comptabilité'))" class="whitespace-nowrap overflow-hidden text-ellipsis">
                                     <Link
                                         :href="route('contactRelance')"
                                         class="block px-2 py-2 rounded hover:bg-gray-700"
