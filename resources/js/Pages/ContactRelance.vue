@@ -290,6 +290,8 @@ const handleConfirm = () => {
                     </table>
                 </div>
             </div>
+            <!-- Légende -->
+            <Legend />
         </div>
     </AuthenticatedLayout>
 </template>
