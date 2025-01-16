@@ -114,7 +114,7 @@ Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::
 
 // Route pour la page de relance des contacts
 Route::middleware(['auth', 'role:Admin,Informatique,Comptabilité', RestrictIP::class])->group(function () {
-    Route::get('/demande-de-rappels', [ContactRelanceController::class, 'index'])->name('contactRelance');
+    Route::get('/demandes-de-rappel', [ContactRelanceController::class, 'index'])->name('contactRelance');
     Route::post('/update-action', [ContactRelanceController::class, 'updateAction'])->name('updateAction');
 });
 

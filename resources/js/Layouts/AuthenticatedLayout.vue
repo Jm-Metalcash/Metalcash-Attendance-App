@@ -316,7 +316,7 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                         }"
                                     >
                                         <i class="fa-solid fa-clock-rotate-left" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
-                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demande de rappels</span>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demandes de rappel</span>
                                     </Link>
                                 </li>
                             </ul>
@@ -510,6 +510,22 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                             :active="route().current('managementCall')"
                         >
                             Gestion des appels
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="
+                                page.props.auth.roles &&
+                                (page.props.auth.roles.includes('Admin') ||
+                                    page.props.auth.roles.includes(
+                                        'Informatique'
+                                    ) ||
+                                    page.props.auth.roles.includes(
+                                        'Comptabilité'
+                                    ))
+                            "
+                            :href="route('contactRelance')"
+                            :active="route().current('contactRelance')"
+                        >
+                           Demandes de rappel
                         </ResponsiveNavLink>
                     </div>
 

@@ -107,11 +107,11 @@ const handleConfirm = () => {
 </script>
 
 <template>
-    <Head title="Demande de rappels" />
+    <Head title="Demandes de rappel" />
 
     <AuthenticatedLayout>
         <template #header>
-            <Header :pageTitle="'Demande de rappels'" />
+            <Header :pageTitle="'Demandes de rappel'" />
         </template>
 
         <!-- Message de succès -->
@@ -128,7 +128,7 @@ const handleConfirm = () => {
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
                 <h3 class="text-lg font-semibold mb-4">Confirmation</h3>
                 <p class="mb-6">
-                    Voulez-vous vraiment définir le status de <span class="font-semibold">{{ currentContact?.name }}</span> 
+                    Voulez-vous vraiment définir le statut de <span class="font-semibold">{{ currentContact?.name }}</span> 
                     sur <span class="font-semibold">{{ getActionLabel(tempActionValue) }}</span> ?
                 </p>
                 <div class="flex justify-end space-x-3">
@@ -149,7 +149,7 @@ const handleConfirm = () => {
         <div class="container flex-grow max-w-[1700px] mt-16 mx-auto px-4 sm:px-8 bg-white rounded-lg shadow-lg py-8 min-h-[800px]">
             <div class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8">
                 <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
-                    <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Demande de rappels
+                    <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Liste de demandes de rappel
                 </h2>
             </div>
 
@@ -231,7 +231,7 @@ const handleConfirm = () => {
             <div class="mt-16 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800 px-4 py-4">
                     <i class="fas fa-history text-[#005692] mr-2"></i>
-                    Historique sur les 7 derniers jours
+                    Historique des demandes de rappel traitées au cours des 7 derniers jours
                 </h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
