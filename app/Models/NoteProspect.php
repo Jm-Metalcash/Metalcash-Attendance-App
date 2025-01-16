@@ -30,6 +30,10 @@ class NoteProspect extends Model
         return $this->belongsTo(Prospect::class);
     }
 
+    public function modifiedBy()
+    {
+        return $this->belongsTo(User::class, 'modified_by_relance');
+    }
     
     public function creator()
     {

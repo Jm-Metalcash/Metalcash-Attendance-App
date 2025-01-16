@@ -37,5 +37,9 @@ class NoteClient extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-}
 
+    public function modifiedBy()
+    {
+        return $this->belongsTo(User::class, 'modified_by_relance');
+    }
+}

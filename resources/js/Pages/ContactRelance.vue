@@ -7,11 +7,14 @@ import { ref, computed } from 'vue';
 
 const page = usePage();
 const contactsToCall = ref(page.props.contactsToCall);
+const callHistory = ref(page.props.callHistory || []); // Ajout de la référence à l'historique
 const sortDirection = ref('desc');
+const historySort = ref('desc');
 const showConfirmDialog = ref(false);
 const currentContact = ref(null);
 const showSuccessMessage = ref(false);
 const tempActionValue = ref(null);
+const selectedActions = ref({});
 
 const toggleSort = () => {
     sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc';
@@ -28,32 +31,22 @@ const getActionLabel = (value) => {
 };
 
 const confirmAction = (contact, newValue) => {
+    selectedActions.value[contact.id] = newValue;
     currentContact.value = contact;
     tempActionValue.value = newValue;
     showConfirmDialog.value = true;
 };
 
-const handleConfirm = () => {
-    if (currentContact.value && tempActionValue.value !== null) {
-        currentContact.value.action_relance = tempActionValue.value;
-
-        router.post('/update-action', {
-            id: currentContact.value.id,
-            type: currentContact.value.type,
-            action: tempActionValue.value
-        });
-
-        showConfirmDialog.value = false;
-        showSuccessMessage.value = true;
-        setTimeout(() => {
-            showSuccessMessage.value = false;
-        }, 2000);
-    }
-};
-
 const handleCancel = () => {
     tempActionValue.value = null;
     showConfirmDialog.value = false;
+};
+
+const getContactAction = (contact) => {
+    if (!(contact.id in selectedActions.value)) {
+        selectedActions.value[contact.id] = '';
+    }
+    return selectedActions.value[contact.id];
 };
 
 const sortedContacts = computed(() => {
@@ -65,6 +58,52 @@ const sortedContacts = computed(() => {
             : dateA - dateB;
     });
 });
+
+const sortedHistory = computed(() => {
+    return [...callHistory.value].sort((a, b) => {
+        const dateA = new Date(a.date_relance_modified);
+        const dateB = new Date(b.date_relance_modified);
+        return historySort.value === 'desc' 
+            ? dateB - dateA 
+            : dateA - dateB;
+    });
+});
+
+const handleConfirm = () => {
+    if (currentContact.value && tempActionValue.value !== null) {
+        const oldStatus = currentContact.value.action_relance;
+        currentContact.value.action_relance = tempActionValue.value;
+        
+        // Ajouter l'entrée dans l'historique local
+        callHistory.value.unshift({
+            date_relance_modified: new Date().toISOString(),
+            contact_name: currentContact.value.name,
+            old_status_relance: oldStatus,
+            new_status_relance: tempActionValue.value,
+            modified_by_relance: page.props.auth.user.name,
+            type: currentContact.value.type
+        });
+
+        router.post('/update-action', {
+            id: currentContact.value.id,
+            type: currentContact.value.type,
+            action: tempActionValue.value,
+            old_status: oldStatus
+        }, {
+            preserveScroll: true,
+            preserveState: true
+        });
+
+        // Réinitialiser la sélection
+        selectedActions.value[currentContact.value.id] = '';
+        
+        showConfirmDialog.value = false;
+        showSuccessMessage.value = true;
+        setTimeout(() => {
+            showSuccessMessage.value = false;
+        }, 2000);
+    }
+};
 </script>
 
 <template>
@@ -89,8 +128,8 @@ const sortedContacts = computed(() => {
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
                 <h3 class="text-lg font-semibold mb-4">Confirmation</h3>
                 <p class="mb-6">
-                    Voulez-vous vraiment marquer <span class="font-semibold">{{ currentContact?.name }}</span> 
-                    comme <span class="font-semibold">{{ getActionLabel(tempActionValue) }}</span> ?
+                    Voulez-vous vraiment définir le status de <span class="font-semibold">{{ currentContact?.name }}</span> 
+                    sur <span class="font-semibold">{{ getActionLabel(tempActionValue) }}</span> ?
                 </p>
                 <div class="flex justify-end space-x-3">
                     <button 
@@ -138,8 +177,11 @@ const sortedContacts = computed(() => {
                                     }"
                                 ></i>
                             </th>
-                            <th class="bg-gray-50 sticky top-0 border-b border-gray-200 px-6 py-3 text-gray-600 font-bold tracking-wider uppercase text-xs w-[45%]">
+                            <th class="bg-gray-50 sticky top-0 border-b border-gray-200 px-6 py-3 text-gray-600 font-bold tracking-wider uppercase text-xs w-[35%]">
                                 Note
+                            </th>
+                            <th class="bg-gray-50 sticky top-0 border-b border-gray-200 px-6 py-3 text-gray-600 font-bold tracking-wider uppercase text-xs w-[10%]">
+                                Statut
                             </th>
                             <th class="bg-gray-50 sticky top-0 border-b border-gray-200 px-6 py-3 text-gray-600 font-bold tracking-wider uppercase text-xs w-[15%]">
                                 Actions
@@ -163,11 +205,15 @@ const sortedContacts = computed(() => {
                             <td class="border-b border-gray-200 px-6 py-4 text-gray-600">
                                 {{ contact.note }}
                             </td>
+                            <td class="border-b border-gray-200 px-6 py-4 text-gray-600">
+                                {{ getActionLabel(contact.action_relance) }}
+                            </td>
                             <td class="border-b border-gray-200 px-6 py-4">
                                 <select
-                                    :value="contact.action_relance"
+                                    :value="getContactAction(contact)"
                                     @change="confirmAction(contact, $event.target.value)"
                                     class="block w-full px-2 py-1 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-[#005692] focus:border-[#005692]">
+                                    <option value="" disabled>Choisir une action</option>
                                     <option value="0">À contacter</option>
                                     <option value="1">Clôturé</option>
                                     <option value="2">Injoignable</option>
@@ -180,6 +226,70 @@ const sortedContacts = computed(() => {
             </div>
             <!-- Légende -->
             <Legend />
+
+            <!-- Historique des 7 derniers jours -->
+            <div class="mt-16 bg-white rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 px-4 py-4">
+                    <i class="fas fa-history text-[#005692] mr-2"></i>
+                    Historique sur les 7 derniers jours
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                <th 
+                                    @click="historySort = historySort === 'desc' ? 'asc' : 'desc'"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                >
+                                    Date de modification
+                                    <i 
+                                        class="fa-solid ml-1"
+                                        :class="{
+                                            'fa-sort-up text-xs': historySort === 'asc',
+                                            'fa-sort-down text-xs': historySort === 'desc'
+                                        }"
+                                    ></i>
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ancien statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nouveau statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modifié par</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="(history, index) in sortedHistory" :key="index" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="px-2 py-1 rounded-md"
+                                        :class="history.type === 'client' ? 'bg-blue-100 text-blue-800' : 'bg-[#f5e9c4] text-[#60501e]'">
+                                        {{ history.contact_name }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ new Date(history.date_relance_modified).toLocaleDateString('fr-FR', { 
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ getActionLabel(history.old_status_relance) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ getActionLabel(history.new_status_relance) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ history.modified_by_relance }}</td>
+                            </tr>
+                            <tr v-if="callHistory.length === 0">
+                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    Aucun historique disponible pour les 7 derniers jours
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>

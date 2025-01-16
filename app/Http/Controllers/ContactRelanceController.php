@@ -8,6 +8,7 @@ use App\Models\NoteClient;
 use App\Models\NoteProspect;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class ContactRelanceController extends Controller
 {
@@ -54,8 +55,46 @@ class ContactRelanceController extends Controller
             ->sortByDesc('date')
             ->values();
 
+        // Récupérer l'historique des 7 derniers jours
+        $sevenDaysAgo = Carbon::now()->subDays(7);
+        
+        $clientHistory = NoteClient::where('date_relance_modified', '>=', $sevenDaysAgo)
+            ->whereNotNull('date_relance_modified')
+            ->with(['client:id,fullName', 'modifiedBy:id,name'])
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'date_relance_modified' => $note->date_relance_modified,
+                    'contact_name' => $note->client->fullName,
+                    'old_status_relance' => $note->old_status_relance,
+                    'new_status_relance' => $note->new_status_relance,
+                    'modified_by_relance' => $note->modifiedBy ? $note->modifiedBy->name : 'Système',
+                    'type' => 'client'
+                ];
+            });
+
+        $prospectHistory = NoteProspect::where('date_relance_modified', '>=', $sevenDaysAgo)
+            ->whereNotNull('date_relance_modified')
+            ->with(['prospect:id,fullName', 'modifiedBy:id,name'])
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'date_relance_modified' => $note->date_relance_modified,
+                    'contact_name' => $note->prospect->fullName,
+                    'old_status_relance' => $note->old_status_relance,
+                    'new_status_relance' => $note->new_status_relance,
+                    'modified_by_relance' => $note->modifiedBy ? $note->modifiedBy->name : 'Système',
+                    'type' => 'prospect'
+                ];
+            });
+
+        $callHistory = $clientHistory->concat($prospectHistory)
+            ->sortByDesc('date_relance_modified')
+            ->values();
+
         return Inertia::render('ContactRelance', [
-            'contactsToCall' => $contactsToCall
+            'contactsToCall' => $contactsToCall,
+            'callHistory' => $callHistory
         ]);
     }
 
@@ -64,7 +103,8 @@ class ContactRelanceController extends Controller
         $request->validate([
             'id' => 'required',
             'type' => 'required|in:client,prospect',
-            'action' => 'required|integer|between:0,4'
+            'action' => 'required|integer|between:0,4',
+            'old_status' => 'nullable|integer|between:0,4'
         ]);
 
         if ($request->type === 'client') {
@@ -73,6 +113,13 @@ class ContactRelanceController extends Controller
             $note = NoteProspect::findOrFail($request->id);
         }
 
+        // Enregistrer l'historique
+        $note->date_relance_modified = now();
+        $note->old_status_relance = $request->old_status;
+        $note->new_status_relance = $request->action;
+        $note->modified_by_relance = auth()->id();
+        
+        // Mettre à jour l'action
         $note->action_relance = $request->action;
         $note->save();
 
