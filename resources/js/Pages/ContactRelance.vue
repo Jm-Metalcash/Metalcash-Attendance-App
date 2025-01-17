@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Header from "@/Components/Header.vue";
 import Legend from "@/Components/Legend.vue";
-import { Head, usePage, router } from "@inertiajs/vue3";
+import { Head, usePage, router, Link } from "@inertiajs/vue3";
 import { ref, computed, watch } from 'vue';
 import { updateContactCount } from '@/Stores/contactStore';
 
@@ -222,8 +222,17 @@ const handleConfirm = () => {
                     <tbody>
                         <tr v-for="contact in sortedContacts" :key="contact.id" class="hover:bg-gray-50 text-sm">
                             <td class="border-b border-gray-200 px-6 py-4">
-                                <span class="px-2 py-1 rounded-md"
-                                    :class="contact.status === 'Client' ? 'bg-blue-100 text-blue-800' : 'bg-[#f5e9c4] text-[#60501e]'">
+                                <span 
+                                    class="px-2 py-1 rounded-md cursor-pointer hover:opacity-80"
+                                    :class="contact.type === 'client' ? 'bg-blue-100 text-blue-800' : 'bg-[#f5e9c4] text-[#60501e]'"
+                                    @click="() => {
+                                        if (contact.type === 'client') {
+                                            router.visit(route('management-call.client', { id: contact.id }));
+                                        } else {
+                                            router.visit(route('management-call', { prospect: contact.id }));
+                                        }
+                                    }"
+                                >
                                     {{ contact.name }}
                                 </span>
                             </td>
@@ -279,8 +288,17 @@ const handleConfirm = () => {
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="(history, index) in sortedHistory" :key="index" class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <span class="px-2 py-1 rounded-md"
-                                        :class="history.type === 'client' ? 'bg-blue-100 text-blue-800' : 'bg-[#f5e9c4] text-[#60501e]'">
+                                    <span 
+                                        class="px-2 py-1 rounded-md cursor-pointer hover:opacity-80"
+                                        :class="history.type === 'client' ? 'bg-blue-100 text-blue-800' : 'bg-[#f5e9c4] text-[#60501e]'"
+                                        @click="() => {
+                                            if (history.type === 'client') {
+                                                router.visit(route('management-call.client', { id: history.id }));
+                                            } else {
+                                                router.visit(route('management-call', { prospect: history.id }));
+                                            }
+                                        }"
+                                    >
                                         {{ history.contact_name }}
                                     </span>
                                 </td>

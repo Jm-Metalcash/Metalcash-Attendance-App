@@ -21,7 +21,7 @@ class ContactRelanceController extends Controller
             ->get()
             ->map(function ($note) {
                 return [
-                    'id' => $note->id,
+                    'id' => $note->client->id,
                     'name' => $note->client->fullName,
                     'phone' => $note->client->phone,
                     'status' => 'Client',
@@ -39,7 +39,7 @@ class ContactRelanceController extends Controller
             ->get()
             ->map(function ($note) {
                 return [
-                    'id' => $note->id,
+                    'id' => $note->prospect->id,
                     'name' => $note->prospect->fullName,
                     'phone' => $note->prospect->phone,
                     'status' => 'Prospect',
@@ -70,7 +70,8 @@ class ContactRelanceController extends Controller
                     'new_status_relance' => $note->new_status_relance,
                     'modified_by_relance' => $note->modifiedBy ? $note->modifiedBy->name : 'Système',
                     'type' => 'client',
-                    'note' => $note->note_content_status
+                    'note' => $note->note_content_status,
+                    'id' => $note->client->id
                 ];
             });
 
@@ -86,7 +87,8 @@ class ContactRelanceController extends Controller
                     'new_status_relance' => $note->new_status_relance,
                     'modified_by_relance' => $note->modifiedBy ? $note->modifiedBy->name : 'Système',
                     'type' => 'prospect',
-                    'note' => $note->note_content_status
+                    'note' => $note->note_content_status,
+                    'id' => $note->prospect->id
                 ];
             });
 
