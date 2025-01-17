@@ -16,6 +16,7 @@ const currentContact = ref(null);
 const showSuccessMessage = ref(false);
 const tempActionValue = ref(null);
 const selectedActions = ref({});
+const note = ref('');
 
 const emits = defineEmits(['updateContactCount']);
 
@@ -43,6 +44,7 @@ const confirmAction = (contact, newValue) => {
 const handleCancel = () => {
     tempActionValue.value = null;
     showConfirmDialog.value = false;
+    note.value = '';
 };
 
 const getContactAction = (contact) => {
@@ -98,14 +100,16 @@ const handleConfirm = () => {
             old_status_relance: oldStatus,
             new_status_relance: tempActionValue.value,
             modified_by_relance: page.props.auth.user.name,
-            type: currentContact.value.type
+            type: currentContact.value.type,
+            note: note.value
         });
 
         router.post('/update-action', {
             id: currentContact.value.id,
             type: currentContact.value.type,
             action: tempActionValue.value,
-            old_status: oldStatus
+            old_status: oldStatus,
+            note: note.value
         }, {
             preserveScroll: true,
             preserveState: true
@@ -144,10 +148,20 @@ const handleConfirm = () => {
         <div v-if="showConfirmDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
                 <h3 class="text-lg font-semibold mb-4">Confirmation</h3>
-                <p class="mb-6">
+                <p class="mb-4">
                     Voulez-vous vraiment définir le statut de <span class="font-semibold">{{ currentContact?.name }}</span> 
                     sur <span class="font-semibold">{{ getActionLabel(tempActionValue) }}</span> ?
                 </p>
+                <div class="mb-4">
+                    <label for="note" class="block text-sm font-medium text-gray-700 mb-1">Note (optionnelle)</label>
+                    <textarea
+                        id="note"
+                        rows="3"
+                        v-model="note"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#005692] focus:border-[#005692] placeholder-gray-400"
+                        placeholder="Ajoutez une note explicative..."
+                    ></textarea>
+                </div>
                 <div class="flex justify-end space-x-3">
                     <button 
                         @click="handleCancel"
@@ -254,23 +268,12 @@ const handleConfirm = () => {
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                <th 
-                                    @click="historySort = historySort === 'desc' ? 'asc' : 'desc'"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                >
-                                    Date de modification
-                                    <i 
-                                        class="fa-solid ml-1"
-                                        :class="{
-                                            'fa-sort-up text-xs': historySort === 'asc',
-                                            'fa-sort-down text-xs': historySort === 'desc'
-                                        }"
-                                    ></i>
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ancien statut</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nouveau statut</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modifié par</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Nom</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[35%]">Note du statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">Ancien statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">Nouveau statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[11%]">Modifié par</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -281,7 +284,7 @@ const handleConfirm = () => {
                                         {{ history.contact_name }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ new Date(history.date_relance_modified).toLocaleDateString('fr-FR', { 
                                         day: '2-digit',
                                         month: '2-digit',
@@ -290,6 +293,7 @@ const handleConfirm = () => {
                                         minute: '2-digit'
                                     }) }}
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ history.note ? history.note : 'Aucune note' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ getActionLabel(history.old_status_relance) }}
                                 </td>

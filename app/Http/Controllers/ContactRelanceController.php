@@ -69,7 +69,8 @@ class ContactRelanceController extends Controller
                     'old_status_relance' => $note->old_status_relance,
                     'new_status_relance' => $note->new_status_relance,
                     'modified_by_relance' => $note->modifiedBy ? $note->modifiedBy->name : 'Système',
-                    'type' => 'client'
+                    'type' => 'client',
+                    'note' => $note->note_content_status
                 ];
             });
 
@@ -84,7 +85,8 @@ class ContactRelanceController extends Controller
                     'old_status_relance' => $note->old_status_relance,
                     'new_status_relance' => $note->new_status_relance,
                     'modified_by_relance' => $note->modifiedBy ? $note->modifiedBy->name : 'Système',
-                    'type' => 'prospect'
+                    'type' => 'prospect',
+                    'note' => $note->note_content_status
                 ];
             });
 
@@ -104,7 +106,8 @@ class ContactRelanceController extends Controller
             'id' => 'required',
             'type' => 'required|in:client,prospect',
             'action' => 'required|integer|between:0,4',
-            'old_status' => 'nullable|integer|between:0,4'
+            'old_status' => 'nullable|integer|between:0,4',
+            'note' => 'nullable|string'
         ]);
 
         if ($request->type === 'client') {
@@ -118,6 +121,7 @@ class ContactRelanceController extends Controller
         $note->old_status_relance = $request->old_status;
         $note->new_status_relance = $request->action;
         $note->modified_by_relance = auth()->id();
+        $note->note_content_status = $request->note;
         
         // Mettre à jour l'action
         $note->action_relance = $request->action;

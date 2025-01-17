@@ -18,6 +18,7 @@ class NoteProspect extends Model
         'type',
         'created_by',
         'updated_by',
+        'note_content_status',
     ];
 
     protected $dates = ['note_date'];
