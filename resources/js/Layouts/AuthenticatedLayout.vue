@@ -318,8 +318,8 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                     >
                                         <i class="fa-solid fa-phone" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
                                         <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demandes de rappel</span>
-                                        <div v-if="contactCount > 0" 
-                                            class="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                                        <div class="ml-2 rounded-full px-2 py-1 text-xs"
+                                            :class="contactCount > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600'">
                                             {{ contactCount }}
                                         </div>
                                     </Link>
