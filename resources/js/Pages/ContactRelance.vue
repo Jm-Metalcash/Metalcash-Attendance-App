@@ -3,7 +3,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Header from "@/Components/Header.vue";
 import Legend from "@/Components/Legend.vue";
 import { Head, usePage, router } from "@inertiajs/vue3";
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { updateContactCount } from '@/Stores/contactStore';
 
 const page = usePage();
 const contactsToCall = ref(page.props.contactsToCall);
@@ -15,6 +16,8 @@ const currentContact = ref(null);
 const showSuccessMessage = ref(false);
 const tempActionValue = ref(null);
 const selectedActions = ref({});
+
+const emits = defineEmits(['updateContactCount']);
 
 const toggleSort = () => {
     sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc';
@@ -50,7 +53,17 @@ const getContactAction = (contact) => {
 };
 
 const sortedContacts = computed(() => {
-    return [...contactsToCall.value].sort((a, b) => {
+    // Filtrer d'abord les contacts selon les critères
+    const filteredContacts = contactsToCall.value.filter(contact => {
+        const actionValue = parseInt(contact.action_relance);
+        return actionValue === 0 || actionValue === 2;
+    });
+
+    // Mettre à jour le compteur global
+    updateContactCount(filteredContacts.length);
+
+    // Puis trier les contacts filtrés
+    return filteredContacts.sort((a, b) => {
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
         return sortDirection.value === 'desc' 
@@ -58,6 +71,10 @@ const sortedContacts = computed(() => {
             : dateA - dateB;
     });
 });
+
+watch(sortedContacts, (newContacts) => {
+    emits('updateContactCount', newContacts.length);
+}, { immediate: true });
 
 const sortedHistory = computed(() => {
     return [...callHistory.value].sort((a, b) => {
@@ -231,7 +248,7 @@ const handleConfirm = () => {
             <div class="mt-16 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800 px-4 py-4">
                     <i class="fas fa-history text-[#005692] mr-2"></i>
-                    Historique des demandes de rappel traitées au cours des 7 derniers jours
+                    Historique des modifications des demandes de rappel
                 </h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">

@@ -5,6 +5,7 @@ import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import Footer from "@/Components/Footer.vue";
+import { contactCount } from '@/Stores/contactStore';
 
 const page = usePage();
 const showingNavigationDropdown = ref(false); // Menu mobile
@@ -308,21 +309,19 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                 <li v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') ||  page.props.auth.roles.includes('Comptabilité'))" class="whitespace-nowrap overflow-hidden text-ellipsis">
                                     <Link
                                         :href="route('contactRelance')"
-                                        class="block px-2 py-2 rounded hover:bg-gray-700"
+                                        class="flex items-center px-2 py-2 rounded hover:bg-gray-700"
                                         :class="{
                                             'bg-gray-700': route().current('contactRelance'),
                                             'text-[10px]': isMenuCollapsed,
                                             'text-sm': !isMenuCollapsed
                                         }"
                                     >
-                                        <i class="fa-solid fa-clock-rotate-left" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
-                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">
-                                            Demandes de rappel
-                                            <span v-if="page.props.contactsToCall && page.props.contactsToCall.length > 0" 
-                                                  class="inline-flex items-center justify-center ml-2 px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                                                <i class="fa-solid fa-bell mr-1"></i>{{ page.props.contactsToCall.length }}
-                                            </span>
-                                        </span>
+                                        <i class="fa-solid fa-phone" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demandes de rappel</span>
+                                        <div v-if="contactCount > 0" 
+                                            class="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                                            {{ contactCount }}
+                                        </div>
                                     </Link>
                                 </li>
                             </ul>
