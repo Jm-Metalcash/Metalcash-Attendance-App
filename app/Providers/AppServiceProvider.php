@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use App\Models\User;
+use App\Models\NoteClient;
+use App\Models\NoteProspect;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,6 +49,25 @@ class AppServiceProvider extends ServiceProvider
                     ? User::with('roles:id,name')->get(['id', 'name', 'email'])
                     : [];
             },
+            'initialContactCount' => function () {
+                if (!Auth::check()) return 0;
+
+                $clientCount = NoteClient::where('type', 'a_contacter')
+                    ->where(function($query) {
+                        $query->where('action_relance', 0)
+                              ->orWhere('action_relance', 2);
+                    })
+                    ->count();
+
+                $prospectCount = NoteProspect::where('type', 'a_contacter')
+                    ->where(function($query) {
+                        $query->where('action_relance', 0)
+                              ->orWhere('action_relance', 2);
+                    })
+                    ->count();
+
+                return $clientCount + $prospectCount;
+            }
         ]);
     }
 }

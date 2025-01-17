@@ -5,7 +5,7 @@ import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import Footer from "@/Components/Footer.vue";
-import { contactCount } from '@/Stores/contactStore';
+import { contactCount, initializeContactCount } from '@/Stores/contactStore';
 
 const page = usePage();
 const showingNavigationDropdown = ref(false); // Menu mobile
@@ -35,11 +35,21 @@ onMounted(() => {
         showEmployeeManagementSubMenu.value = state.employeeManagement;
         showCallManagementSubMenu.value = state.callManagement;
     }
+    if (page.props.initialContactCount !== undefined) {
+        initializeContactCount(page.props.initialContactCount);
+    }
 });
 
 // Mettre à jour le localStorage quand l'état change
 watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu, showCallManagementSubMenu], () => {
     saveMenuState();
+});
+
+// Mettre à jour le compteur quand les props changent
+watch(() => page.props.initialContactCount, (newCount) => {
+    if (newCount !== undefined) {
+        initializeContactCount(newCount);
+    }
 });
 </script>
 
@@ -318,8 +328,7 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                     >
                                         <i class="fa-solid fa-phone" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
                                         <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demandes de rappel</span>
-                                        <div class="ml-2 rounded-full px-2 py-1 text-xs"
-                                            :class="contactCount > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600'">
+                                        <div class="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
                                             {{ contactCount }}
                                         </div>
                                     </Link>
@@ -529,8 +538,14 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                             "
                             :href="route('contactRelance')"
                             :active="route().current('contactRelance')"
+                            class="flex items-center justify-between"
                         >
-                           Demandes de rappel
+                            <div class="flex items-center">
+                                <span>Demandes de rappel</span>
+                            </div>
+                            <div class="bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                                {{ contactCount }}
+                            </div>
                         </ResponsiveNavLink>
                     </div>
 
