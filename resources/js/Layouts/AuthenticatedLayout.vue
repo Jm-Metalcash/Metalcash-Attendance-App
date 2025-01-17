@@ -316,7 +316,13 @@ watch([isMenuCollapsed, showTimeManagementSubMenu, showEmployeeManagementSubMenu
                                         }"
                                     >
                                         <i class="fa-solid fa-clock-rotate-left" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
-                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demandes de rappel</span>
+                                        <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">
+                                            Demandes de rappel
+                                            <span v-if="page.props.contactsToCall && page.props.contactsToCall.length > 0" 
+                                                  class="inline-flex items-center justify-center ml-2 px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                                                <i class="fa-solid fa-bell mr-1"></i>{{ page.props.contactsToCall.length }}
+                                            </span>
+                                        </span>
                                     </Link>
                                 </li>
                             </ul>
