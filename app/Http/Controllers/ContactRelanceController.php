@@ -137,6 +137,11 @@ class ContactRelanceController extends Controller
         // Si l'action n'est ni 0 ni 2, changer le type en "information"
         if (!in_array($request->action, [0, 2])) {
             $note->type = 'information';
+            // Ajouter la date et l'utilisateur qui a modifié dans le contenu
+            $user = auth()->user();
+            $currentContent = $note->content;
+            $formattedDate = now()->format('d/m/Y à H:i');
+            $note->content = $currentContent . "\n\n(Traité le " . $formattedDate . " par " . $user->name . ")";
         }
         
         $note->save();

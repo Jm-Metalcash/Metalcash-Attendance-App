@@ -243,7 +243,7 @@ const handleConfirm = () => {
                                 {{ new Date(contact.date).toLocaleDateString('fr-FR') }}
                             </td>
                             <td class="border-b border-gray-200 px-6 py-4 text-gray-600">
-                                {{ contact.note }}
+                                <div v-html="contact.note" class="whitespace-pre-wrap"></div>
                             </td>
                             <td class="border-b border-gray-200 px-6 py-4 text-gray-600">
                                 {{ getActionLabel(contact.action_relance) }}
