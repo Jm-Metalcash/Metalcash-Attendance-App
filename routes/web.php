@@ -36,19 +36,17 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::get('/index', function () {
         return Inertia::render('Index');
     })->name('index');
-});
 
-
-//Récupère les users pour le Menu de navigation
-Route::get('/dashboard', [AuthenticatedSessionController::class, 'index'])->name('dashboard');
-
-
-
-// Route de dashboard
-Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::get('/pointage', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    // Routes pour la gestion des pointages
+    Route::get('/server-time', [TimeEntryController::class, 'getCurrentTime']);
+    Route::post('/time-entries', [TimeEntryController::class, 'store']);
+
+    // Nouvelle route pour obtenir l'heure du serveur
+    // Route::get('/server-time', [TimeEntryController::class, 'getCurrentTime']);
 
     // Autres routes nécessitant la restriction d'IP après authentification
     Route::get('/historique', [HistoricalController::class, 'index'])->name('historique');

@@ -134,68 +134,50 @@ function getLastTime(day, type) {
 }
 
 // Fonction pour enregistrer une arrivée ou un départ
-function recordTime(actionType) {
-    const today = new Date().toLocaleDateString("fr-FR");
-    const currentTime = new Date().toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+async function recordTime(actionType) {
+    try {
+        // Obtenir l'heure du serveur
+        const serverTimeResponse = await axios.get("/server-time");
+        const { time, date, day } = serverTimeResponse.data;
 
-    let dayInfo = days.value.find((day) => day.date === today);
+        let dayInfo = days.value.find((d) => d.date === date);
 
-    if (!dayInfo) {
-        // Si aucun jour trouvé pour aujourd'hui, créez-en un nouveau localement
-        dayInfo = {
-            id: null, // ID attribué après la création dans le backend
-            day: new Date().toLocaleDateString("fr-FR", { weekday: "long" }),
-            date: today,
-            arrivals: [],
-            departures: [],
-            total: "",
-        };
-        days.value.push(dayInfo);
-    }
-
-    // Ajouter l'heure actuelle dans les arrivées ou départs
-    if (actionType === "arrival") {
-        dayInfo.arrivals.push(currentTime);
-    } else if (actionType === "departure") {
-        dayInfo.departures.push(currentTime);
-    }
-
-    // Calculer le total pour aujourd'hui
-    dayInfo.total = calculateDailyTotal(dayInfo.arrivals, dayInfo.departures);
-
-    // Envoyer les données au backend pour l'heure enregistrée
-    axios
-        .post("/time-entries/store", {
+        // Envoyer les données au backend
+        const response = await axios.post("/time-entries", {
             user_id: props.auth.user.id,
-            day_id: dayInfo.id || null, // Null si le jour n'existe pas encore
+            day_id: dayInfo ? dayInfo.id : null,
             type: actionType,
-            time: currentTime,
-        })
-        .then((response) => {
-            console.log("Données sauvegardées :", response.data);
-            if (!dayInfo.id) {
-                dayInfo.id = response.data.day_id; // Mise à jour de l'ID
-            }
-
-            // Synchroniser le total avec la table `days`
-            axios
-                .post("/days/update-total", {
-                    day_id: dayInfo.id,
-                    total: dayInfo.total,
-                })
-                .then((syncResponse) => {
-                    console.log("Total synchronisé :", syncResponse.data);
-                })
-                .catch((error) => {
-                    console.error("Erreur lors de la synchronisation :", error);
-                });
-        })
-        .catch((error) => {
-            console.error("Erreur lors de l'enregistrement :", error);
         });
+
+        console.log("Données sauvegardées :", response.data);
+
+        if (!dayInfo) {
+            dayInfo = {
+                id: response.data.time_entry.day_id,
+                day: day,
+                date: date,
+                arrivals: [],
+                departures: [],
+                total: "",
+            };
+            days.value.push(dayInfo);
+        }
+
+        // Utiliser l'heure retournée par le serveur
+        const serverTime = response.data.time_entry.time;
+        
+        if (actionType === "arrival") {
+            dayInfo.arrivals.push(serverTime);
+        } else if (actionType === "departure") {
+            dayInfo.departures.push(serverTime);
+        }
+
+        dayInfo.total = calculateDailyTotal(dayInfo.arrivals, dayInfo.departures);
+        weeklyTotal.value = calculateWeeklyTotal();
+
+    } catch (error) {
+        console.error("Erreur lors de l'enregistrement :", error);
+    }
 }
 
 // Calculer le total des heures travaillées pour un jour

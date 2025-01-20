@@ -13,13 +13,19 @@ class TimeEntryController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validation des données
+            // Forcer la mise à jour du fuseau horaire
+            date_default_timezone_set('Europe/Paris');
+            
+            // Validation des données de base
             $validated = $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'day_id' => 'nullable|exists:days,id',
                 'type' => 'required|in:arrival,departure',
-                'time' => 'required|date_format:H:i',
             ]);
+
+            // Utiliser l'heure du serveur
+            $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+            $validated['time'] = $now->format('H:i');
 
             // Vérifier si `day_id` n'est pas fourni
             if (empty($validated['day_id'])) {
@@ -56,5 +62,21 @@ class TimeEntryController extends Controller
             // Retourner une réponse d'erreur
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    // Nouvelle méthode pour obtenir l'heure du serveur
+    public function getCurrentTime()
+    {
+        // Forcer la mise à jour du fuseau horaire
+        date_default_timezone_set('Europe/Paris');
+        
+        // Récupérer l'heure du serveur directement via PHP
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+        
+        return response()->json([
+            'time' => $now->format('H:i'),
+            'date' => $now->format('d/m/Y'),
+            'day' => Carbon::now()->translatedFormat('l')
+        ]);
     }
 }
