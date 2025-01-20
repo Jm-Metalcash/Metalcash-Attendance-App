@@ -400,6 +400,7 @@ const removeDepartureTimeEdit = (index) => {
                 >
                     <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
                         <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Historique des pointages
+                        <span v-if="isShow">de {{ user.name }}</span>
                     </h2>
                 </div>
                 <div
