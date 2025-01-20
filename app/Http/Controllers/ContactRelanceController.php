@@ -113,9 +113,15 @@ class ContactRelanceController extends Controller
         ]);
 
         if ($request->type === 'client') {
-            $note = NoteClient::findOrFail($request->id);
+            $note = NoteClient::where('client_id', $request->id)
+                ->where('type', 'a_contacter')
+                ->latest('note_date')
+                ->firstOrFail();
         } else {
-            $note = NoteProspect::findOrFail($request->id);
+            $note = NoteProspect::where('prospect_id', $request->id)
+                ->where('type', 'a_contacter')
+                ->latest('note_date')
+                ->firstOrFail();
         }
 
         // Enregistrer l'historique
@@ -127,6 +133,12 @@ class ContactRelanceController extends Controller
         
         // Mettre à jour l'action
         $note->action_relance = $request->action;
+        
+        // Si l'action n'est ni 0 ni 2, changer le type en "information"
+        if (!in_array($request->action, [0, 2])) {
+            $note->type = 'information';
+        }
+        
         $note->save();
 
         return back();
