@@ -8,9 +8,9 @@ const userRole = computed(() => user.roles?.[0]?.name || '');
 
 // Configuration des accès par rôle
 const roleAccess = {
-    Admin: ['dashboard', 'employes', 'management-call', 'index', 'historique', 'demandes-de-rappel'],
-    Informatique: ['dashboard', 'employes', 'management-call', 'index', 'historique', 'demandes-de-rappel'],
-    Comptabilité: ['dashboard', 'management-call', 'index', 'historique', 'demandes-de-rappel'],
+    Admin: ['dashboard', 'employes', 'management-call', 'index', 'historique', 'contactRelance'],
+    Informatique: ['dashboard', 'employes', 'management-call', 'index', 'historique', 'contactRelance'],
+    Comptabilité: ['dashboard', 'management-call', 'index', 'historique', 'contactRelance'],
     Employé: ['dashboard', 'index', 'historique'],
     Ouvrier: ['dashboard', 'index', 'historique']
 };
@@ -49,9 +49,9 @@ const allRoutes = [
     },
     {
         path: '/demandes-de-rappel',
-        name: 'demandes-de-rappel',
+        name: 'contactRelance',
         label: 'Demandes de rappel',
-        keywords: ['Demandes de rappel', 'Consulter les demandes de rappel', 'Historique des demandes de rappel', 'Relance', 'Commercial']
+        keywords: ['Demandes de rappel', 'Consulter les demandes de rappel', 'Historique des demandes de rappel', 'Relance', 'Commercial', 'Contacter']
     },
 ];
 
