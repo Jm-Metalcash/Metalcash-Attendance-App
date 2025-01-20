@@ -45,8 +45,7 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
     Route::get('/server-time', [TimeEntryController::class, 'getCurrentTime']);
     Route::post('/time-entries', [TimeEntryController::class, 'store']);
 
-    // Nouvelle route pour obtenir l'heure du serveur
-    // Route::get('/server-time', [TimeEntryController::class, 'getCurrentTime']);
+
 
     // Autres routes nécessitant la restriction d'IP après authentification
     Route::get('/historique', [HistoricalController::class, 'index'])->name('historique');

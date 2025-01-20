@@ -253,7 +253,7 @@ watch(() => page.props.initialContactCount, (newCount) => {
                                     class="whitespace-nowrap overflow-hidden text-ellipsis block px-2 py-2 rounded hover:bg-gray-700"
                                 >
                                     <i class="fa fa-user" :class="{ 'mr-1': isMenuCollapsed, 'mr-3': !isMenuCollapsed }"></i>
-                                    <Link :href="`/employes/${user.id}/profil`">
+                                    <Link :href="route('users.pointages', user.id)">
                                         <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">
                                             {{ user.name }}
                                             <span class="text-gray-400">
