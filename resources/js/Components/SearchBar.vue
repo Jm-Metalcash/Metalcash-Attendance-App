@@ -59,8 +59,7 @@ const allRoutes = [
 const routes = computed(() => {
     const role = userRole.value;
     const allowedRoutes = roleAccess[role] || [];
-    console.log('Role actuel:', role); // Pour le débogage
-    console.log('Routes autorisées:', allowedRoutes); // Pour le débogage
+
     return allRoutes.filter(route => allowedRoutes.includes(route.name));
 });
 

@@ -328,7 +328,7 @@ watch(() => page.props.initialContactCount, (newCount) => {
                                     >
                                         <i class="fa-solid fa-phone" :class="{ 'mr-1': isMenuCollapsed, 'mr-2': !isMenuCollapsed }"></i>
                                         <span :class="{ 'text-[10px]': isMenuCollapsed, 'text-sm': !isMenuCollapsed }">Demandes de rappel</span>
-                                        <div class="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                                        <div class="ml-2 bg-red-500 text-white rounded-full px-2 py-1" :class="{ 'text-[8px]': isMenuCollapsed, 'text-xs': !isMenuCollapsed }">
                                             {{ contactCount }}
                                         </div>
                                     </Link>

@@ -68,6 +68,22 @@ const page = usePage();
                         <i class="fas fa-phone text-2xl mb-2"></i>
                         <span>Gestion des appels</span>
                     </Link>
+
+                    <Link
+                        v-if="
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes(
+                                    'Informatique'
+                                )||
+                                page.props.auth.roles.includes('Comptabilité'))
+                        "
+                        :href="route('contactRelance')"
+                        class="action-button"
+                    >
+                        <i class="fa-solid fa-phone-volume text-2xl mb-2"></i>
+                        <span>Demandes de rappel</span>
+                    </Link>
                 </div>
             </div>
 
