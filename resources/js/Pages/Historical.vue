@@ -9,6 +9,19 @@ import axios from "axios";
 const props = defineProps(["days", "isShow", "user"]);
 
 const page = usePage();
+const showFlash = ref(false);
+const flashMessage = ref('');
+const flashType = ref('success');
+
+// Fonction pour afficher le flash message
+const displayFlash = (message, type = 'success') => {
+    flashMessage.value = message;
+    flashType.value = type;
+    showFlash.value = true;
+    setTimeout(() => {
+        showFlash.value = false;
+    }, 8000);
+};
 
 // Calculer dynamiquement le titre
 const pageTitle = computed(() =>
@@ -145,14 +158,14 @@ function filterDays() {
 
             const arrivals = Array.isArray(day.time_entries)
                 ? day.time_entries
-                      .filter((entry) => entry.type === "arrival")
-                      .map((entry) => entry.time)
+                    .filter((entry) => entry.type === "arrival")
+                    .map((entry) => entry.time)
                 : [];
 
             const departures = Array.isArray(day.time_entries)
                 ? day.time_entries
-                      .filter((entry) => entry.type === "departure")
-                      .map((entry) => entry.time)
+                    .filter((entry) => entry.type === "departure")
+                    .map((entry) => entry.time)
                 : [];
 
             groupedByMonth[month].days.push({
@@ -183,14 +196,14 @@ function filterDays() {
                     .map((day) => {
                         const arrivals = Array.isArray(day.time_entries)
                             ? day.time_entries
-                                  .filter((entry) => entry.type === "arrival")
-                                  .map((entry) => entry.time)
+                                .filter((entry) => entry.type === "arrival")
+                                .map((entry) => entry.time)
                             : [];
 
                         const departures = Array.isArray(day.time_entries)
                             ? day.time_entries
-                                  .filter((entry) => entry.type === "departure")
-                                  .map((entry) => entry.time)
+                                .filter((entry) => entry.type === "departure")
+                                .map((entry) => entry.time)
                             : [];
 
                         return {
@@ -250,6 +263,7 @@ const years = ref([2023, 2024, 2025]);
 // Variables pour le modal
 const isModalOpen = ref(false);
 const selectedDay = ref(null);
+const originalDayData = ref(null);
 
 // Ouvrir le modal pour modifier un jour
 const openModal = (day) => {
@@ -258,11 +272,19 @@ const openModal = (day) => {
         page.props.auth.roles.includes("Admin") ||
         page.props.auth.roles.includes("Informatique")
     ) {
-        // Si l'utilisateur est "Admin" ou "Informatique", on peut ouvrir le modal
-        selectedDay.value = { ...day };
+        // Créer une copie profonde des données du jour
+        selectedDay.value = {
+            ...day,
+            arrivals: [...(day.arrivals || [])],
+            departures: [...(day.departures || [])]
+        };
+        // Sauvegarder les données originales
+        originalDayData.value = {
+            arrivals: [...(day.arrivals || [])],
+            departures: [...(day.departures || [])]
+        };
         isModalOpen.value = true;
     } else {
-        // Sinon, empêcher l'ouverture et afficher un message ou prendre une autre action
         console.log(
             "Accès refusé : vous n'avez pas les autorisations nécessaires."
         );
@@ -271,8 +293,14 @@ const openModal = (day) => {
 
 // Fermer le modal
 const closeModal = () => {
+    if (originalDayData.value && selectedDay.value) {
+        // Restaurer les données originales avant de fermer
+        selectedDay.value.arrivals = [...originalDayData.value.arrivals];
+        selectedDay.value.departures = [...originalDayData.value.departures];
+    }
     isModalOpen.value = false;
     selectedDay.value = null;
+    originalDayData.value = null;
 };
 
 // Sauvegarder les modifications du jour
@@ -297,9 +325,11 @@ const saveDayChanges = async () => {
             departures: formattedDepartures,
         });
 
+        displayFlash('Le jour a été modifié avec succès !');
         // Recharger la page après la mise à jour
         window.location.reload();
     } catch (error) {
+        displayFlash('Erreur lors de la modification du jour.');
         console.error(
             "Erreur lors de la sauvegarde des modifications :",
             error
@@ -346,10 +376,12 @@ const addDay = async () => {
             departures: formattedDepartures,
         });
 
+        displayFlash('Le jour a été ajouté avec succès !');
         // Fermer le modal après succès
         closeAddDayModal();
         window.location.reload(); // Recharger la page pour refléter les changements
     } catch (error) {
+        displayFlash('Erreur lors de l\'ajout du jour.');
         console.error("Erreur lors de l'ajout du jour :", error);
     }
 };
@@ -383,6 +415,7 @@ const removeDepartureTimeEdit = (index) => {
 </script>
 
 <template>
+
     <Head title="Historique des pointages" />
 
     <AuthenticatedLayout>
@@ -391,58 +424,69 @@ const removeDepartureTimeEdit = (index) => {
         </template>
 
         <section
-            class="attendance-section flex-grow w-full max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-14 pb-20 rounded-lg shadow-lg min-h-[800px]"
-        >
+            class="attendance-section flex-grow w-full max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-16 md:pt-14 pb-20 rounded-lg shadow-lg min-h-[800px]">
             <!-- Statistiques et filtres -->
             <div class="w-full mx-auto mb-2">
-                <div
-                    class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
+                <transition
+                    enter-active-class="transition ease-out duration-300 transform"
+                    enter-from-class="opacity-0 -translate-y-2"
+                    enter-to-class="opacity-100 translate-y-0"
+                    leave-active-class="transition ease-in duration-300 transform"
+                    leave-from-class="opacity-100 translate-y-0"
+                    leave-to-class="opacity-0 -translate-y-2"
                 >
+                    <div v-if="showFlash" 
+                        :class="[
+                            'fixed top-5 right-5 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center',
+                            flashType === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                        ]"
+                    >
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i :class="[
+                                    'fas mr-3',
+                                    flashType === 'success' ? 'text-white' : 'text-white'
+                                ]"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">{{ flashMessage }}</p>
+                            </div>
+                            <button @click="showFlash = false" class="ml-4 text-white hover:text-gray-200">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </transition>
+                <div class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8">
                     <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
                         <i class="fa-solid fa-clock-rotate-left text-[#005692] mr-2"></i> Historique des pointages
                         <span v-if="isShow">de {{ user.name }}</span>
                     </h2>
                 </div>
                 <div
-                    class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                >
+                    class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <!-- Bouton pour ajouter un jour -->
-                    <div
-                        v-if="
-                            isShow &&
-                            page.props.auth.roles &&
-                            (page.props.auth.roles.includes('Admin') ||
-                                page.props.auth.roles.includes('Informatique'))
-                        "
-                        class="flex items-center"
-                    >
+                    <div v-if="
+                        isShow &&
+                        page.props.auth.roles &&
+                        (page.props.auth.roles.includes('Admin') ||
+                            page.props.auth.roles.includes('Informatique'))
+                    " class="flex items-center">
                         <PrimaryButton @click="openAddDayModal">
                             <i class="fas fa-plus mr-2"></i> Ajouter un jour
                         </PrimaryButton>
                     </div>
 
                     <!-- Filtres -->
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-center gap-4"
-                    >
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                         <!-- Filtre Année -->
                         <div class="flex items-center gap-2">
-                            <label
-                                for="year"
-                                class="text-gray-600 font-medium text-sm"
-                            >
+                            <label for="year" class="text-gray-600 font-medium text-sm">
                                 Année
                             </label>
-                            <select
-                                id="year"
-                                v-model="selectedYear"
-                                class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option
-                                    v-for="year in years"
-                                    :key="year"
-                                    :value="year"
-                                >
+                            <select id="year" v-model="selectedYear"
+                                class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option v-for="year in years" :key="year" :value="year">
                                     {{ year }}
                                 </option>
                             </select>
@@ -450,22 +494,12 @@ const removeDepartureTimeEdit = (index) => {
 
                         <!-- Filtre Mois -->
                         <div class="flex items-center gap-2">
-                            <label
-                                for="month"
-                                class="text-gray-600 font-medium text-sm"
-                            >
+                            <label for="month" class="text-gray-600 font-medium text-sm">
                                 Mois
                             </label>
-                            <select
-                                id="month"
-                                v-model="selectedMonth"
-                                class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option
-                                    v-for="month in months"
-                                    :key="month.value"
-                                    :value="month.value"
-                                >
+                            <select id="month" v-model="selectedMonth"
+                                class="border border-gray-300 rounded-md text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option v-for="month in months" :key="month.value" :value="month.value">
                                     {{ month.name }}
                                 </option>
                             </select>
@@ -476,10 +510,8 @@ const removeDepartureTimeEdit = (index) => {
 
             <!-- Table -->
             <div class="w-full mx-auto overflow-x-auto">
-                <div
-                    v-if="selectedMonth === 0"
-                    class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300 text-gray-800"
-                >
+                <div v-if="selectedMonth === 0"
+                    class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300 text-gray-800">
                     <!-- Total des heures -->
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-calendar-alt text-green-500"></i>
@@ -487,7 +519,7 @@ const removeDepartureTimeEdit = (index) => {
                             <span>Jours enregistrés: </span>
                             <span class="font-bold">{{
                                 totalDaysRecorded
-                            }}</span>
+                                }}</span>
                         </span>
                     </div>
                     <!-- Jours enregistrés -->
@@ -497,14 +529,11 @@ const removeDepartureTimeEdit = (index) => {
                             <span>Total des heures: </span>
                             <span class="font-bold">{{
                                 formattedTotalHours
-                            }}</span>
+                                }}</span>
                         </span>
                     </div>
                 </div>
-                <template
-                    v-for="(monthGroup, monthIndex) in filteredDays"
-                    :key="monthIndex"
-                >
+                <template v-for="(monthGroup, monthIndex) in filteredDays" :key="monthIndex">
                     <!-- En-tête du mois -->
                     <h3 class="text-lg font-semibold text-gray-700 mt-12 mb-4">
                         {{ monthGroup.monthName }}
@@ -514,23 +543,19 @@ const removeDepartureTimeEdit = (index) => {
                         <thead class="bg-[rgb(0,85,150)]">
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
                                     Jour
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
                                     Arrivées
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
                                     Départs
                                 </th>
                                 <th
-                                    class="px-7 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider"
-                                >
+                                    class="px-7 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider">
                                     Total
                                 </th>
                             </tr>
@@ -538,28 +563,19 @@ const removeDepartureTimeEdit = (index) => {
                         <tbody>
                             <!-- Lignes principales -->
                             <tr v-if="monthGroup.days.length === 0">
-                                <td
-                                    colspan="4"
-                                    class="px-4 sm:px-6 py-4 text-center text-sm md:text-base"
-                                >
+                                <td colspan="4" class="px-4 sm:px-6 py-4 text-center text-sm md:text-base">
                                     Aucun pointage trouvé pour ce mois.
                                 </td>
                             </tr>
-                            <template
-                                v-for="(day, dayIndex) in monthGroup.days"
-                                :key="`${monthIndex}-${dayIndex}`"
-                            >
-                                <tr
-                                    :class="[
-                                        'hover:bg-gray-50 transition-colors',
-                                        isShow ? 'cursor-pointer' : '',
-                                    ]"
-                                    @click="isShow && openModal(day)"
-                                >
+                            <template v-for="(day, dayIndex) in monthGroup.days" :key="`${monthIndex}-${dayIndex}`">
+                                <tr :class="[
+                                    'hover:bg-gray-50 transition-colors',
+                                    isShow ? 'cursor-pointer' : '',
+                                ]" @click="isShow && openModal(day)">
                                     <td class="px-6 py-4">
                                         <strong class="capitalize">{{
                                             day.day
-                                        }}</strong>
+                                            }}</strong>
                                         <br />
                                         <span class="text-sm text-gray-500">
                                             {{
@@ -578,30 +594,22 @@ const removeDepartureTimeEdit = (index) => {
                                                     : null
                                             ) || "--:--"
                                         }}
-                                        <button
-                                            v-if="
-                                                day.arrivals &&
-                                                day.arrivals.length > 1
-                                            "
-                                            class="text-gray-500 text-sm ml-2"
-                                            @click.stop="
+                                        <button v-if="
+                                            day.arrivals &&
+                                            day.arrivals.length > 1
+                                        " class="text-gray-500 text-sm ml-2" @click.stop="
                                                 toggleExpand(
                                                     monthIndex,
                                                     dayIndex
                                                 )
-                                            "
-                                        >
+                                                ">
                                             (+{{ day.arrivals.length - 1 }})
-                                            <i
-                                                :class="
-                                                    expandedDays.includes(
-                                                        `${monthIndex}-${dayIndex}`
-                                                    )
-                                                        ? 'fa-solid fa-chevron-up'
-                                                        : 'fa-solid fa-chevron-down'
-                                                "
-                                                class="ml-1"
-                                            ></i>
+                                            <i :class="expandedDays.includes(
+                                                `${monthIndex}-${dayIndex}`
+                                            )
+                                                    ? 'fa-solid fa-chevron-up'
+                                                    : 'fa-solid fa-chevron-down'
+                                                " class="ml-1"></i>
                                         </button>
                                     </td>
                                     <td class="px-6 py-4 text-red-700">
@@ -613,90 +621,61 @@ const removeDepartureTimeEdit = (index) => {
                                                     : null
                                             ) || "--:--"
                                         }}
-                                        <button
-                                            v-if="
-                                                day.departures &&
-                                                day.departures.length > 1
-                                            "
-                                            class="text-gray-500 text-sm ml-2"
-                                            @click.stop="
+                                        <button v-if="
+                                            day.departures &&
+                                            day.departures.length > 1
+                                        " class="text-gray-500 text-sm ml-2" @click.stop="
                                                 toggleExpand(
                                                     monthIndex,
                                                     dayIndex
                                                 )
-                                            "
-                                        >
+                                                ">
                                             (+{{ day.departures.length - 1 }})
-                                            <i
-                                                :class="
-                                                    expandedDays.includes(
-                                                        `${monthIndex}-${dayIndex}`
-                                                    )
-                                                        ? 'fa-solid fa-chevron-up'
-                                                        : 'fa-solid fa-chevron-down'
-                                                "
-                                                class="ml-1"
-                                            ></i>
+                                            <i :class="expandedDays.includes(
+                                                `${monthIndex}-${dayIndex}`
+                                            )
+                                                    ? 'fa-solid fa-chevron-up'
+                                                    : 'fa-solid fa-chevron-down'
+                                                " class="ml-1"></i>
                                         </button>
                                     </td>
-                                    <td
-                                        class="px-6 py-4 text-right font-semibold opacity-70"
-                                    >
+                                    <td class="px-6 py-4 text-right font-semibold opacity-70">
                                         {{ day.total || "--:--" }}
                                     </td>
                                 </tr>
 
                                 <!-- Lignes détaillées -->
-                                <tr
-                                    v-if="
-                                        expandedDays.includes(
-                                            `${monthIndex}-${dayIndex}`
-                                        )
-                                    "
-                                >
+                                <tr v-if="
+                                    expandedDays.includes(
+                                        `${monthIndex}-${dayIndex}`
+                                    )
+                                ">
                                     <td colspan="4" class="px-0 py-0">
                                         <transition name="slide-expand">
-                                            <div
-                                                class="bg-gray-50 border rounded-lg overflow-hidden"
-                                            >
+                                            <div class="bg-gray-50 border rounded-lg overflow-hidden">
                                                 <!-- Détails -->
-                                                <div
-                                                    class="p-4"
-                                                    :class="[
-                                                        'hover:bg-gray-50 transition-colors',
-                                                        isShow
-                                                            ? 'cursor-pointer'
-                                                            : '',
-                                                    ]"
-                                                    @click="
+                                                <div class="p-4" :class="[
+                                                    'hover:bg-gray-50 transition-colors',
+                                                    isShow
+                                                        ? 'cursor-pointer'
+                                                        : '',
+                                                ]" @click="
                                                         isShow && openModal(day)
-                                                    "
-                                                >
-                                                    <h4
-                                                        class="text-sm font-semibold text-gray-800 mb-2"
-                                                    >
+                                                        ">
+                                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">
                                                         Détails des heures :
                                                     </h4>
-                                                    <div
-                                                        class="flex flex-col space-y-2"
-                                                    >
+                                                    <div class="flex flex-col space-y-2">
                                                         <div>
-                                                            <strong
-                                                                class="text-green-600"
-                                                                >Arrivées
-                                                                :</strong
-                                                            >
-                                                            <div
-                                                                class="flex flex-wrap gap-2 mt-1"
-                                                            >
-                                                                <span
-                                                                    v-for="(
+                                                            <strong class="text-green-600">Arrivées
+                                                                :</strong>
+                                                            <div class="flex flex-wrap gap-2 mt-1">
+                                                                <span v-for="(
                                                                         arrival,
-                                                                        i
+                                                                            i
                                                                     ) in day.arrivals"
                                                                     :key="`arrival-${dayIndex}-${i}`"
-                                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-md text-sm"
-                                                                >
+                                                                    class="bg-green-100 text-green-600 px-3 py-1 rounded-md text-sm">
                                                                     {{
                                                                         formatTimeWithoutSeconds(
                                                                             arrival
@@ -706,22 +685,15 @@ const removeDepartureTimeEdit = (index) => {
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <strong
-                                                                class="text-red-600"
-                                                                >Départs
-                                                                :</strong
-                                                            >
-                                                            <div
-                                                                class="flex flex-wrap gap-2 mt-1"
-                                                            >
-                                                                <span
-                                                                    v-for="(
+                                                            <strong class="text-red-600">Départs
+                                                                :</strong>
+                                                            <div class="flex flex-wrap gap-2 mt-1">
+                                                                <span v-for="(
                                                                         departure,
-                                                                        i
+                                                                            i
                                                                     ) in day.departures"
                                                                     :key="`departure-${dayIndex}-${i}`"
-                                                                    class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-sm"
-                                                                >
+                                                                    class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-sm">
                                                                     {{
                                                                         formatTimeWithoutSeconds(
                                                                             departure
@@ -739,10 +711,8 @@ const removeDepartureTimeEdit = (index) => {
                             </template>
                         </tbody>
                     </table>
-                    <div
-                        v-if="selectedMonth > 0"
-                        class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300 rounded-b-lg text-gray-800"
-                    >
+                    <div v-if="selectedMonth > 0"
+                        class="flex justify-between items-center p-4 bg-gray-100 border-t border-gray-300 rounded-b-lg text-gray-800">
                         <!-- Total des heures -->
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-calendar-alt text-green-500"></i>
@@ -750,7 +720,7 @@ const removeDepartureTimeEdit = (index) => {
                                 <span>Jours enregistrés: </span>
                                 <span class="font-bold">{{
                                     totalDaysRecorded
-                                }}</span>
+                                    }}</span>
                             </span>
                         </div>
                         <!-- Jours enregistrés -->
@@ -760,7 +730,7 @@ const removeDepartureTimeEdit = (index) => {
                                 <span>Total des heures: </span>
                                 <span class="font-bold">{{
                                     formattedTotalHours
-                                }}</span>
+                                    }}</span>
                             </span>
                         </div>
                     </div>
@@ -771,25 +741,23 @@ const removeDepartureTimeEdit = (index) => {
             <div class="pt-16 flex justify-center">
                 <!-- Si isShow est vrai, afficher le bouton avec la route "employes" -->
                 <Link v-if="isShow" :href="route('employes')">
-                    <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à la
-                        gestion des employés
-                    </PrimaryButton>
+                <PrimaryButton>
+                    <i class="fas fa-arrow-left mr-2"></i> Retour à la
+                    gestion des employés
+                </PrimaryButton>
                 </Link>
                 <!-- Sinon, afficher le bouton pour retourner au dashboard -->
                 <Link v-else :href="route('home')">
-                    <PrimaryButton>
-                        <i class="fas fa-arrow-left mr-2"></i> Retour à
-                        l'accueil
-                    </PrimaryButton>
+                <PrimaryButton>
+                    <i class="fas fa-arrow-left mr-2"></i> Retour à
+                    l'accueil
+                </PrimaryButton>
                 </Link>
             </div>
 
             <!-- Modal pour modifier les jours -->
-            <div
-                v-if="isModalOpen"
-                class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75"
-            >
+            <div v-if="isModalOpen"
+                class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                     <!-- Affichage du jour sélectionné -->
                     <h2 class="text-xl font-semibold mb-4">
@@ -803,80 +771,50 @@ const removeDepartureTimeEdit = (index) => {
 
                     <!-- Champs pour modifier les heures d'arrivée -->
                     <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                        >
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             Heures d'arrivée
                         </label>
                         <div class="space-y-2">
-                            <div
-                                v-for="(arrival, index) in selectedDay.arrivals"
-                                :key="`arrival-edit-${index}`"
-                                class="flex items-center space-x-2"
-                            >
-                                <input
-                                    type="time"
-                                    v-model="selectedDay.arrivals[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                />
-                                <button
-                                    @click="removeArrivalTimeEdit(index)"
-                                    class="text-red-500 hover:text-red-700"
-                                >
+                            <div v-for="(arrival, index) in selectedDay.arrivals" :key="`arrival-edit-${index}`"
+                                class="flex items-center space-x-2">
+                                <input type="time" v-model="selectedDay.arrivals[index]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                                <button @click="removeArrivalTimeEdit(index)" class="text-red-500 hover:text-red-700">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button
-                            @click="addArrivalTimeEdit"
-                            class="mt-2 text-blue-500 hover:text-blue-700 text-sm"
-                        >
+                        <button @click="addArrivalTimeEdit" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
                             <i class="fas fa-plus-circle"></i> Ajouter une heure
                         </button>
                     </div>
 
                     <!-- Champs pour modifier les heures de départ -->
                     <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                        >
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             Heures de départ
                         </label>
                         <div class="space-y-2">
-                            <div
-                                v-for="(
+                            <div v-for="(
                                     departure, index
-                                ) in selectedDay.departures"
-                                :key="`departure-edit-${index}`"
-                                class="flex items-center space-x-2"
-                            >
-                                <input
-                                    type="time"
-                                    v-model="selectedDay.departures[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                />
-                                <button
-                                    @click="removeDepartureTimeEdit(index)"
-                                    class="text-red-500 hover:text-red-700"
-                                >
+                                ) in selectedDay.departures" :key="`departure-edit-${index}`"
+                                class="flex items-center space-x-2">
+                                <input type="time" v-model="selectedDay.departures[index]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                                <button @click="removeDepartureTimeEdit(index)" class="text-red-500 hover:text-red-700">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button
-                            @click="addDepartureTimeEdit"
-                            class="mt-2 text-blue-500 hover:text-blue-700 text-sm"
-                        >
+                        <button @click="addDepartureTimeEdit" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
                             <i class="fas fa-plus-circle"></i> Ajouter une heure
                         </button>
                     </div>
 
                     <!-- Boutons pour annuler ou sauvegarder -->
                     <div class="flex justify-end space-x-4">
-                        <button
-                            @click="closeModal"
-                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500"
-                        >
+                        <button @click="closeModal"
+                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
                             Annuler
                         </button>
                         <PrimaryButton @click="saveDayChanges">
@@ -887,26 +825,17 @@ const removeDepartureTimeEdit = (index) => {
             </div>
 
             <!-- Modal pour ajouter un nouveau jour -->
-            <div
-                v-if="isAddDayModalOpen"
-                class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75"
-            >
+            <div v-if="isAddDayModalOpen"
+                class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                     <!-- Formulaire pour ajouter un jour -->
                     <h2 class="text-xl font-semibold mb-4">Ajouter un jour</h2>
 
                     <!-- Champ pour sélectionner le jour de la semaine -->
                     <div class="mb-4">
-                        <label
-                            for="day"
-                            class="block text-sm font-medium text-gray-700"
-                            >Jour</label
-                        >
-                        <select
-                            id="day"
-                            v-model="newDay.day"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        >
+                        <label for="day" class="block text-sm font-medium text-gray-700">Jour</label>
+                        <select id="day" v-model="newDay.day"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             <option value="Lundi">Lundi</option>
                             <option value="Mardi">Mardi</option>
                             <option value="Mercredi">Mercredi</option>
@@ -917,93 +846,55 @@ const removeDepartureTimeEdit = (index) => {
 
                     <!-- Champ pour sélectionner la date -->
                     <div class="mb-4">
-                        <label
-                            for="date"
-                            class="block text-sm font-medium text-gray-700"
-                            >Date</label
-                        >
-                        <input
-                            id="date"
-                            type="date"
-                            v-model="newDay.date"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        />
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                        <input id="date" type="date" v-model="newDay.date"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
                     </div>
 
                     <!-- Champs pour les heures d'arrivée -->
                     <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                        >
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             Heures d'arrivée
                         </label>
                         <div class="space-y-2">
-                            <div
-                                v-for="(arrival, index) in newDay.arrivals"
-                                :key="`arrival-${index}`"
-                                class="flex items-center space-x-2"
-                            >
-                                <input
-                                    type="time"
-                                    v-model="newDay.arrivals[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                />
-                                <button
-                                    @click="removeArrivalTime(index)"
-                                    class="text-red-500 hover:text-red-700"
-                                >
+                            <div v-for="(arrival, index) in newDay.arrivals" :key="`arrival-${index}`"
+                                class="flex items-center space-x-2">
+                                <input type="time" v-model="newDay.arrivals[index]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                                <button @click="removeArrivalTime(index)" class="text-red-500 hover:text-red-700">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button
-                            @click="addArrivalTime"
-                            class="mt-2 text-blue-500 hover:text-blue-700 text-sm"
-                        >
+                        <button @click="addArrivalTime" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
                             <i class="fas fa-plus-circle"></i> Ajouter une heure
                         </button>
                     </div>
 
                     <!-- Champs pour les heures de départ -->
                     <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                        >
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             Heures de départ
                         </label>
                         <div class="space-y-2">
-                            <div
-                                v-for="(departure, index) in newDay.departures"
-                                :key="`departure-${index}`"
-                                class="flex items-center space-x-2"
-                            >
-                                <input
-                                    type="time"
-                                    v-model="newDay.departures[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                />
-                                <button
-                                    @click="removeDepartureTime(index)"
-                                    class="text-red-500 hover:text-red-700"
-                                >
+                            <div v-for="(departure, index) in newDay.departures" :key="`departure-${index}`"
+                                class="flex items-center space-x-2">
+                                <input type="time" v-model="newDay.departures[index]"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                                <button @click="removeDepartureTime(index)" class="text-red-500 hover:text-red-700">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button
-                            @click="addDepartureTime"
-                            class="mt-2 text-blue-500 hover:text-blue-700 text-sm"
-                        >
+                        <button @click="addDepartureTime" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
                             <i class="fas fa-plus-circle"></i> Ajouter une heure
                         </button>
                     </div>
 
                     <!-- Boutons pour annuler ou ajouter -->
                     <div class="flex justify-end space-x-4">
-                        <button
-                            @click="closeAddDayModal"
-                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500"
-                        >
+                        <button @click="closeAddDayModal"
+                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
                             Annuler
                         </button>
                         <PrimaryButton @click="addDay"> Ajouter </PrimaryButton>
@@ -1036,7 +927,8 @@ const removeDepartureTimeEdit = (index) => {
 
 .slide-expand-enter-to,
 .slide-expand-leave-from {
-    max-height: 500px; /* Ajustez selon vos besoins */
+    max-height: 500px;
+    /* Ajustez selon vos besoins */
     opacity: 1;
 }
 
