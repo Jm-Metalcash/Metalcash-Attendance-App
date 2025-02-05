@@ -49,7 +49,10 @@ Route::middleware(['auth', 'verified', RestrictIP::class])->group(function () {
 
     // Autres routes nécessitant la restriction d'IP après authentification
     Route::get('/historique', [HistoricalController::class, 'index'])->name('historique');
-
+    Route::get('/historique/{id}', [HistoricalController::class, 'show'])->name('historique.show');
+    Route::post('/update-day/{id}', [HistoricalController::class, 'updateDay'])->name('day.update');
+    Route::post('/add-day', [HistoricalController::class, 'addDay'])->name('day.add');
+    Route::delete('/delete-day/{id}', [HistoricalController::class, 'deleteDay'])->name('day.delete');
     // Envoi des données des jours dans la base de données
     Route::post('/days/store', [DayController::class, 'store'])->name('days.store');
     Route::get('/dashboard/days', [DayController::class, 'index']);

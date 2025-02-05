@@ -149,6 +149,24 @@ class HistoricalController extends Controller
         }
     }
 
+    // Supprimer un jour et ses time_entries associés
+    public function deleteDay($id)
+    {
+        try {
+            $day = Day::findOrFail($id);
+
+            // Supprimer d'abord les time_entries associés
+            TimeEntry::where('day_id', $id)->delete();
+
+            // Supprimer le jour
+            $day->delete();
+
+            return response()->json(['message' => 'Jour supprimé avec succès']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     // Fonction pour recalculer le total des heures d'un jour
     private function recalculateTotal(Day $day)
     {

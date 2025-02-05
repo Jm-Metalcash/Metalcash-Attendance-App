@@ -325,15 +325,37 @@ const saveDayChanges = async () => {
             departures: formattedDepartures,
         });
 
-        displayFlash('Le jour a été modifié avec succès !');
+        displayFlash('Le jour a été modifié avec succès !', 'success');
         // Recharger la page après la mise à jour
         window.location.reload();
     } catch (error) {
-        displayFlash('Erreur lors de la modification du jour.');
+        displayFlash('Erreur lors de la modification du jour.', 'error');
         console.error(
             "Erreur lors de la sauvegarde des modifications :",
             error
         );
+    }
+};
+
+// Fonction pour supprimer un jour
+const deleteDay = async () => {
+    if (!selectedDay.value || !selectedDay.value.id) {
+        console.error("ID du jour manquant !");
+        return;
+    }
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce jour ?')) {
+        return;
+    }
+
+    try {
+        await axios.delete(`/delete-day/${selectedDay.value.id}`);
+        displayFlash('Le jour a été supprimé avec succès !', 'success');
+        closeModal();
+        window.location.reload();
+    } catch (error) {
+        displayFlash('Erreur lors de la suppression du jour.', 'error');
+        console.error("Erreur lors de la suppression du jour :", error);
     }
 };
 
@@ -376,12 +398,12 @@ const addDay = async () => {
             departures: formattedDepartures,
         });
 
-        displayFlash('Le jour a été ajouté avec succès !');
+        displayFlash('Le jour a été ajouté avec succès !', 'success');
         // Fermer le modal après succès
         closeAddDayModal();
         window.location.reload(); // Recharger la page pour refléter les changements
     } catch (error) {
-        displayFlash('Erreur lors de l\'ajout du jour.');
+        displayFlash('Erreur lors de l\'ajout du jour.', 'error');
         console.error("Erreur lors de l'ajout du jour :", error);
     }
 };
@@ -758,68 +780,77 @@ const removeDepartureTimeEdit = (index) => {
             <!-- Modal pour modifier les jours -->
             <div v-if="isModalOpen"
                 class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                    <!-- Affichage du jour sélectionné -->
-                    <h2 class="text-xl font-semibold mb-4">
-                        Modifier le jour :
-                        {{
-                            new Date(selectedDay.date).toLocaleDateString(
-                                "fr-FR"
-                            )
-                        }}
-                    </h2>
+                <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-lg mx-4">
+                    <!-- En-tête du modal -->
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            Modifier le jour : {{ selectedDay?.date }}
+                        </h2>
+                    </div>
 
                     <!-- Champs pour modifier les heures d'arrivée -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
                             Heures d'arrivée
                         </label>
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <div v-for="(arrival, index) in selectedDay.arrivals" :key="`arrival-edit-${index}`"
-                                class="flex items-center space-x-2">
+                                class="flex items-center gap-2">
                                 <input type="time" v-model="selectedDay.arrivals[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
-                                <button @click="removeArrivalTimeEdit(index)" class="text-red-500 hover:text-red-700">
+                                    class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                                <button @click="removeArrivalTimeEdit(index)" 
+                                    class="p-2 text-red-500 hover:text-red-700 transition-colors">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button @click="addArrivalTimeEdit" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
-                            <i class="fas fa-plus-circle"></i> Ajouter une heure
+                        <button @click="addArrivalTimeEdit" 
+                            class="mt-3 inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Ajouter une heure
                         </button>
                     </div>
 
                     <!-- Champs pour modifier les heures de départ -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
                             Heures de départ
                         </label>
-                        <div class="space-y-2">
-                            <div v-for="(
-                                    departure, index
-                                ) in selectedDay.departures" :key="`departure-edit-${index}`"
-                                class="flex items-center space-x-2">
+                        <div class="space-y-3">
+                            <div v-for="(departure, index) in selectedDay.departures" :key="`departure-edit-${index}`"
+                                class="flex items-center gap-2">
                                 <input type="time" v-model="selectedDay.departures[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
-                                <button @click="removeDepartureTimeEdit(index)" class="text-red-500 hover:text-red-700">
+                                    class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                                <button @click="removeDepartureTimeEdit(index)"
+                                    class="p-2 text-red-500 hover:text-red-700 transition-colors">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button @click="addDepartureTimeEdit" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
-                            <i class="fas fa-plus-circle"></i> Ajouter une heure
+                        <button @click="addDepartureTimeEdit"
+                            class="mt-3 inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Ajouter une heure
                         </button>
                     </div>
 
-                    <!-- Boutons pour annuler ou sauvegarder -->
-                    <div class="flex justify-end space-x-4">
-                        <button @click="closeModal"
-                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
-                            Annuler
+                    <!-- Actions -->
+                    <div class="flex justify-between items-center">
+                        <button @click="deleteDay"
+                            class="inline-flex items-center px-4 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-400">
+                            <i class="fas fa-trash-alt mr-2"></i>
+                            Supprimer
                         </button>
-                        <PrimaryButton @click="saveDayChanges">
-                            Enregistrer
-                        </PrimaryButton>
+                        <div class="flex items-center gap-3">
+                            <button @click="closeModal"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200">
+                                Annuler
+                            </button>
+                            <button @click="saveDayChanges"
+                                class="px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-600">
+                                Sauvegarder
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -827,15 +858,21 @@ const removeDepartureTimeEdit = (index) => {
             <!-- Modal pour ajouter un nouveau jour -->
             <div v-if="isAddDayModalOpen"
                 class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                    <!-- Formulaire pour ajouter un jour -->
-                    <h2 class="text-xl font-semibold mb-4">Ajouter un jour</h2>
+                <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-lg mx-4">
+                    <!-- En-tête du modal -->
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            Ajouter un jour
+                        </h2>
+                    </div>
 
-                    <!-- Champ pour sélectionner le jour de la semaine -->
-                    <div class="mb-4">
-                        <label for="day" class="block text-sm font-medium text-gray-700">Jour</label>
-                        <select id="day" v-model="newDay.day"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <!-- Sélection du jour -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            Jour
+                        </label>
+                        <select v-model="newDay.day"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                             <option value="Lundi">Lundi</option>
                             <option value="Mardi">Mardi</option>
                             <option value="Mercredi">Mercredi</option>
@@ -844,60 +881,71 @@ const removeDepartureTimeEdit = (index) => {
                         </select>
                     </div>
 
-                    <!-- Champ pour sélectionner la date -->
-                    <div class="mb-4">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
-                        <input id="date" type="date" v-model="newDay.date"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                    <!-- Sélection de la date -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            Date
+                        </label>
+                        <input type="date" v-model="newDay.date"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
                     </div>
 
-                    <!-- Champs pour les heures d'arrivée -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <!-- Heures d'arrivée -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
                             Heures d'arrivée
                         </label>
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <div v-for="(arrival, index) in newDay.arrivals" :key="`arrival-${index}`"
-                                class="flex items-center space-x-2">
+                                class="flex items-center gap-2">
                                 <input type="time" v-model="newDay.arrivals[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
-                                <button @click="removeArrivalTime(index)" class="text-red-500 hover:text-red-700">
+                                    class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                                <button @click="removeArrivalTime(index)"
+                                    class="p-2 text-red-500 hover:text-red-700 transition-colors">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button @click="addArrivalTime" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
-                            <i class="fas fa-plus-circle"></i> Ajouter une heure
+                        <button @click="addArrivalTime"
+                            class="mt-3 inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Ajouter une heure
                         </button>
                     </div>
 
-                    <!-- Champs pour les heures de départ -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <!-- Heures de départ -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
                             Heures de départ
                         </label>
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <div v-for="(departure, index) in newDay.departures" :key="`departure-${index}`"
-                                class="flex items-center space-x-2">
+                                class="flex items-center gap-2">
                                 <input type="time" v-model="newDay.departures[index]"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
-                                <button @click="removeDepartureTime(index)" class="text-red-500 hover:text-red-700">
+                                    class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                                <button @click="removeDepartureTime(index)"
+                                    class="p-2 text-red-500 hover:text-red-700 transition-colors">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
-                        <button @click="addDepartureTime" class="mt-2 text-blue-500 hover:text-blue-700 text-sm">
-                            <i class="fas fa-plus-circle"></i> Ajouter une heure
+                        <button @click="addDepartureTime"
+                            class="mt-3 inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Ajouter une heure
                         </button>
                     </div>
 
-                    <!-- Boutons pour annuler ou ajouter -->
-                    <div class="flex justify-end space-x-4">
+                    <!-- Actions -->
+                    <div class="flex justify-end items-center gap-3">
                         <button @click="closeAddDayModal"
-                            class="bg-gray-100 text-gray-600 px-4 rounded-md font-bold hover:bg-gray-50 hover:text-gray-500">
+                            class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200">
                             Annuler
                         </button>
-                        <PrimaryButton @click="addDay"> Ajouter </PrimaryButton>
+                        <button @click="addDay"
+                            class="px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-600">
+                            Ajouter
+                        </button>
                     </div>
                 </div>
             </div>
