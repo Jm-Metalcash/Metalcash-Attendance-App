@@ -33,7 +33,7 @@ class RestrictIP
         // Liste des adresses IP autorisées
         $allowedIps = [
             '127.0.0.1', // IP LOCALHOST
-            '87.65.90.56', // IPV4 METALCASH
+            '80.201.194.70', // IPV4 METALCASH
             '91.180.115.83', // IP HOME WORK
         ];
 
