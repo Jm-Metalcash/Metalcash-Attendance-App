@@ -14,111 +14,127 @@ const page = usePage();
             <Header :pageTitle="'Accueil'" />
         </template>
 
-        <div
-            class="home-section max-w-[1700px] mt-16 mx-auto px-6 sm:px-8 py-16 bg-white rounded-lg shadow-lg min-h-[800px]"
-        >
-            <div class="text-center mb-8">
-                <h1 class="text-2xl md:text-3xl font-semibold text-gray-900">
-                    Que souhaitez-vous faire ?
-                </h1>
-                <p class="text-gray-600 mt-2">
-                    Sélectionnez une option pour commencer.
-                </p>
-            </div>
+        <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="text-center mb-12">
+                    <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+                        Bienvenue sur <span class="text-[rgb(0,86,146)]">Metalcash</span>
+                    </h1>
+                    <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                        Gérez votre temps et vos activités efficacement
+                    </p>
+                </div>
 
-            <div class="flex justify-center">
-                <div class="flex flex-wrap justify-center gap-6 mt-8">
-                    <Link :href="route('dashboard')" class="action-button">
-                        <i class="fas fa-check-circle text-2xl mb-2"></i>
-                        <span>Pointer aujourd'hui</span>
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 max-w-6xl mx-auto">
+                    <Link :href="route('dashboard')" 
+                        class="action-card group">
+                        <div class="card-icon-wrapper">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2 class="card-title">Pointer aujourd'hui</h2>
+                        <p class="card-description">Enregistrez votre présence pour la journée</p>
                     </Link>
 
-                    <Link :href="route('historique')" class="action-button">
-                        <i class="fas fa-history text-2xl mb-2"></i>
-                        <span>Consulter mon historique</span>
+                    <Link :href="route('historique')" 
+                        class="action-card group">
+                        <div class="card-icon-wrapper">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h2 class="card-title">Historique</h2>
+                        <p class="card-description">Consultez vos pointages précédents</p>
                     </Link>
 
                     <Link
-                        v-if="
-                            page.props.auth.roles &&
-                            (page.props.auth.roles.includes('Admin') ||
-                                page.props.auth.roles.includes(
-                                    'Informatique'
-                                ))
-                        "
+                        v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique'))"
                         :href="route('employes')"
-                        class="action-button"
-                    >
-                        <i class="fas fa-users text-2xl mb-2"></i>
-                        <span>Gestion des employés</span>
+                        class="action-card group">
+                        <div class="card-icon-wrapper">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h2 class="card-title">Gestion des employés</h2>
+                        <p class="card-description">Gérez les informations du personnel</p>
                     </Link>
 
                     <Link
-                        v-if="
-                            page.props.auth.roles &&
-                            (page.props.auth.roles.includes('Admin') ||
-                                page.props.auth.roles.includes(
-                                    'Informatique'
-                                )||
-                                page.props.auth.roles.includes('Comptabilité'))
-                        "
+                        v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
                         :href="route('managementCall')"
-                        class="action-button"
-                    >
-                        <i class="fas fa-phone text-2xl mb-2"></i>
-                        <span>Gestion des appels</span>
+                        class="action-card group">
+                        <div class="card-icon-wrapper">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <h2 class="card-title">Gestion des appels</h2>
+                        <p class="card-description">Suivez et gérez les appels</p>
                     </Link>
 
                     <Link
-                        v-if="
-                            page.props.auth.roles &&
-                            (page.props.auth.roles.includes('Admin') ||
-                                page.props.auth.roles.includes(
-                                    'Informatique'
-                                )||
-                                page.props.auth.roles.includes('Comptabilité'))
-                        "
+                        v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
                         :href="route('contactRelance')"
-                        class="action-button"
-                    >
-                        <i class="fa-solid fa-phone-volume text-2xl mb-2"></i>
-                        <span>Demandes de rappel</span>
+                        class="action-card group">
+                        <div class="card-icon-wrapper">
+                            <i class="fa-solid fa-phone-volume"></i>
+                        </div>
+                        <h2 class="card-title">Demandes de rappel</h2>
+                        <p class="card-description">Gérez les demandes de rappel</p>
                     </Link>
                 </div>
-            </div>
 
-            <!-- OTHER BUTTONS -->
-            <div
-                class="other-buttons mt-12 flex justify-center space-x-6 md:space-x-8 text-gray-600"
-            >
-                <Link
-                    :href="route('profile.edit')"
-                    class="flex items-center space-x-2 text-sm md:text-base hover:text-blue-600 transition-colors duration-200 ease-in-out"
-                >
-                    <i class="fas fa-user-circle"></i>
-                    <span>Gestion de compte</span>
-                </Link>
+                <div class="mt-16 flex flex-col sm:flex-row items-center justify-center gap-6 text-gray-600">
+                    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4 sm:px-0">
+                        <Link
+                            :href="route('profile.edit')"
+                            class="user-action-button w-full sm:w-auto justify-center bg-white hover:bg-gray-50">
+                            <i class="fas fa-user-circle mr-2"></i>
+                            <span>Mon compte</span>
+                        </Link>
 
-                <Link
-                    :href="route('logout')"
-                    method="post"
-                    as="button"
-                    class="flex items-center space-x-2 text-sm md:text-base hover:text-red-600 transition-colors duration-200 ease-in-out"
-                >
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Se déconnecter</span>
-                </Link>
+                        <Link
+                            :href="route('logout')"
+                            method="post"
+                            as="button"
+                            class="user-action-button w-full sm:w-auto justify-center bg-red-50 text-red-600 hover:bg-red-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            <span>Déconnexion</span>
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
 
 <style scoped>
-.action-button {
-    @apply flex flex-col items-center justify-center bg-gray-100 text-gray-800 p-6 rounded-lg shadow-md font-medium hover:bg-[rgb(0,86,146)] hover:text-white transition-colors duration-300 ease-in-out;
+.action-card {
+    @apply bg-white p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col items-center text-center border border-gray-100 hover:border-[rgb(0,86,146)] relative overflow-hidden;
 }
 
-.action-button:hover {
-    transform: scale(1.05);
+.card-icon-wrapper {
+    @apply w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[rgb(0,86,146)] bg-opacity-10 flex items-center justify-center mb-3 sm:mb-4 text-[rgb(0,86,146)] group-hover:bg-[rgb(0,86,146)] group-hover:text-white transition-all duration-300;
+}
+
+.card-icon-wrapper i {
+    @apply text-xl sm:text-2xl transition-transform duration-300 group-hover:scale-110;
+}
+
+.card-title {
+    @apply text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2;
+}
+
+.card-description {
+    @apply text-xs sm:text-sm text-gray-600 group-hover:text-gray-700;
+}
+
+.user-action-button {
+    @apply flex items-center px-6 py-3 sm:py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out border border-gray-200;
+}
+
+/* Animation subtile au hover */
+.action-card::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-[rgb(0,86,146)] to-blue-400 opacity-0 transition-opacity duration-300;
+    mix-blend-mode: overlay;
+}
+
+.action-card:hover::after {
+    @apply opacity-10;
 }
 </style>

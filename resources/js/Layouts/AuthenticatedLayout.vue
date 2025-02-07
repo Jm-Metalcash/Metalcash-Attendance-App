@@ -61,7 +61,7 @@ watch(() => page.props.initialContactCount, (newCount) => {
                 'w-80': !isMenuCollapsed,
                 'w-48': isMenuCollapsed,
             }"
-            class="hidden md:flex bg-gray-800 text-gray-300 flex-col transition-all duration-300"
+            class="hidden lg:flex bg-gray-800 text-gray-300 flex-col transition-all duration-300"
         >
             <!-- Header Logo and Collapse -->
             <header
@@ -369,208 +369,154 @@ watch(() => page.props.initialContactCount, (newCount) => {
         <!-- Conteneur principal qui contient le contenu et la nav mobile -->
         <div class="flex-1 flex flex-col bg-gray-100 min-h-screen">
             <!-- NAVBAR MOBILE -->
-            <nav class="bg-white border-b border-gray-100 md:hidden">
+            <nav class="bg-white shadow-sm lg:hidden">
                 <!-- Top Bar Mobile -->
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="px-4">
                     <div class="flex justify-between h-16">
-                        <div class="flex">
+                        <div class="flex items-center">
                             <!-- Logo -->
-                            <div class="shrink-0 flex items-center">
-                                <Link :href="route('index')">
-                                    <img
-                                        :src="logoUrl"
-                                        alt="Logo Metalcash"
-                                        class="w-16 h-16"
-                                    />
-                                </Link>
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:flex sm:items-center sm:ml-6">
-                            <!-- Settings Dropdown -->
-                            <div class="ml-3 relative">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                                            >
-                                                {{ page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="ml-2 -mr-0.5 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Mon profil
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Se déconnecter
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
+                            <Link :href="route('index')" class="flex items-center">
+                                <img :src="logoUrl" alt="Logo" class="w-10 h-10" />
+                                <span class="text-gray-900 font-bold ml-2 text-lg">Metalcash</span>
+                            </Link>
                         </div>
 
                         <!-- Hamburger -->
-                        <div class="-mr-2 flex items-center sm:hidden">
-                            <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
+                        <button
+                            @click="showingNavigationDropdown = !showingNavigationDropdown"
+                            class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out"
+                        >
+                            <svg
+                                class="h-6 w-6"
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 24 24"
                             >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+                                <path
+                                    :class="{ hidden: showingNavigationDropdown, 'inline-flex': !showingNavigationDropdown }"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                />
+                                <path
+                                    :class="{ hidden: !showingNavigationDropdown, 'inline-flex': showingNavigationDropdown }"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Responsive Navigation Menu -->
+                <!-- Menu Mobile -->
                 <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
+                    :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }"
+                    class="lg:hidden bg-gray-50"
                 >
-                    <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Gestion du temps de travail
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('historique')"
-                            :active="route().current('historique')"
-                        >
-                            Historique du temps de travail
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            v-if="
-                                page.props.auth.roles &&
-                                (page.props.auth.roles.includes('Admin') ||
-                                    page.props.auth.roles.includes(
-                                        'Informatique'
-                                    ))
-                            "
-                            :href="route('employes')"
-                            :active="route().current('employes')"
-                        >
-                            Gestion des employés
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            v-if="
-                                page.props.auth.roles &&
-                                (page.props.auth.roles.includes('Admin') ||
-                                    page.props.auth.roles.includes(
-                                        'Informatique'
-                                    ) ||
-                                    page.props.auth.roles.includes(
-                                        'Comptabilité'
-                                    ))
-                            "
-                            :href="route('managementCall')"
-                            :active="route().current('managementCall')"
-                        >
-                            Gestion des appels
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            v-if="
-                                page.props.auth.roles &&
-                                (page.props.auth.roles.includes('Admin') ||
-                                    page.props.auth.roles.includes(
-                                        'Informatique'
-                                    ) ||
-                                    page.props.auth.roles.includes(
-                                        'Comptabilité'
-                                    ))
-                            "
-                            :href="route('contactRelance')"
-                            :active="route().current('contactRelance')"
-                            class="flex items-center justify-between"
-                        >
-                            <div class="flex items-center">
-                                <span>Demandes de rappel</span>
+                    <!-- User Info -->
+                    <div class="px-4 py-4 border-b border-gray-200 bg-white">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 rounded-full bg-[rgb(0,86,146)] text-white flex items-center justify-center font-semibold text-lg">
+                                    {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
+                                </div>
                             </div>
-                            <div class="bg-red-500 text-white rounded-full px-2 py-1 text-xs">
-                                {{ contactCount }}
-                            </div>
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div class="pt-4 pb-1 border-t border-gray-200">
-                        <div class="px-4">
-                            <div class="font-medium text-base text-gray-800">
-                                {{ page.props.auth.user.name }}
-                            </div>
-                            <div class="font-medium text-sm text-gray-500">
-                                {{ page.props.auth.user.email }}
+                            <div class="ml-3">
+                                <div class="text-base font-medium text-gray-800">
+                                    {{ page.props.auth.user.name }}
+                                </div>
+                                <div class="text-sm font-medium text-gray-500">
+                                    {{ page.props.auth.roles[0] }}
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Mon profil
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
+                    <!-- Navigation Links -->
+                    <div class="px-2 py-3">
+                        <div class="space-y-1">
+                            <!-- Gestion du temps -->
+                            <div class="px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                Gestion du temps
+                            </div>
+                            <Link
+                                :href="route('dashboard')"
+                                class="mobile-nav-link"
+                                :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('dashboard') }"
+                            >
+                                <i class="fas fa-stopwatch mr-3"></i>
+                                <span>Pointage</span>
+                            </Link>
+                            <Link
+                                :href="route('historique')"
+                                class="mobile-nav-link"
+                                :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('historique') }"
+                            >
+                                <i class="fas fa-history mr-3"></i>
+                                <span>Historique</span>
+                            </Link>
+
+                            <!-- Administration -->
+                            <template v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))">
+                                <div class="mt-4 px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                    Administration
+                                </div>
+                                <Link
+                                    v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique'))"
+                                    :href="route('employes')"
+                                    class="mobile-nav-link"
+                                    :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('employes') }"
+                                >
+                                    <i class="fas fa-users mr-3"></i>
+                                    <span>Gestion des employés</span>
+                                </Link>
+                                <Link
+                                    v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
+                                    :href="route('managementCall')"
+                                    class="mobile-nav-link"
+                                    :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('managementCall') }"
+                                >
+                                    <i class="fas fa-phone mr-3"></i>
+                                    <span>Gestion des appels</span>
+                                </Link>
+                                <Link
+                                    v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
+                                    :href="route('contactRelance')"
+                                    class="mobile-nav-link"
+                                    :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('contactRelance') }"
+                                >
+                                    <i class="fa-solid fa-phone-volume mr-3"></i>
+                                    <span>Demandes de rappel</span>
+                                    <span v-if="contactCount > 0" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                        {{ contactCount }}
+                                    </span>
+                                </Link>
+                            </template>
+
+                            <!-- Paramètres -->
+                            <div class="mt-4 px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                Paramètres
+                            </div>
+                            <Link
+                                :href="route('profile.edit')"
+                                class="mobile-nav-link"
+                                :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('profile.edit') }"
+                            >
+                                <i class="fas fa-user-circle mr-3"></i>
+                                <span>Mon profil</span>
+                            </Link>
+                            <Link
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
+                                class="mobile-nav-link text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
-                                Se déconnecter
-                            </ResponsiveNavLink>
+                                <i class="fas fa-sign-out-alt mr-3"></i>
+                                <span>Déconnexion</span>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -607,5 +553,13 @@ watch(() => page.props.initialContactCount, (newCount) => {
 .fade-leave-to {
     opacity: 0;
     transform: translateY(-10px);
+}
+
+.mobile-nav-link {
+    @apply flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-all duration-200 w-full;
+}
+
+.mobile-nav-link.router-link-active {
+    @apply bg-[rgb(0,86,146)] text-white;
 }
 </style>
