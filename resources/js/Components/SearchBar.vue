@@ -126,15 +126,15 @@ const navigateToRoute = (routeName) => {
     <div
         class="relative transition-all"
         :class="{
-            'w-full sm:w-[500px] bg-white': isFocused,
-            'w-full sm:w-[300px]': !isFocused
+            'w-full lg:w-[500px] bg-white': isFocused,
+            'w-full lg:w-[300px]': !isFocused
         }"
     >
         <input
             v-model="searchQuery"
             type="text"
             placeholder="Rechercher une page..."
-            class="w-full py-2 pl-10 pr-4 text-sm sm:text-base text-gray-700 border rounded-full outline-none transition-all"
+            class="w-full py-2 pl-10 pr-4 text-sm lg:text-base text-gray-700 border rounded-full outline-none transition-all"
             :class="{
                 'border-blue-500': isFocused,
                 'border-gray-300': !isFocused,
