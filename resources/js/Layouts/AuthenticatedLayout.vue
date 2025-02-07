@@ -1,10 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
-import Dropdown from "@/Components/Dropdown.vue";
-import DropdownLink from "@/Components/DropdownLink.vue";
-import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import Footer from "@/Components/Footer.vue";
 import { contactCount, initializeContactCount } from '@/Stores/contactStore';
 
 const page = usePage();
