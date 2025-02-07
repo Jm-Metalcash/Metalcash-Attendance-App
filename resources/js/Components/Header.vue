@@ -18,7 +18,7 @@ defineProps({
         <SearchBar />
 
         <!-- Dropdown utilisateur -->
-        <div class="hidden sm:flex sm:items-center sm:ms-6">
+        <div class="hidden lg:flex lg:items-center lg:ms-6">
             <div class="ms-3 relative">
                 <Dropdown align="right" width="48">
                     <!-- Bouton déclencheur -->

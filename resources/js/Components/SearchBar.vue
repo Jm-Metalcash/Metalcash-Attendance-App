@@ -125,13 +125,16 @@ const navigateToRoute = (routeName) => {
 <template>
     <div
         class="relative transition-all"
-        :class="{ 'w-[500px] bg-white': isFocused, 'w-[300px]': !isFocused }"
+        :class="{
+            'w-full sm:w-[500px] bg-white': isFocused,
+            'w-full sm:w-[300px]': !isFocused
+        }"
     >
         <input
             v-model="searchQuery"
             type="text"
             placeholder="Rechercher une page..."
-            class="w-full py-2 pl-10 pr-4 text-gray-700 border rounded-full outline-none transition-all"
+            class="w-full py-2 pl-10 pr-4 text-sm sm:text-base text-gray-700 border rounded-full outline-none transition-all"
             :class="{
                 'border-blue-500': isFocused,
                 'border-gray-300': !isFocused,
@@ -142,7 +145,7 @@ const navigateToRoute = (routeName) => {
         <div class="absolute inset-y-0 left-0 flex items-center pl-3">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 transition-all"
+                class="w-4 h-4 sm:w-5 sm:h-5 transition-all"
                 :class="{
                     'text-blue-500': isFocused,
                     'text-gray-400': !isFocused,
@@ -163,16 +166,16 @@ const navigateToRoute = (routeName) => {
         <!-- Liste des suggestions améliorée -->
         <div
             v-if="showSuggestions && filteredSuggestions.length > 0"
-            class="absolute w-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[400px] overflow-y-auto"
+            class="absolute w-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[300px] sm:max-h-[400px] overflow-y-auto"
         >
             <div
                 v-for="suggestion in filteredSuggestions"
                 :key="suggestion.path"
                 @mousedown="navigateToRoute(suggestion.name)"
-                class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                class="px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
             >
-                <div class="font-medium text-gray-700">{{ suggestion.label }}</div>
-                <div class="text-sm text-gray-500 mt-1">
+                <div class="font-medium text-gray-700 text-sm sm:text-base">{{ suggestion.label }}</div>
+                <div class="text-xs sm:text-sm text-gray-500 mt-1">
                     <span class="text-blue-500">#</span>
                     {{ suggestion.keywords.slice(0, 3).join(' • ') }}
                 </div>

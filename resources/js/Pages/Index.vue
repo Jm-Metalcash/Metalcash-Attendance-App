@@ -2,8 +2,25 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import Header from "@/Components/Header.vue";
+import { computed } from 'vue';
 
 const page = usePage();
+
+// Calculer le nombre de cartes visibles en fonction des rôles
+const visibleCards = computed(() => {
+    let count = 2; // Pointage et Historique sont toujours visibles
+    const roles = page.props.auth.roles || [];
+    const isAdmin = roles.includes('Admin');
+    const isIT = roles.includes('Informatique');
+    const isCompta = roles.includes('Comptabilité');
+
+    if (isAdmin || isIT) count++; // Gestion des employés
+    if (isAdmin || isIT || isCompta) {
+        count += 2; // Gestion des appels et Demandes de rappel
+    }
+
+    return count;
+});
 </script>
 
 <template>
@@ -25,8 +42,13 @@ const page = usePage();
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 max-w-6xl mx-auto">
-                    <Link :href="route('dashboard')" 
+                <div class="grid auto-rows-fr justify-center gap-4 lg:gap-8 max-w-6xl mx-auto" 
+                    :class="{
+                        'grid-cols-1 sm:grid-cols-1 md:grid-cols-1 w-full max-w-md': visibleCards === 1,
+                        'grid-cols-2 sm:grid-cols-2 w-full max-w-2xl': visibleCards === 2,
+                        'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 w-full': visibleCards >= 3
+                    }">
+                    <Link v-if="true" :href="route('dashboard')" 
                         class="action-card group">
                         <div class="card-icon-wrapper">
                             <i class="fas fa-check-circle"></i>
@@ -35,7 +57,7 @@ const page = usePage();
                         <p class="card-description">Enregistrez votre présence pour la journée</p>
                     </Link>
 
-                    <Link :href="route('historique')" 
+                    <Link v-if="true" :href="route('historique')" 
                         class="action-card group">
                         <div class="card-icon-wrapper">
                             <i class="fas fa-history"></i>

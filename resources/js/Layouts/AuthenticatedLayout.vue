@@ -412,119 +412,137 @@ watch(() => page.props.initialContactCount, (newCount) => {
                 </div>
 
                 <!-- Menu Mobile -->
-                <div
-                    :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }"
-                    class="lg:hidden bg-gray-50"
+                <transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="transform -translate-x-full opacity-0"
+                    enter-to-class="transform translate-x-0 opacity-100"
+                    leave-active-class="transition duration-200 ease-in"
+                    leave-from-class="transform translate-x-0 opacity-100"
+                    leave-to-class="transform -translate-x-full opacity-0"
                 >
-                    <!-- User Info -->
-                    <div class="px-4 py-4 border-b border-gray-200 bg-white">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="h-10 w-10 rounded-full bg-[rgb(0,86,146)] text-white flex items-center justify-center font-semibold text-lg">
-                                    {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
+                    <div
+                        v-show="showingNavigationDropdown"
+                        class="lg:hidden fixed inset-0 z-40"
+                    >
+                        <!-- Overlay sombre -->
+                        <div 
+                            class="fixed inset-0 bg-black bg-opacity-25 transition-opacity"
+                            @click="showingNavigationDropdown = false"
+                        ></div>
+
+                        <!-- Contenu du menu -->
+                        <div class="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-white overflow-y-auto">
+                            <!-- User Info -->
+                            <div class="px-4 py-4 border-b border-gray-200 bg-white">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-10 w-10 rounded-full bg-[rgb(0,86,146)] text-white flex items-center justify-center font-semibold text-lg">
+                                            {{ page.props.auth.user.name.charAt(0).toUpperCase() }}
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <div class="text-base font-medium text-gray-800">
+                                            {{ page.props.auth.user.name }}
+                                        </div>
+                                        <div class="text-sm font-medium text-gray-500">
+                                            {{ page.props.auth.roles[0] }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="ml-3">
-                                <div class="text-base font-medium text-gray-800">
-                                    {{ page.props.auth.user.name }}
-                                </div>
-                                <div class="text-sm font-medium text-gray-500">
-                                    {{ page.props.auth.roles[0] }}
+
+                            <!-- Navigation Links -->
+                            <div class="px-2 py-3">
+                                <div class="space-y-1">
+                                    <!-- Gestion du temps -->
+                                    <div class="px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                        Gestion du temps
+                                    </div>
+                                    <Link
+                                        :href="route('dashboard')"
+                                        class="mobile-nav-link"
+                                        :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('dashboard') }"
+                                    >
+                                        <i class="fas fa-stopwatch mr-3"></i>
+                                        <span>Pointage</span>
+                                    </Link>
+                                    <Link
+                                        :href="route('historique')"
+                                        class="mobile-nav-link"
+                                        :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('historique') }"
+                                    >
+                                        <i class="fas fa-history mr-3"></i>
+                                        <span>Historique</span>
+                                    </Link>
+
+                                    <!-- Administration -->
+                                    <template v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))">
+                                        <div class="mt-4 px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                            Administration
+                                        </div>
+                                        <Link
+                                            v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique'))"
+                                            :href="route('employes')"
+                                            class="mobile-nav-link"
+                                            :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('employes') }"
+                                        >
+                                            <i class="fas fa-users mr-3"></i>
+                                            <span>Gestion des employés</span>
+                                        </Link>
+                                        <Link
+                                            v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
+                                            :href="route('managementCall')"
+                                            class="mobile-nav-link"
+                                            :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('managementCall') }"
+                                        >
+                                            <i class="fas fa-phone mr-3"></i>
+                                            <span>Gestion des appels</span>
+                                        </Link>
+                                        <Link
+                                            v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
+                                            :href="route('contactRelance')"
+                                            class="mobile-nav-link"
+                                            :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('contactRelance') }"
+                                        >
+                                            <i class="fa-solid fa-phone-volume mr-3"></i>
+                                            <span>Demandes de rappel</span>
+                                            <span v-if="contactCount > 0" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                                {{ contactCount }}
+                                            </span>
+                                        </Link>
+                                    </template>
+
+                                    <!-- Paramètres -->
+                                    <div class="mt-4 px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
+                                        Paramètres
+                                    </div>
+                                    <Link
+                                        :href="route('profile.edit')"
+                                        class="mobile-nav-link"
+                                        :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('profile.edit') }"
+                                    >
+                                        <i class="fas fa-user-circle mr-3"></i>
+                                        <span>Mon profil</span>
+                                    </Link>
+                                    <Link
+                                        :href="route('logout')"
+                                        method="post"
+                                        as="button"
+                                        class="mobile-nav-link text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                        <i class="fas fa-sign-out-alt mr-3"></i>
+                                        <span>Déconnexion</span>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Navigation Links -->
-                    <div class="px-2 py-3">
-                        <div class="space-y-1">
-                            <!-- Gestion du temps -->
-                            <div class="px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
-                                Gestion du temps
-                            </div>
-                            <Link
-                                :href="route('dashboard')"
-                                class="mobile-nav-link"
-                                :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('dashboard') }"
-                            >
-                                <i class="fas fa-stopwatch mr-3"></i>
-                                <span>Pointage</span>
-                            </Link>
-                            <Link
-                                :href="route('historique')"
-                                class="mobile-nav-link"
-                                :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('historique') }"
-                            >
-                                <i class="fas fa-history mr-3"></i>
-                                <span>Historique</span>
-                            </Link>
-
-                            <!-- Administration -->
-                            <template v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))">
-                                <div class="mt-4 px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
-                                    Administration
-                                </div>
-                                <Link
-                                    v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique'))"
-                                    :href="route('employes')"
-                                    class="mobile-nav-link"
-                                    :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('employes') }"
-                                >
-                                    <i class="fas fa-users mr-3"></i>
-                                    <span>Gestion des employés</span>
-                                </Link>
-                                <Link
-                                    v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
-                                    :href="route('managementCall')"
-                                    class="mobile-nav-link"
-                                    :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('managementCall') }"
-                                >
-                                    <i class="fas fa-phone mr-3"></i>
-                                    <span>Gestion des appels</span>
-                                </Link>
-                                <Link
-                                    v-if="page.props.auth.roles && (page.props.auth.roles.includes('Admin') || page.props.auth.roles.includes('Informatique') || page.props.auth.roles.includes('Comptabilité'))"
-                                    :href="route('contactRelance')"
-                                    class="mobile-nav-link"
-                                    :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('contactRelance') }"
-                                >
-                                    <i class="fa-solid fa-phone-volume mr-3"></i>
-                                    <span>Demandes de rappel</span>
-                                    <span v-if="contactCount > 0" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                                        {{ contactCount }}
-                                    </span>
-                                </Link>
-                            </template>
-
-                            <!-- Paramètres -->
-                            <div class="mt-4 px-3 py-2 text-sm font-medium text-gray-400 uppercase tracking-wider">
-                                Paramètres
-                            </div>
-                            <Link
-                                :href="route('profile.edit')"
-                                class="mobile-nav-link"
-                                :class="{ 'bg-[rgb(0,86,146)] text-white': route().current('profile.edit') }"
-                            >
-                                <i class="fas fa-user-circle mr-3"></i>
-                                <span>Mon profil</span>
-                            </Link>
-                            <Link
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                                class="mobile-nav-link text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                                <i class="fas fa-sign-out-alt mr-3"></i>
-                                <span>Déconnexion</span>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+                </transition>
             </nav>
 
             <!-- Header Section -->
             <header
-                class="bg-white text-gray-800 shadow z-50"
+                class="bg-white text-gray-800 shadow"
                 v-if="$slots.header"
             >
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -561,5 +579,23 @@ watch(() => page.props.initialContactCount, (newCount) => {
 
 .mobile-nav-link.router-link-active {
     @apply bg-[rgb(0,86,146)] text-white;
+}
+
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.2s ease-in;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+.bg-opacity-25 {
+    transition: opacity 0.3s ease-in-out;
 }
 </style>
