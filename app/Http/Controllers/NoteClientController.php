@@ -65,7 +65,16 @@ class NoteClientController extends Controller
     {
         try {
             $note = NoteClient::where('client_id', $clientId)->findOrFail($noteId);
+            $client = Client::find($clientId);
             $note->delete();
+
+            // Ajouter une entrée dans ClientsProspectsUpdate pour suivre cette modification
+            ClientsProspectsUpdate::create([
+                'updatable_type' => Client::class,
+                'updatable_id' => $clientId,
+                'user_id' => Auth::id(),
+                'action' => 'note_deleted',
+            ]);
 
             return response()->json(['message' => 'Note deleted successfully'], 200);
         } catch (\Exception $e) {

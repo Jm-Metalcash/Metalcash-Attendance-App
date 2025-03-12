@@ -91,6 +91,14 @@ class NoteProspectController extends Controller
         // Supprime la note
         $note->delete();
 
+        // Ajouter une entrée dans ClientsProspectsUpdate pour suivre cette modification
+        ClientsProspectsUpdate::create([
+            'updatable_type' => Prospect::class,
+            'updatable_id' => $prospect->id,
+            'user_id' => Auth::id(),
+            'action' => 'note_deleted',
+        ]);
+
         // Si c'était un avertissement, vérifie s'il reste d'autres avertissements pour ce prospect
         if ($isWarning) {
             $hasOtherWarnings = $prospect->notes()->where('type', 'avertissement')->exists();
