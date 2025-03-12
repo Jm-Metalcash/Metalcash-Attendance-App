@@ -47,7 +47,7 @@ class NoteProspectController extends Controller
     public function store(Request $request, Prospect $prospect)
     {
         $validatedData = $request->validate([
-            'content' => 'nullable|string|max:1000',
+            'content' => 'nullable|string',
             'note_date' => 'nullable|date',
             'type' => 'required|string|in:information,avertissement,premium,attention,a_contacter',
         ]);

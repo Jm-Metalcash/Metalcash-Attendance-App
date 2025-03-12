@@ -43,7 +43,7 @@ class NoteClientController extends Controller
     public function updateNote(Request $request, $clientId, $noteId)
     {
         $validated = $request->validate([
-            'content' => 'required|string|max:500',
+            'content' => 'required|string',
             'type' => 'required|string|in:information,avertissement,premium,attention,a_contacter',
         ]);
 
