@@ -20,7 +20,7 @@ class NoteProspectController extends Controller
         }
 
         $validatedData = $request->validate([
-            'content' => 'nullable|string|max:1000',
+            'content' => 'nullable|string',
             'type' => 'required|string|in:information,avertissement,premium,attention,a_contacter',
         ]);
 
