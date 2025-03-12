@@ -69,7 +69,7 @@ const getNoteClass = (noteType) => {
             <div class="text-xs w-full sm:w-1/6">
                 Modifié par : <br />
                 <span class="font-bold text-xs mr-2">
-                    {{ prospect.last_modifier || "Inconnu" }}
+                    {{ prospect.last_note_updater || prospect.last_modifier || "Inconnu" }}
                 </span>
                 <span class="font-bold text-xs">
                     {{ formatDate(prospect.modified_at) }}

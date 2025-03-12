@@ -36,6 +36,9 @@ class ProspectController extends Controller
         // Charger les prospects modifiés récemment
         $recentProspects = Prospect::with([
             'lastImportantNote:id,prospect_id,type',
+            'notes' => function($query) {
+                $query->latest('updated_at')->with('updater:id,name')->take(1);
+            }
         ])
             ->select('id', 'firstName', 'familyName', 'phone', 'country')
             ->whereIn('id', $prospectIds)
@@ -44,11 +47,16 @@ class ProspectController extends Controller
         // Ajouter last_important_note à chaque prospect
         $recentProspects->each(function ($prospect) {
             $prospect->last_important_note = $prospect->lastImportantNote?->type;
+            // Obtenir le dernier utilisateur qui a modifié une note
+            $prospect->last_note_updater = $prospect->notes->first()?->updater?->name ?? null;
         });
 
         // Charger les clients modifiés récemment
         $recentClients = Client::with([
             'lastImportantNote:id,client_id,type',
+            'notes' => function($query) {
+                $query->latest('updated_at')->with('updater:id,name')->take(1);
+            }
         ])
             ->select('id', 'firstName', 'familyName', 'phone', 'country')
             ->whereIn('id', $clientIds)
@@ -57,6 +65,8 @@ class ProspectController extends Controller
         // Ajouter last_important_note à chaque client
         $recentClients->each(function ($client) {
             $client->last_important_note = $client->lastImportantNote?->type;
+            // Obtenir le dernier utilisateur qui a modifié une note
+            $client->last_note_updater = $client->notes->first()?->updater?->name ?? null;
         });
 
         // Créer des mappings pour un accès rapide
@@ -81,6 +91,7 @@ class ProspectController extends Controller
                         'last_modifier' => $update->user->name ?? 'Inconnu',
                         'modified_at' => $update->created_at,
                         'lastImportantNote' => $prospect->last_important_note,
+                        'last_note_updater' => $prospect->last_note_updater,
                     ];
                 }
             } elseif ($update->updatable_type == Client::class) {
@@ -97,6 +108,7 @@ class ProspectController extends Controller
                         'last_modifier' => $update->user->name ?? 'Inconnu',
                         'modified_at' => $update->created_at,
                         'lastImportantNote' => $client->last_important_note,
+                        'last_note_updater' => $client->last_note_updater,
                     ];
                 }
             }
