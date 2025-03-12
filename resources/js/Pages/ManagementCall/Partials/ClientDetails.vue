@@ -121,15 +121,21 @@ Enregistre comme ceci :
                                 </td>
 
                                 <!-- Contenu de la note -->
+                                <!-- Section à modifier -->
                                 <td class="py-3 px-5 border-b text-sm text-left align-top w-6/12">
                                     <span v-if="!isEditingNotes[note.id]" @click="editNote(note.id)"
                                         class="editable-text cursor-pointer hover:text-gray-600"
                                         style="white-space: pre-wrap;">
                                         {{ note.content }}
                                     </span>
-                                    <textarea v-else v-model="note.content" @blur="saveNote(note)"
-                                        @keydown.enter.prevent="saveNote(note)"
-                                        class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"></textarea>
+                                    <div v-else>
+                                        <textarea v-model="note.content" @blur="saveNote(note)"
+                                            class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"></textarea>
+                                        <button @click="saveNote(note)"
+                                            class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200">
+                                            Enregistrer la note
+                                        </button>
+                                    </div>
                                     <p v-if="successMessages.notes[note.id]"
                                         class="text-green-500 text-xs mt-1 success-message">
                                         Enregistré avec succès
