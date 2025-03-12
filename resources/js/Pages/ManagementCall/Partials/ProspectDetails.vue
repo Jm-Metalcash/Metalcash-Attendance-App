@@ -37,7 +37,7 @@
                     </option>
                     <option value="a_contacter">Ajouter aux demandes de rappels</option>
                 </select>
-                <textarea v-model="newNote.content" @keydown.enter="saveNewNote"
+                <textarea v-model="newNote.content"
                     class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Saisir la note..."></textarea>
                 <button @click="saveNewNote"
@@ -107,15 +107,15 @@
                                 0,
                                 visibleNotesCount
                             )" :key="note.id" :class="note.type === 'avertissement'
-                                        ? 'bg-orange-50 text-orange-800'
-                                        : note.type === 'premium'
-                                            ? 'bg-green-50 text-green-800'
-                                            : note.type === 'attention'
-                                                ? 'bg-red-50 text-red-800'
-                                                : note.type === 'a_contacter'
-                                                    ? 'bg-purple-50 text-purple-800'
-                                                    : 'bg-gray-50 text-gray-800'
-                                    ">
+                                ? 'bg-orange-50 text-orange-800'
+                                : note.type === 'premium'
+                                    ? 'bg-green-50 text-green-800'
+                                    : note.type === 'attention'
+                                        ? 'bg-red-50 text-red-800'
+                                        : note.type === 'a_contacter'
+                                            ? 'bg-purple-50 text-purple-800'
+                                            : 'bg-gray-50 text-gray-800'
+                                ">
                                 <!-- Date -->
                                 <td class="py-3 px-5 border text-sm text-left align-top w-1/12">
                                     <span class="block font-medium">
@@ -126,12 +126,18 @@
                                 <!-- Contenu de la note -->
                                 <td class="py-3 px-5 border-b text-sm text-left align-top w-6/12">
                                     <span v-if="!isEditingNotes[note.id]" @click="editNote(note.id)"
-                                        class="editable-text cursor-pointer hover:text-gray-600">
+                                        class="editable-text cursor-pointer hover:text-gray-600"
+                                        style="white-space: pre-wrap;">
                                         {{ note.content }}
                                     </span>
-                                    <textarea v-else v-model="note.content" @blur="saveNote(note)"
-                                        @keydown.enter.prevent="saveNote(note)"
-                                        class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"></textarea>
+                                    <div v-else>
+                                        <textarea v-model="note.content" @blur="saveNote(note)"
+                                            class="editable-input mt-1 block w-full p-2 border-gray-300 rounded-md"></textarea>
+                                        <button @click="saveNote(note)"
+                                            class="mt-3 bg-blue-600 text-white rounded-md px-4 py-2 text-sm hover:bg-blue-700 transition-colors duration-200">
+                                            Enregistrer la note
+                                        </button>
+                                    </div>
                                     <p v-if="successMessages.notes[note.id]"
                                         class="text-green-500 text-xs mt-1 success-message">
                                         Enregistré avec succès
@@ -143,7 +149,7 @@
                                     <div>
                                         <span class="block">{{
                                             note.creator?.name || ""
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </td>
 
@@ -388,7 +394,7 @@ const updateLatestWarningType = () => {
 // Calcul du type de la dernière note importante
 const latestWarningType = computed(() => {
     const notes = editableProspect.notes;
-    
+
     // Récupérer la note la plus récente parmi les types importants
     const importantNotes = notes
         .filter(note => ['avertissement', 'attention', 'premium'].includes(note.type))
@@ -398,12 +404,12 @@ const latestWarningType = computed(() => {
     if (importantNotes.length > 0) {
         return importantNotes[0].type;
     }
-    
+
     // Sinon, on vérifie s'il y a une note "a_contacter"
     if (notes.some(note => note.type === 'a_contacter')) {
         return 'a_contacter';
     }
-    
+
     return null;
 });
 
