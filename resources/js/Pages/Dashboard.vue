@@ -263,354 +263,259 @@ watch(() => days.value, updateButtonStates, { deep: true });
     <Head title="Aujourd'hui" />
 
     <AuthenticatedLayout>
-        <template #header>
-            <Header :pageTitle="`Aujourd'hui`" />
-        </template>
-
-        <section
-            class="attendance-section max-w-[1700px] mt-16 mx-auto px-4 sm:px-6 lg:px-8 bg-white pt-8 pb-20"
-        >
-            <div class="flex flex-col items-center space-y-8">
-                <!-- Bloc de date, heure, et citation -->
-                <div
-                    class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
-                >
-                    <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
+        <section class="attendance-section bg-gray-50 pt-8 pb-16 min-h-screen">
+            <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Titre de la page -->
+                <div class="p-6 rounded-lg text-center w-full bg-white shadow-sm mb-8">
+                    <h1 class="text-gray-800 text-xl sm:text-2xl font-semibold shadow-md py-8">
                         <i class="fas fa-clock text-[#005692] mr-2"></i> Gestion du temps de travail
-                    </h2>
+                    </h1>
                 </div>
 
-                <!-- Boutons d'arrivée et de départ -->
-                <div
-                    class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg"
-                >
-                    <!-- Bouton Heure d'arrivée -->
-                    <div
-                        class="p-6 rounded-lg shadow-md text-center"
-                        :class="{
-                            'bg-gray-200': isArrivalButtonDisabled,
-                            'bg-white': !isArrivalButtonDisabled,
-                        }"
-                    >
-                        <h3 class="text-gray-800 text-lg font-semibold">
-                            <i
-                                class="fas fa-sign-in-alt text-green-600 mr-2"
-                            ></i>
-                            Heure d'arrivée
-                        </h3>
-                        <button
-                            :disabled="isArrivalButtonDisabled"
-                            @click="
-                                recordTime('arrival');
-                                updateButtonStates();
-                            "
-                            class="mt-4 text-green-700 border border-green-700 bg-white hover:text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-300 font-medium rounded-full text-sm px-6 py-3"
+                <!-- Contenu principal -->
+                <div class="mb-8 bg-white rounded-xl shadow-sm p-6">
+                    <!-- Boutons d'arrivée et de départ -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl mx-auto mb-10">
+                        <!-- Bouton Heure d'arrivée -->
+                        <div
+                            class="p-6 rounded-xl shadow-sm text-center"
+                            :class="{
+                                'bg-gray-100': isArrivalButtonDisabled,
+                                'bg-white': !isArrivalButtonDisabled,
+                            }"
                         >
-                            <i class="fas fa-arrow-right"></i> À l'instant
-                        </button>
-                        <p class="mt-2 text-sm text-gray-500">
-                            {{
-                                getLastTime(
-                                    days.find(
-                                        (day) =>
-                                            day.date ===
-                                            new Date().toLocaleDateString(
-                                                "fr-FR"
-                                            )
-                                    ),
-                                    "arrivals"
-                                ) === "Aucune heure enregistrée"
-                                    ? "Aucune heure enregistrée"
-                                    : "Dernière heure enregistrée : " +
-                                      formatTimeWithoutSeconds(
-                                          getLastTime(
-                                              days.find(
-                                                  (day) =>
-                                                      day.date ===
-                                                      new Date().toLocaleDateString(
-                                                          "fr-FR"
-                                                      )
-                                              ),
-                                              "arrivals"
+                            <h3 class="text-gray-800 text-lg font-semibold">
+                                <i class="fas fa-sign-in-alt text-emerald-600 mr-2"></i>
+                                Heure d'arrivée
+                            </h3>
+                            <button
+                                :disabled="isArrivalButtonDisabled"
+                                @click="
+                                    recordTime('arrival');
+                                    updateButtonStates();
+                                "
+                                class="mt-4 text-emerald-700 border border-emerald-700 bg-white hover:text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-300 font-medium rounded-full text-sm px-6 py-3"
+                            >
+                                <i class="fas fa-arrow-right"></i> À l'instant
+                            </button>
+                            <p class="mt-2 text-sm text-gray-500">
+                                {{
+                                    getLastTime(
+                                        days.find(
+                                            (day) =>
+                                                day.date ===
+                                                new Date().toLocaleDateString(
+                                                    "fr-FR"
+                                                )
+                                        ),
+                                        "arrivals"
+                                    ) === "Aucune heure enregistrée"
+                                        ? "Aucune heure enregistrée"
+                                        : "Dernière heure enregistrée : " +
+                                          formatTimeWithoutSeconds(
+                                              getLastTime(
+                                                  days.find(
+                                                      (day) =>
+                                                          day.date ===
+                                                          new Date().toLocaleDateString(
+                                                              "fr-FR"
+                                                          )
+                                                  ),
+                                                  "arrivals"
+                                              )
                                           )
-                                      )
-                            }}
-                        </p>
+                                }}
+                            </p>
+                        </div>
+
+                        <!-- Bouton Heure de départ -->
+                        <div
+                            class="p-6 rounded-xl shadow-sm text-center"
+                            :class="{
+                                'bg-gray-100': isDepartureButtonDisabled,
+                                'bg-white': !isDepartureButtonDisabled,
+                            }"
+                        >
+                            <h3 class="text-gray-800 text-lg font-semibold">
+                                <i class="fas fa-sign-out-alt text-red-600 mr-2"></i>
+                                Heure de départ
+                            </h3>
+                            <button
+                                :disabled="isDepartureButtonDisabled"
+                                @click="
+                                    recordTime('departure');
+                                    updateButtonStates();
+                                "
+                                class="mt-4 text-red-700 border border-red-700 bg-white hover:text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-300 font-medium rounded-full text-sm px-6 py-3"
+                            >
+                                <i class="fas fa-arrow-left"></i> Maintenant
+                            </button>
+                            <p class="mt-2 text-sm text-gray-500">
+                                {{
+                                    getLastTime(
+                                        days.find(
+                                            (day) =>
+                                                day.date ===
+                                                new Date().toLocaleDateString(
+                                                    "fr-FR"
+                                                )
+                                        ),
+                                        "departures"
+                                    ) === "Aucune heure enregistrée"
+                                        ? "Aucune heure enregistrée"
+                                        : "Dernière heure enregistrée : " +
+                                          formatTimeWithoutSeconds(
+                                              getLastTime(
+                                                  days.find(
+                                                      (day) =>
+                                                          day.date ===
+                                                          new Date().toLocaleDateString(
+                                                              "fr-FR"
+                                                          )
+                                                  ),
+                                                  "departures"
+                                              )
+                                          )
+                                }}
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Bouton Heure de départ -->
-                    <div
-                        class="p-6 rounded-lg shadow-md text-center"
-                        :class="{
-                            'bg-gray-200': isDepartureButtonDisabled,
-                            'bg-white': !isDepartureButtonDisabled,
-                        }"
-                    >
-                        <h3 class="text-gray-800 text-lg font-semibold">
-                            <i
-                                class="fas fa-sign-out-alt text-red-600 mr-2"
-                            ></i>
-                            Heure de départ
-                        </h3>
-                        <button
-                            :disabled="isDepartureButtonDisabled"
-                            @click="
-                                recordTime('departure');
-                                updateButtonStates();
-                            "
-                            class="mt-4 text-red-700 border border-red-700 bg-white hover:text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-300 font-medium rounded-full text-sm px-6 py-3"
-                        >
-                            <i class="fas fa-arrow-left"></i> Maintenant
-                        </button>
-                        <p class="mt-2 text-sm text-gray-500">
-                            {{
-                                getLastTime(
-                                    days.find(
-                                        (day) =>
-                                            day.date ===
-                                            new Date().toLocaleDateString(
-                                                "fr-FR"
-                                            )
-                                    ),
-                                    "departures"
-                                ) === "Aucune heure enregistrée"
-                                    ? "Aucune heure enregistrée"
-                                    : "Dernière heure enregistrée : " +
-                                      formatTimeWithoutSeconds(
-                                          getLastTime(
-                                              days.find(
-                                                  (day) =>
-                                                      day.date ===
-                                                      new Date().toLocaleDateString(
-                                                          "fr-FR"
-                                                      )
-                                              ),
-                                              "departures"
-                                          )
-                                      )
-                            }}
-                        </p>
+                    <!-- Statistiques -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mx-auto mb-10">
+                        <div class="bg-blue-50 rounded-lg p-4 flex items-center">
+                            <div class="w-12 h-12 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-clock text-blue-600 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xs sm:text-sm font-medium text-gray-500">Total de la semaine</h3>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800">{{ weeklyTotal }}</p>
+                            </div>
+                        </div>
+                        <div class="bg-indigo-50 rounded-lg p-4 flex items-center">
+                            <div class="w-12 h-12 flex-shrink-0 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt text-indigo-600 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xs sm:text-sm font-medium text-gray-500">Cette semaine</h3>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800">{{ days.length }} jours</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- TABLEAU CETTE SEMAINE -->
-                <h3
-                    class="bg-[rgb(0,85,150)] w-full max-w-4xl mx-auto text-gray-100 px-4 py-2 text-left font-bold mt-12 mb-0"
-                >
-                    Cette semaine :
-                </h3>
+                    <!-- TABLEAU CETTE SEMAINE -->
+                    <div class="mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
+                        <!-- En-tête de la semaine -->
+                        <div class="bg-gradient-to-r from-[#005692] to-[#0078c9] px-6 py-4 flex justify-between items-center text-white">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-week mr-3"></i>
+                                <h3 class="text-xs md:text-sm">
+                                    Cette semaine
+                                </h3>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="mr-3 text-xs md:text-sm font-medium">
+                                    {{ weeklyTotal }}
+                                </span>
+                            </div>
+                        </div>
 
-                <div
-                    class="w-full max-w-4xl mx-auto overflow-x-auto border mt-0"
-                >
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Jour
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Arrivées
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Départs
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Total
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Lignes principales -->
-                            <template v-for="(day, index) in days" :key="index">
-                                <tr>
-                                    <td class="px-6 py-4">
-                                        <strong class="capitalize">{{
-                                            day.day
-                                        }}</strong>
-                                        <br />
-                                        <span class="text-sm text-gray-500">{{
-                                            day.date
-                                        }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-emerald-700">
-                                        {{
-                                            formatTimeWithoutSeconds(
-                                                day.arrivals[0]
-                                            ) || "--:--"
-                                        }}
-                                        <button
-                                            v-if="day.arrivals.length > 1"
-                                            class="text-gray-500 text-sm ml-2"
-                                            @click="toggleExpand(index)"
-                                        >
-                                            (+{{ day.arrivals.length - 1 }})
-                                            <i
-                                                :class="
-                                                    expandedDays.includes(index)
-                                                        ? 'fa-solid fa-chevron-up'
-                                                        : 'fa-solid fa-chevron-down'
-                                                "
-                                                class="ml-1"
-                                            ></i>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 text-red-700">
-                                        {{
-                                            formatTimeWithoutSeconds(
-                                                day.departures[0]
-                                            ) || "--:--"
-                                        }}
-                                        <button
-                                            v-if="day.departures.length > 1"
-                                            class="text-gray-500 text-sm ml-2"
-                                            @click="toggleExpand(index)"
-                                        >
-                                            (+{{ day.departures.length - 1 }})
-                                            <i
-                                                :class="
-                                                    expandedDays.includes(index)
-                                                        ? 'fa-solid fa-chevron-up'
-                                                        : 'fa-solid fa-chevron-down'
-                                                "
-                                                class="ml-1"
-                                            ></i>
-                                        </button>
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-right font-bold opacity-70"
-                                    >
-                                        {{ day.total || "--:--" }}
-                                    </td>
-                                </tr>
+                        <!-- Contenu du tableau -->
+                        <div class="divide-y divide-gray-100">
+                            <!-- Jours -->
+                            <div v-for="(day, index) in days" :key="index" class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100">
+                                    <!-- Date -->
+                                    <div class="flex-shrink-0 flex items-center w-48">
+                                        <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
+                                            <span class="text-sm font-medium text-gray-600">
+                                                {{ new Date(day.date.split('/').reverse().join('-')).getDate() }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800 capitalize">{{ day.day }}</p>
+                                            <p class="text-xs text-gray-500">
+                                                {{ day.date }}
+                                            </p>
+                                        </div>
+                                    </div>
 
-                                <!-- Lignes détaillées -->
-                                <tr>
-                                    <td colspan="4" class="px-0 py-0">
-                                        <transition name="slide-expand">
-                                            <div
-                                                v-show="
-                                                    expandedDays.includes(index)
-                                                "
-                                                class="bg-gray-50 border rounded-lg overflow-hidden"
-                                            >
-                                                <!-- En-tête des détails -->
-                                                <div
-                                                    class="flex justify-between items-center border-b border-gray-300 pb-3 mb-3 p-4"
-                                                >
-                                                    <h3
-                                                        class="text-base font-semibold text-gray-800"
-                                                    >
-                                                        <i
-                                                            class="fas fa-calendar-day text-gray-500 mr-2"
-                                                        ></i
-                                                        >Détails du jour
-                                                    </h3>
-                                                    <span
-                                                        class="text-sm text-gray-500"
-                                                    >
-                                                        {{ day.date }}
-                                                    </span>
-                                                </div>
-
-                                                <!-- Contenu détaillé -->
-                                                <div
-                                                    class="flex flex-col space-y-4 p-4"
-                                                >
-                                                    <!-- Section des arrivées -->
-                                                    <div>
-                                                        <h4
-                                                            class="text-sm font-semibold text-green-600 flex items-center"
-                                                        >
-                                                            <i
-                                                                class="fas fa-arrow-right text-green-500 mr-2"
-                                                            ></i
-                                                            >Arrivées
-                                                        </h4>
-                                                        <div
-                                                            class="flex flex-wrap mt-2 gap-2"
-                                                        >
-                                                            <span
-                                                                v-for="(
-                                                                    arrival, i
-                                                                ) in day.arrivals"
-                                                                :key="`arrival-${index}-${i}`"
-                                                                class="bg-green-100 text-green-600 px-3 py-1 rounded-md text-sm font-medium"
-                                                            >
-                                                                {{
-                                                                    formatTimeWithoutSeconds(
-                                                                        arrival
-                                                                    )
-                                                                }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Section des départs -->
-                                                    <div>
-                                                        <h4
-                                                            class="text-sm font-semibold text-red-600 flex items-center"
-                                                        >
-                                                            <i
-                                                                class="fas fa-arrow-left text-red-500 mr-2"
-                                                            ></i
-                                                            >Départs
-                                                        </h4>
-                                                        <div
-                                                            class="flex flex-wrap mt-2 gap-2"
-                                                        >
-                                                            <span
-                                                                v-for="(
-                                                                    departure, i
-                                                                ) in day.departures"
-                                                                :key="`departure-${index}-${i}`"
-                                                                class="bg-red-100 text-red-600 px-3 py-1 rounded-md text-sm font-medium"
-                                                            >
-                                                                {{
-                                                                    formatTimeWithoutSeconds(
-                                                                        departure
-                                                                    )
-                                                                }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                    <!-- Heures d'arrivée et départ -->
+                                    <div class="flex-1 grid grid-cols-3 gap-6">
+                                        <div class="text-center">
+                                            <p class="text-xs text-gray-500 mb-1">Arrivée</p>
+                                            <div class="flex items-center justify-center">
+                                                <span class="text-emerald-600 font-medium">
+                                                    {{ formatTimeWithoutSeconds(day.arrivals && day.arrivals.length > 0 ? day.arrivals[0] : null) || "--:--" }}
+                                                </span>
+                                                <button v-if="day.arrivals && day.arrivals.length > 1"
+                                                    class="ml-2 text-xs text-gray-500 hover:text-gray-700"
+                                                    @click.stop="toggleExpand(index)">
+                                                    (+ {{ day.arrivals.length - 1 }})
+                                                </button>
                                             </div>
-                                        </transition>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-xs text-gray-500 mb-1">Départ</p>
+                                            <div class="flex items-center justify-center">
+                                                <span class="text-red-600 font-medium">
+                                                    {{ formatTimeWithoutSeconds(day.departures && day.departures.length > 0 ? day.departures[0] : null) || "--:--" }}
+                                                </span>
+                                                <button v-if="day.departures && day.departures.length > 1"
+                                                    class="ml-2 text-xs text-gray-500 hover:text-gray-700"
+                                                    @click.stop="toggleExpand(index)">
+                                                    (+ {{ day.departures.length - 1 }})
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-xs text-gray-500 mb-1">Total</p>
+                                            <p class="font-medium text-blue-600">{{ day.total || "0:00" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <!-- Total des heures de la semaine -->
-                <div
-                    class="totalHour w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 bg-gray-100 text-gray-800 text-center sm:text-right"
-                >
-                    <h3
-                        class="text-base flex justify-center sm:justify-end items-center"
-                    >
-                        <i class="fas fa-calendar-week mr-2"></i>Total de la
-                        semaine :
-                        <span class="font-semibold ml-2 text-base">{{
-                            weeklyTotal
-                        }}</span>
-                    </h3>
-                </div>
+                                <!-- Détails des heures (masquable) -->
+                                <div v-if="expandedDays.includes(index)" class="mt-4 pt-4 border-t border-gray-100">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <h4 class="text-sm font-medium text-gray-700 mb-2">Détail des arrivées</h4>
+                                            <div class="flex flex-wrap gap-2">
+                                                <span v-for="(arrival, i) in day.arrivals" :key="`arrival-${index}-${i}`"
+                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    {{ formatTimeWithoutSeconds(arrival) }}
+                                                </span>
+                                                <span v-if="day.arrivals.length === 0" class="text-sm text-gray-500">
+                                                    Aucune arrivée enregistrée
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-medium text-gray-700 mb-2">Détail des départs</h4>
+                                            <div class="flex flex-wrap gap-2">
+                                                <span v-for="(departure, i) in day.departures" :key="`departure-${index}-${i}`"
+                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    {{ formatTimeWithoutSeconds(departure) }}
+                                                </span>
+                                                <span v-if="day.departures.length === 0" class="text-sm text-gray-500">
+                                                    Aucun départ enregistré
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="pt-4">
-                    <Link :href="route('historique')">
-                        <PrimaryButton>Voir historique complet</PrimaryButton>
-                    </Link>
+                    <!-- Lien vers l'historique -->
+                    <div class="mt-10 flex justify-center">
+                        <Link :href="route('historique')">
+                            <PrimaryButton class="bg-[#005692] hover:bg-blue-700">
+                                <i class="fas fa-history mr-2"></i> Voir historique complet
+                            </PrimaryButton>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </section>

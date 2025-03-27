@@ -774,13 +774,13 @@ const removeDepartureTimeEdit = (index) => {
                             class="mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
 
                             <!-- En-tête de la semaine -->
-                            <div class="bg-gradient-to-r from-[#005692] to-[#0078c9] px-6 py-4 flex justify-between items-center 
+                            <div class="bg-gradient-to-r from-[#005692] to-[#0078c9] px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center 
                                 text-white cursor-pointer" @click="toggleWeek(monthIndex, weekIndex)">
-                                <div class="flex items-center">
+                                <div class="flex items-center mb-2 sm:mb-0">
                                     <i class="fas fa-calendar-week mr-3"></i>
                                     <h3 class="text-xs md:text-sm">
                                         Semaine {{ week.weekNumber }}
-                                        <span class="text-xs md:text-sm font-normal opacity-80 ml-2">
+                                        <span class="text-xs md:text-sm font-normal opacity-80 ml-2 block sm:inline-block">
                                             ({{ new Date(week.days[0].date).toLocaleDateString("fr-FR", {
                                                 day: 'numeric',
                                             month:
@@ -791,7 +791,7 @@ const removeDepartureTimeEdit = (index) => {
                                         </span>
                                     </h3>
                                 </div>
-                                <div class="flex items-center">
+                                <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto">
                                     <span class="mr-3 text-xs md:text-sm font-medium">
                                         {{ formatTotal(calculateWeekTotal(week)) }}
                                     </span>
@@ -817,9 +817,9 @@ const removeDepartureTimeEdit = (index) => {
                                     class="px-6 py-4 hover:bg-gray-50 transition-colors"
                                     :class="{ 'cursor-pointer': isShow }" @click="isShow ? openModal(day) : null">
 
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100">
                                         <!-- Date -->
-                                        <div class="flex-shrink-0 flex items-center w-64">
+                                        <div class="flex-shrink-0 flex items-center w-full sm:w-48">
                                             <div
                                                 class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
                                                 <span class="text-sm font-medium text-gray-600">
@@ -835,7 +835,7 @@ const removeDepartureTimeEdit = (index) => {
                                         </div>
 
                                         <!-- Heures d'arrivée et départ -->
-                                        <div class="flex-1 grid grid-cols-3 gap-8">
+                                        <div class="flex-1 grid grid-cols-3 gap-4 sm:gap-6">
                                             <div class="text-center">
                                                 <p class="text-xs text-gray-500 mb-1">Arrivée</p>
                                                 <div class="flex items-center justify-center">
@@ -910,11 +910,11 @@ const removeDepartureTimeEdit = (index) => {
                                 </div>
 
                                 <!-- Total de la semaine -->
-                                <div class="px-6 py-3 bg-indigo-50 flex justify-end items-center">
-                                    <div class="mr-8 font-medium text-gray-700">
+                                <div class="px-4 sm:px-6 py-3 bg-indigo-50 flex flex-col sm:flex-row sm:justify-end sm:items-center">
+                                    <div class="text-center sm:text-right sm:mr-8 font-medium text-gray-700 mb-2 sm:mb-0">
                                         Total semaine {{ week.weekNumber }}:
                                     </div>
-                                    <div class="font-bold text-blue-700">
+                                    <div class="text-center sm:text-right font-bold text-blue-700">
                                         {{ formatTotal(calculateWeekTotal(week)) }}
                                     </div>
                                 </div>
