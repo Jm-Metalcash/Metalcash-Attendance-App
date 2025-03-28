@@ -255,6 +255,10 @@ const handleConfirm = () => {
                                 </select>
                             </div>
                         </div>
+                        
+                        <div v-if="sortedContacts.length === 0" class="p-4 text-center text-sm text-gray-500 bg-white rounded-lg shadow-sm">
+                            Aucun contact à rappeler.
+                        </div>
                     </div>
                 </div>
 
@@ -338,6 +342,11 @@ const handleConfirm = () => {
                                         </select>
                                     </td>
                                 </tr>
+                                <tr v-if="sortedContacts.length === 0">
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Aucun contact à rappeler.
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -403,7 +412,7 @@ const handleConfirm = () => {
                         </div>
                         
                         <div v-if="callHistory.length === 0" class="p-4 text-center text-sm text-gray-500">
-                            Aucun historique disponible pour les 7 derniers jours
+                            Aucun historique disponible pour les 7 derniers jours.
                         </div>
                     </div>
                 </div>
@@ -463,7 +472,7 @@ const handleConfirm = () => {
                                 </tr>
                                 <tr v-if="callHistory.length === 0">
                                     <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                        Aucun historique disponible pour les 7 derniers jours
+                                        Aucun historique disponible pour les 7 derniers jours.
                                     </td>
                                 </tr>
                             </tbody>
