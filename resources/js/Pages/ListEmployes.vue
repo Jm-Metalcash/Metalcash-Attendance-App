@@ -524,16 +524,15 @@ const closeModal = () => {
                                 <button
                                     @click="closeModal"
                                     type="button"
-                                    class="w-full sm:w-auto mb-2 sm:mb-0 sm:mr-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out"
+                                    class="w-full sm:w-auto mb-2 sm:mb-0 sm:mr-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out text-center"
                                 >
                                     Annuler
                                 </button>
                                 <PrimaryButton
-                                    class="w-full sm:w-auto"
+                                    class="w-full sm:w-auto flex justify-center items-center"
                                     :class="{ 'opacity-25': form.processing, 'bg-[#005692] hover:bg-[rgba(0,85,150,0.8)]': !form.processing }"
                                     :disabled="form.processing"
-                                    >Ajouter</PrimaryButton
-                                >
+                                    >Ajouter</PrimaryButton>
                             </div>
                         </form>
                     </div>
