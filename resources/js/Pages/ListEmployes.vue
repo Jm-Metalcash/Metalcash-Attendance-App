@@ -101,32 +101,158 @@ const closeModal = () => {
                 </div>
 
                 <!-- Table responsive -->
-                <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                <div class="block lg:hidden">
+                    <!-- Vue mobile et tablette : cartes empilées -->
+                    <div class="space-y-4">
+                        <div v-for="user in users" :key="user.id" 
+                            class="bg-white rounded-lg shadow-sm p-4 hover:bg-gray-50 transition-colors"
+                            :class="{ 'border-l-4 border-red-500': user.status === 1 }"
+                        >
+                            <div class="flex justify-between items-start mb-3">
+                                <div 
+                                    @click="() => $inertia.get(route('employees.profile', user.id))"
+                                    class="cursor-pointer"
+                                >
+                                    <h3 
+                                        :class="{
+                                            'text-red-500': user.status === 1,
+                                            'text-gray-800 hover:text-[#0078c9]': user.status !== 1
+                                        }"
+                                        class="font-medium text-base"
+                                    >
+                                        {{ user.name }}
+                                    </h3>
+                                    <p class="text-sm text-gray-500 mt-1">{{ user.email }}</p>
+                                </div>
+                                <div>
+                                    <span
+                                        v-if="
+                                            user.days &&
+                                            user.days.length &&
+                                            user.days.some(
+                                                (day) =>
+                                                    day.date === today &&
+                                                    day.status === 1
+                                            )
+                                        "
+                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                                    >
+                                        Actif
+                                    </span>
+                                    <span
+                                        v-else
+                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                                    >
+                                        Inactif
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 text-sm mb-3">
+                                <span class="text-gray-500">Rôle:</span>
+                                <span 
+                                    :class="{
+                                        'text-red-500': user.status === 1,
+                                        'text-gray-700': user.status !== 1
+                                    }"
+                                >
+                                    <span
+                                        v-for="role in user.roles"
+                                        :key="role.id"
+                                    >
+                                        {{ role.name
+                                        }}<span
+                                            v-if="
+                                                user.roles.length > 1 &&
+                                                role !==
+                                                    user.roles[
+                                                        user.roles.length - 1
+                                                    ]
+                                            "
+                                            >,
+                                        </span>
+                                    </span>
+                                </span>
+                            </div>
+                            
+                            <div class="flex justify-end mt-2">
+                                <!-- Bouton "Voir historique" pour Comptabilité -->
+                                <button
+                                    v-if="
+                                        user.status !== 1 &&
+                                        page.props.auth.roles.includes(
+                                            'Comptabilité'
+                                        )
+                                    "
+                                    @click="
+                                        () =>
+                                            $inertia.get(
+                                                route(
+                                                    'users.pointages',
+                                                    user.id
+                                                )
+                                            )
+                                    "
+                                    class="px-3 py-1.5 text-xs text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
+                                >
+                                    <i class="fa-regular fa-eye mr-1"></i>
+                                    Voir historique
+                                </button>
+
+                                <!-- Bouton "Gestion des pointages" pour les autres -->
+                                <button
+                                    v-if="
+                                        user.status !== 1 &&
+                                        !page.props.auth.roles.includes(
+                                            'Comptabilité'
+                                        )
+                                    "
+                                    @click="
+                                        () =>
+                                            $inertia.get(
+                                                route(
+                                                    'users.pointages',
+                                                    user.id
+                                                )
+                                            )
+                                    "
+                                    class="px-3 py-1.5 text-xs text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
+                                >
+                                    <i class="fa-solid fa-gear mr-1"></i>
+                                    Gestion des pointages
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vue desktop : tableau classique -->
+                <div class="hidden lg:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 rounded-xl overflow-hidden">
                         <thead>
                             <tr class="bg-gradient-to-r from-[#005692] to-[#0078c9] text-white">
                                 <th
-                                    class="px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-medium tracking-wider"
+                                    class="px-6 py-4 text-left text-sm font-medium tracking-wider"
                                 >
                                     Nom
                                 </th>
                                 <th
-                                    class="px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-medium tracking-wider hidden sm:table-cell"
+                                    class="px-6 py-4 text-left text-sm font-medium tracking-wider"
                                 >
                                     E-mail
                                 </th>
                                 <th
-                                    class="px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-medium tracking-wider hidden md:table-cell"
+                                    class="px-6 py-4 text-left text-sm font-medium tracking-wider"
                                 >
                                     Rôle
                                 </th>
                                 <th
-                                    class="px-3 py-3 sm:px-6 sm:py-4 text-center text-xs sm:text-sm font-medium tracking-wider"
+                                    class="px-6 py-4 text-center text-sm font-medium tracking-wider"
                                 >
                                     Statut
                                 </th>
                                 <th
-                                    class="px-3 py-3 sm:px-6 sm:py-4 text-center text-xs sm:text-sm font-medium tracking-wider"
+                                    class="px-6 py-4 text-center text-sm font-medium tracking-wider"
                                 >
                                     Action
                                 </th>
@@ -152,11 +278,9 @@ const closeModal = () => {
                                         'hover:text-[#0078c9]':
                                             user.status !== 1, // Texte bleu au survol si actif
                                     }"
-                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap cursor-pointer font-medium"
+                                    class="px-6 py-4 whitespace-nowrap cursor-pointer font-medium"
                                 >
-                                    <div>{{ user.name }}</div>
-                                    <!-- Afficher l'email sur mobile uniquement -->
-                                    <div class="text-xs text-gray-500 mt-1 sm:hidden">{{ user.email }}</div>
+                                    {{ user.name }}
                                 </td>
 
                                 <td
@@ -166,7 +290,7 @@ const closeModal = () => {
                                         'hover:text-[#0078c9]':
                                             user.status !== 1, // Texte bleu au survol si actif
                                     }"
-                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap cursor-pointer hidden sm:table-cell"
+                                    class="px-6 py-4 whitespace-nowrap cursor-pointer"
                                     @click="
                                         () =>
                                             $inertia.get(
@@ -186,7 +310,7 @@ const closeModal = () => {
                                         'text-gray-700':
                                             user.status !== 1, // Texte normal si actif
                                     }"
-                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap hidden md:table-cell"
+                                    class="px-6 py-4 whitespace-nowrap"
                                 >
                                     <span
                                         v-for="role in user.roles"
@@ -206,7 +330,7 @@ const closeModal = () => {
                                     </span>
                                 </td>
                                 <td
-                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap cursor-auto text-center"
+                                    class="px-6 py-4 whitespace-nowrap cursor-auto text-center"
                                 >
                                     <span
                                         v-if="
@@ -218,20 +342,20 @@ const closeModal = () => {
                                                     day.status === 1
                                             )
                                         "
-                                        class="px-2 py-1 sm:px-3 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                                        class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
                                     >
                                         Actif
                                     </span>
                                     <span
                                         v-else
-                                        class="px-2 py-1 sm:px-3 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                                        class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
                                     >
                                         Inactif
                                     </span>
                                 </td>
 
                                 <td
-                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-center"
+                                    class="px-6 py-4 whitespace-nowrap text-center"
                                 >
                                     <!-- Bouton "Voir historique" pour Comptabilité -->
                                     <button
@@ -250,11 +374,10 @@ const closeModal = () => {
                                                     )
                                                 )
                                         "
-                                        class="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
+                                        class="px-4 py-2 text-sm text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
                                     >
                                         <i class="fa-regular fa-eye mr-1"></i>
-                                        <span class="hidden sm:inline">Voir historique</span>
-                                        <span class="sm:hidden">Voir</span>
+                                        Voir historique
                                     </button>
 
                                     <!-- Bouton "Gestion des pointages" pour les autres -->
@@ -274,11 +397,10 @@ const closeModal = () => {
                                                     )
                                                 )
                                         "
-                                        class="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
+                                        class="px-4 py-2 text-sm text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
                                     >
                                         <i class="fa-solid fa-gear mr-1"></i>
-                                        <span class="hidden sm:inline">Gestion des pointages</span>
-                                        <span class="sm:hidden">Gestion</span>
+                                        Gestion des pointages
                                     </button>
                                 </td>
                             </tr>
