@@ -68,74 +68,74 @@ const closeModal = () => {
         </template>
 
         <div
-            class="container flex-grow max-w-[1700px] mt-16 mx-auto px-4 sm:px-8 bg-white rounded-lg shadow-lg py-8 min-h-[800px]"
+            class="container flex-grow max-w-[1700px] mt-8 sm:mt-16 mx-auto px-2 sm:px-4 md:px-6 lg:px-8 bg-gray-50 py-4 sm:py-8 min-h-[800px]"
         >
             <div
-                class="p-6 rounded-lg text-center w-full bg-white shadow-md mb-8"
+                class="p-4 sm:p-6 rounded-lg text-center w-full bg-white shadow-sm mb-4 sm:mb-8"
             >
-                <h2 class="text-gray-800 text-xl sm:text-2xl font-semibold">
+                <h2 class="text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold py-2 sm:py-4">
                     <i class="fa-solid fa-user text-[#005692] mr-2"></i> Gestion
                     des employés
                 </h2>
             </div>
-            <div class="py-8">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
                 <!-- Titre de la page -->
-                <div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
                     <h2
-                        class="text-2xl font-semibold leading-tight text-gray-800"
+                        class="text-lg sm:text-xl font-bold text-gray-700"
                     >
                         Liste des employés
                     </h2>
+
+                    <!-- Bouton pour ouvrir le modal -->
+                    <PrimaryButton
+                        class="w-full sm:w-auto bg-[#005692] hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
+                        @click="openModal"
+                        v-if="
+                            page.props.auth.roles &&
+                            (page.props.auth.roles.includes('Admin') ||
+                                page.props.auth.roles.includes('Informatique'))
+                        "
+                        ><i class="fas fa-plus mr-2"></i>Ajouter un employé</PrimaryButton
+                    >
                 </div>
 
-                <!-- Bouton pour ouvrir le modal -->
-                <PrimaryButton
-                    class="mt-8 mb-0"
-                    @click="openModal"
-                    v-if="
-                        page.props.auth.roles &&
-                        (page.props.auth.roles.includes('Admin') ||
-                            page.props.auth.roles.includes('Informatique'))
-                    "
-                    >Ajouter un employé</PrimaryButton
-                >
-
                 <!-- Table responsive -->
-                <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table class="min-w-full divide-y divide-gray-200 rounded-xl overflow-hidden">
                         <thead>
-                            <tr>
+                            <tr class="bg-gradient-to-r from-[#005692] to-[#0078c9] text-white">
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-medium tracking-wider"
                                 >
                                     Nom
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-medium tracking-wider hidden sm:table-cell"
                                 >
                                     E-mail
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 text-left text-xs sm:text-sm font-medium tracking-wider hidden md:table-cell"
                                 >
                                     Rôle
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 text-center text-xs sm:text-sm font-medium tracking-wider"
                                 >
                                     Statut
                                 </th>
                                 <th
-                                    class="text-center px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 text-center text-xs sm:text-sm font-medium tracking-wider"
                                 >
                                     Action
                                 </th>
                             </tr>
                         </thead>
                         <tbody
-                            class="bg-white divide-y divide-gray-200 cursor-pointer"
+                            class="bg-white divide-y divide-gray-100"
                         >
-                            <tr v-for="user in users" :key="user.id">
+                            <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 transition-colors">
                                 <td
                                     @click="
                                         () =>
@@ -149,21 +149,24 @@ const closeModal = () => {
                                     :class="{
                                         'text-red-500 hover:text-red-700':
                                             user.status === 1, // Texte rouge si désactivé
-                                        'hover:text-blue-700':
+                                        'hover:text-[#0078c9]':
                                             user.status !== 1, // Texte bleu au survol si actif
                                     }"
-                                    class="px-6 py-4 whitespace-nowrap cursor-pointer"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap cursor-pointer font-medium"
                                 >
-                                    {{ user.name }}
+                                    <div>{{ user.name }}</div>
+                                    <!-- Afficher l'email sur mobile uniquement -->
+                                    <div class="text-xs text-gray-500 mt-1 sm:hidden">{{ user.email }}</div>
                                 </td>
 
                                 <td
                                     :class="{
                                         'text-red-500 hover:text-red-700':
                                             user.status === 1, // Texte rouge si désactivé
-                                        'hover:text-blue-700':
+                                        'hover:text-[#0078c9]':
                                             user.status !== 1, // Texte bleu au survol si actif
                                     }"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap cursor-pointer hidden sm:table-cell"
                                     @click="
                                         () =>
                                             $inertia.get(
@@ -178,11 +181,12 @@ const closeModal = () => {
                                 </td>
                                 <td
                                     :class="{
-                                        'text-red-500 hover:text-red-700 text-left ml-4':
+                                        'text-red-500 hover:text-red-700':
                                             user.status === 1, // Texte rouge si désactivé
-                                        'hover:text-blue-700 text-left pl-2':
-                                            user.status !== 1, // Texte bleu au survol si actif
+                                        'text-gray-700':
+                                            user.status !== 1, // Texte normal si actif
                                     }"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap hidden md:table-cell"
                                 >
                                     <span
                                         v-for="role in user.roles"
@@ -202,7 +206,7 @@ const closeModal = () => {
                                     </span>
                                 </td>
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap cursor-auto text-center"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap cursor-auto text-center"
                                 >
                                     <span
                                         v-if="
@@ -214,20 +218,20 @@ const closeModal = () => {
                                                     day.status === 1
                                             )
                                         "
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                                        class="px-2 py-1 sm:px-3 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
                                     >
                                         Actif
                                     </span>
                                     <span
                                         v-else
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                                        class="px-2 py-1 sm:px-3 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
                                     >
                                         Inactif
                                     </span>
                                 </td>
 
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap text-center"
+                                    class="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-center"
                                 >
                                     <!-- Bouton "Voir historique" pour Comptabilité -->
                                     <button
@@ -246,10 +250,11 @@ const closeModal = () => {
                                                     )
                                                 )
                                         "
-                                        class="px-4 py-2 text-sm text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
+                                        class="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
                                     >
-                                        <i class="fa-regular fa-eye"></i>
-                                        Voir historique
+                                        <i class="fa-regular fa-eye mr-1"></i>
+                                        <span class="hidden sm:inline">Voir historique</span>
+                                        <span class="sm:hidden">Voir</span>
                                     </button>
 
                                     <!-- Bouton "Gestion des pointages" pour les autres -->
@@ -269,10 +274,11 @@ const closeModal = () => {
                                                     )
                                                 )
                                         "
-                                        class="px-3 py-2 text-xs text-white bg-[rgb(0,85,150)] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out"
+                                        class="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm text-white bg-[#005692] rounded-md hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out shadow-sm"
                                     >
-                                        <i class="fa-solid fa-gear"></i>
-                                        Gestion des pointages
+                                        <i class="fa-solid fa-gear mr-1"></i>
+                                        <span class="hidden sm:inline">Gestion des pointages</span>
+                                        <span class="sm:hidden">Gestion</span>
                                     </button>
                                 </td>
                             </tr>
@@ -280,9 +286,9 @@ const closeModal = () => {
                     </table>
                 </div>
             </div>
-            <div class="mb-12 mt-12 flex justify-center">
+            <div class="mt-10 flex justify-center">
                 <Link :href="route('home')">
-                    <PrimaryButton>
+                    <PrimaryButton class="bg-[#005692] hover:bg-[rgba(0,85,150,0.8)] transition duration-150 ease-in-out">
                         <i class="fas fa-arrow-left mr-2"></i> Retour à
                         l'accueil
                     </PrimaryButton>
@@ -291,26 +297,22 @@ const closeModal = () => {
         </div>
 
         <!-- Modal pour ajouter un employé -->
-        <div v-if="isModalOpen" class="fixed z-10 inset-0 overflow-y-auto">
-            <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="fixed inset-0 bg-gray-800 opacity-75"></div>
-
-                <div
-                    class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-lg z-50"
-                >
-                    <div class="p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">
+        <div v-if="isModalOpen" class="fixed z-50 inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+            <div class="flex items-center justify-center min-h-screen px-2 sm:px-4">
+                <div class="bg-white rounded-xl shadow-xl p-4 sm:p-8 w-full max-w-lg mx-2 sm:mx-4 z-50">
+                    <div class="mb-4 sm:mb-6">
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
                             Ajouter un nouvel employé
                         </h3>
 
                         <form @submit.prevent="submit">
                             <!-- Nom -->
                             <div class="mt-4">
-                                <InputLabel for="name" value="Nom" />
+                                <InputLabel for="name" value="Nom" class="text-gray-700 font-medium" />
                                 <TextInput
                                     id="name"
                                     type="text"
-                                    class="mt-1 block w-full"
+                                    class="mt-1 block w-full rounded-md border-gray-300"
                                     v-model="form.name"
                                     required
                                 />
@@ -322,11 +324,11 @@ const closeModal = () => {
 
                             <!-- E-mail -->
                             <div class="mt-4">
-                                <InputLabel for="email" value="E-mail" />
+                                <InputLabel for="email" value="E-mail" class="text-gray-700 font-medium" />
                                 <TextInput
                                     id="email"
                                     type="email"
-                                    class="mt-1 block w-full"
+                                    class="mt-1 block w-full rounded-md border-gray-300"
                                     v-model="form.email"
                                     required
                                 />
@@ -341,11 +343,12 @@ const closeModal = () => {
                                 <InputLabel
                                     for="password"
                                     value="Mot de passe"
+                                    class="text-gray-700 font-medium"
                                 />
                                 <TextInput
                                     id="password"
                                     type="password"
-                                    class="mt-1 block w-full"
+                                    class="mt-1 block w-full rounded-md border-gray-300"
                                     v-model="form.password"
                                     required
                                 />
@@ -360,11 +363,12 @@ const closeModal = () => {
                                 <InputLabel
                                     for="password_confirmation"
                                     value="Confirmer mot de passe"
+                                    class="text-gray-700 font-medium"
                                 />
                                 <TextInput
                                     id="password_confirmation"
                                     type="password"
-                                    class="mt-1 block w-full"
+                                    class="mt-1 block w-full rounded-md border-gray-300"
                                     v-model="form.password_confirmation"
                                     required
                                 />
@@ -376,7 +380,7 @@ const closeModal = () => {
 
                             <!-- Rôle -->
                             <div class="mt-4">
-                                <InputLabel for="role" value="Rôle" />
+                                <InputLabel for="role" value="Rôle" class="text-gray-700 font-medium" />
                                 <select
                                     id="role"
                                     v-model="form.role"
@@ -394,16 +398,17 @@ const closeModal = () => {
                                 </select>
                             </div>
 
-                            <!-- Actions -->
-                            <div class="mt-6 flex justify-end">
+                            <div class="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-0">
                                 <button
                                     @click="closeModal"
-                                    class="mr-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
+                                    type="button"
+                                    class="w-full sm:w-auto mb-2 sm:mb-0 sm:mr-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out"
                                 >
                                     Annuler
                                 </button>
                                 <PrimaryButton
-                                    :class="{ 'opacity-25': form.processing }"
+                                    class="w-full sm:w-auto"
+                                    :class="{ 'opacity-25': form.processing, 'bg-[#005692] hover:bg-[rgba(0,85,150,0.8)]': !form.processing }"
                                     :disabled="form.processing"
                                     >Ajouter</PrimaryButton
                                 >
@@ -425,5 +430,35 @@ const closeModal = () => {
     .sm\:max-w-lg {
         max-width: 100%;
     }
+    
+    /* Ajustements pour mobile */
+    table {
+        border-radius: 0.5rem;
+    }
+    
+    th, td {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+/* Pour les tablettes */
+@media (min-width: 641px) and (max-width: 768px) {
+    table {
+        font-size: 0.875rem;
+    }
+}
+
+/* Ajout d'une petite animation de survol sur les lignes de la table */
+.transition-colors:hover {
+    transition: background-color 0.2s ease;
+}
+
+/* Style pour les boutons primaires */
+:deep(.primary-button) {
+    background-color: #005692;
+}
+:deep(.primary-button:hover) {
+    background-color: rgba(0,85,150,0.8);
 }
 </style>

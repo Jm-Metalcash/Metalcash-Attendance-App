@@ -17,42 +17,42 @@ const getUserName = (item) => {
         <h3 class="text-base font-semibold py-3 px-5 bg-[#005691] text-zinc-50">
             Liste des derniers prospects ajoutés
         </h3>
-        <div
-            v-for="(prospect, index) in recentAddedProspects"
-            :key="prospect.id"
-            @click="selectProspect(prospect)"
+            <div
+                v-for="(prospect, index) in recentAddedProspects"
+                :key="prospect.id"
+                @click="selectProspect(prospect)"
             class="text-sm flex flex-wrap justify-between items-center cursor-pointer rounded-md px-2 py-2 my-2 w-full text-gray-700 hover:bg-blue-50 hover:text-blue-700"
-        >
+            >
             <!-- Nom complet -->
             <div class="flex w-full sm:w-1/6 items-center">
-                <span
+                        <span
                     class="flex justify-center items-center mr-4 h-3 w-3 rounded-full bg-yellow-500"
-                ></span>
+                        ></span>
                 <div class="font-medium text-left">
-                    {{ prospect.firstName }} {{ prospect.familyName }}
-                </div>
-            </div>
+                            {{ prospect.firstName }} {{ prospect.familyName }}
+                        </div>
+                    </div>
 
-            <!-- Numéro de téléphone -->
+                        <!-- Numéro de téléphone -->
             <div class="flex w-full sm:w-1/6">
                 <div v-if="prospect.phone != null" class="text-sm font-medium text-left ml-6 md:ml-0">
-                    {{ prospect.phone }}
-                </div>
+                                {{ prospect.phone }}
+                            </div>
                 <div v-else class="font-medium text-left ml-6 md:ml-0 opacity-60">
                     Aucun numéro de téléphone
-                </div>
-            </div>
+                            </div>
+                        </div>
 
-            <!-- Pays -->
+                        <!-- Pays -->
             <div class="flex w-full sm:w-1/6">
                 <div v-if="prospect.country != null" class="text-sm font-normal text-left ml-6 md:ml-0">
-                    {{ prospect.country }}
-                </div>
+                                {{ prospect.country }}
+                            </div>
                 <div v-else class="text-sm font-normal text-left ml-6 md:ml-0 opacity-60">
                     Aucun pays enregistré
                 </div>
             </div>
-
+            
             <!-- Date d'ajout et utilisateur ayant ajouté -->
             <div class="text-xs w-full sm:w-1/6">
                 Ajouté par : <br />
