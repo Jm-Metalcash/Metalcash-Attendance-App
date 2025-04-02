@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, defineProps, nextTick, reactive, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Header from "@/Components/Header.vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import axios from "axios";
@@ -652,10 +653,12 @@ const removeDepartureTimeEdit = (index) => {
 </script>
 
 <template>
-
     <Head :title="pageTitle" />
 
     <AuthenticatedLayout>
+        <template #header>
+            <Header :pageTitle="pageTitle" />
+        </template>
         <section class="attendance-history bg-gray-50 pt-8 pb-16 min-h-screen">
             <!-- Flash messages -->
             <transition enter-active-class="transition ease-out duration-300 transform"

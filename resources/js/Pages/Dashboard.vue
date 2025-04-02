@@ -263,6 +263,9 @@ watch(() => days.value, updateButtonStates, { deep: true });
     <Head title="Aujourd'hui" />
 
     <AuthenticatedLayout>
+        <template #header>
+            <Header :pageTitle="'Aujourd\'hui'" />
+        </template>
         <section class="attendance-section bg-gray-50 pt-8 pb-16 min-h-screen">
             <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Titre de la page -->
